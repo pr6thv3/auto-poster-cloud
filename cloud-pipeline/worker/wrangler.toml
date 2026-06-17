@@ -1,0 +1,6 @@
+name = "auto-poster-trigger-worker"
+main = "src/index.js"
+compatibility_date = "2024-05-02"
+
+# Note: All configuration variables (GITHUB_OWNER, GITHUB_REPO, GITHUB_WORKFLOW_FILE, 
+# GITHUB_DISPATCH_TOKEN, WORKER_TRIGGER_SECRET) must be set as Cloudflare Worker Secrets.

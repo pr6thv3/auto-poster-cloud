@@ -1,0 +1,9 @@
+{
+  "name": "auto-poster-trigger-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker to trigger GHA video posting pipeline",
+  "main": "src/index.js",
+  "devDependencies": {
+    "wrangler": "^3.57.0"
+  }
+}
