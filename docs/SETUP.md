@@ -70,3 +70,44 @@ Navigate to your GitHub repository -> **Settings** -> **Secrets and variables** 
   GET https://graph.facebook.com/{version}/me/accounts?fields=id,name,access_token,instagram_business_account&access_token={60_day_token}
   ```
 * Store the returned `access_token` as `META_PAGE_ACCESS_TOKEN`.
+
+---
+
+## ⚡ Cloudflare Worker Deployment & Setup
+
+The trigger Worker is designed to be deployed using Wrangler.
+
+### 1. Log In to Cloudflare
+In your local command line, run:
+```bash
+npx wrangler login
+```
+
+### 2. Configure Worker Secrets
+You must configure the required secrets in your Cloudflare environment. These secrets are encrypted and kept hidden on Cloudflare servers. Run the following commands:
+
+```bash
+# GitHub repository owner (username or org name)
+npx wrangler secret put GITHUB_OWNER
+
+# GitHub repository name (e.g. auto-poster-cloud)
+npx wrangler secret put GITHUB_REPO
+
+# Target workflow file name (e.g. generate-and-post.yml)
+npx wrangler secret put GITHUB_WORKFLOW_FILE
+
+# Fine-grained GitHub PAT with actions:write scope to trigger dispatch
+npx wrangler secret put GITHUB_DISPATCH_TOKEN
+
+# Shared trigger secret (matches CLOUDFLARE_TRIGGER_SECRET in GHA)
+npx wrangler secret put WORKER_TRIGGER_SECRET
+```
+
+### 3. Deploy the Worker
+Run the deploy command from the `cloud-pipeline/worker/` directory:
+```bash
+npx wrangler deploy
+```
+
+Once deployed, Cloudflare will output the Worker URL (e.g., `https://auto-poster-trigger-worker.<your-subdomain>.workers.dev`). Use this URL on your phone or in API calls!
+
