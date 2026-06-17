@@ -1,5 +1,7 @@
 import os
 import sys
+import subprocess
+import shutil
 
 def main():
     topic = os.environ.get('TOPIC', 'Default Topic')
@@ -25,9 +27,69 @@ def main():
         
         print("[MOCK] Mock video generation completed successfully.")
     else:
-        print("[REAL] Running real MoneyPrinterTurbo is not implemented in Phase 1.")
-        # This will be wired to actual CLI execution in a future phase
-        sys.exit(1)
+        print("[REAL] Setting up and running real MoneyPrinterTurbo...")
+        
+        repo_dir = "moneyprinter-repo"
+        # 1. Clone repo if it doesn't exist
+        if not os.path.exists(repo_dir):
+            print(f"[REAL] Cloning harry0703/MoneyPrinterTurbo into {repo_dir}...")
+            subprocess.run([
+                "git", "clone", "https://github.com/harry0703/MoneyPrinterTurbo.git", repo_dir
+            ], check=True)
+        
+        # 2. Write config.toml inside the cloned repo
+        llm_provider = os.environ.get('LLM_PROVIDER', 'openai')
+        video_source = os.environ.get('VIDEO_SOURCE', 'pexels')
+        pexels_key = os.environ.get('PEXELS_API_KEY', '')
+        openai_key = os.environ.get('OPENAI_API_KEY', '')
+        openai_model = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4o-mini')
+        gemini_key = os.environ.get('GEMINI_API_KEY', '')
+        gemini_model = os.environ.get('GEMINI_MODEL_NAME', 'gemini-1.5-flash')
+        
+        config_path = os.path.join(repo_dir, "config.toml")
+        print(f"[REAL] Generating config.toml at {config_path}...")
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.write(f"""[app]
+video_source = "{video_source}"
+pexels_api_keys = ["{pexels_key}"]
+llm_provider = "{llm_provider}"
+openai_api_key = "{openai_key}"
+openai_model_name = "{openai_model}"
+gemini_api_key = "{gemini_key}"
+gemini_model_name = "{gemini_model}"
+subtitle_provider = "edge"
+""")
+            
+        # 3. Install dependencies in GHA
+        print("[REAL] Installing MoneyPrinterTurbo dependencies...")
+        subprocess.run([
+            sys.executable, "-m", "pip", "install", "-r", os.path.join(repo_dir, "requirements.txt")
+        ], check=True)
+        
+        # 4. Run CLI script
+        print("[REAL] Executing MoneyPrinterTurbo CLI...")
+        cmd = [
+            sys.executable,
+            "cli.py",
+            "--video-subject", topic,
+            "--video-language", "en-US",
+            "--voice-name", "en-US-AndrewNeural",
+            "--paragraph-number", "1"
+        ]
+        subprocess.run(cmd, cwd=repo_dir, check=True)
+        
+        # 5. Locate the generated output and copy it to our storage directory
+        src_storage = os.path.join(repo_dir, "storage")
+        dst_storage = "storage"
+        if os.path.exists(src_storage):
+            print(f"[REAL] Copying generated storage files from {src_storage} to {dst_storage}...")
+            if os.path.exists(dst_storage):
+                shutil.rmtree(dst_storage)
+            shutil.copytree(src_storage, dst_storage)
+            print("[REAL] Storage folder copied successfully.")
+        else:
+            print("Error: No storage directory generated inside MoneyPrinterTurbo repository.")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
