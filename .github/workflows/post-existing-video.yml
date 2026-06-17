@@ -96,6 +96,7 @@ jobs:
       - name: Post to YouTube
         id: post-youtube
         if: contains(github.event.inputs.platforms, 'youtube')
+        continue-on-error: true
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
@@ -111,6 +112,7 @@ jobs:
       - name: Post to Instagram
         id: post-instagram
         if: contains(github.event.inputs.platforms, 'instagram')
+        continue-on-error: true
         env:
           META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
@@ -124,6 +126,7 @@ jobs:
       - name: Post to Facebook
         id: post-facebook
         if: contains(github.event.inputs.platforms, 'facebook')
+        continue-on-error: true
         env:
           META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
           FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
@@ -159,7 +162,39 @@ jobs:
         run: |
           python scripts/write_summary.py
 
+      - name: Upload Logs and Results Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posting-logs-${{ github.event.inputs.job_id || github.run_id }}
+          path: |
+            platform-results.json
+            run-log.json
+
       - name: Run R2 Cleanup (Mock)
         if: always()
         run: |
           python scripts/cleanup_r2.py
+
+      - name: Check for Failures
+        if: always()
+        run: |
+          if [ -f platform-results.json ]; then
+            if grep -q '"status": "failed"' platform-results.json; then
+              echo "Error: One or more video posting tasks failed!"
+              exit 1
+            fi
+          fi
+
+      - name: Comment on Tracking Issue on Failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ vars.TRACKING_ISSUE_NUMBER }}
+        run: |
+          if [ -n "$ISSUE_NUMBER" ]; then
+            COMMENT_BODY="❌ **auto-poster-cloud Manual Post Pipeline Failed!**\n\n* **Run ID**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n* **Job ID**: ${{ github.event.inputs.job_id }}\n* **Topic**: Manual Video Post\n\nPlease check the Actions logs and the job summary for failure details."
+            gh issue comment "$ISSUE_NUMBER" --body "$COMMENT_BODY"
+          else
+            echo "No TRACKING_ISSUE_NUMBER variable set. Skipping issue comment."
+          fi

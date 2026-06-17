@@ -82,5 +82,53 @@ def main():
         f_out.close()
         print("Summary written successfully to GITHUB_STEP_SUMMARY.")
 
+    # 1. Write platform-results.json
+    import json
+    import datetime
+    
+    platform_results = {
+        "youtube": {
+            "status": yt_status,
+            "video_id": yt_video_id,
+            "error": yt_error
+        },
+        "instagram": {
+            "status": ig_status,
+            "media_id": ig_media_id,
+            "error": ig_error
+        },
+        "facebook": {
+            "status": fb_status,
+            "video_id": fb_video_id,
+            "error": fb_error
+        }
+    }
+    try:
+        with open("platform-results.json", "w", encoding="utf-8") as f:
+            json.dump(platform_results, f, indent=2)
+        print("Wrote platform-results.json successfully.")
+    except Exception as e:
+        print(f"Error writing platform-results.json: {str(e)}")
+
+    # 2. Write run-log.json
+    run_log = {
+        "job_id": os.environ.get('GITHUB_RUN_ID', 'local'),
+        "topic": topic,
+        "title": title,
+        "niche": niche,
+        "privacy": privacy,
+        "mock_mode": mock_mode,
+        "video_path": video_path,
+        "public_video_url": public_video_url,
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "results": platform_results
+    }
+    try:
+        with open("run-log.json", "w", encoding="utf-8") as f:
+            json.dump(run_log, f, indent=2)
+        print("Wrote run-log.json successfully.")
+    except Exception as e:
+        print(f"Error writing run-log.json: {str(e)}")
+
 if __name__ == "__main__":
     main()
