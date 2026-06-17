@@ -58,7 +58,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r auto-poster-cloud/requirements.txt
+          pip install -r requirements.txt
 
       - name: Run MoneyPrinterTurbo (or Mock)
         id: run-mpt
@@ -68,12 +68,12 @@ jobs:
           DESCRIPTION: ${{ github.event.inputs.description }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
-          python auto-poster-cloud/scripts/run_moneyprinterturbo.py
+          python scripts/run_moneyprinterturbo.py
 
       - name: Find Output Video
         id: find-video
         run: |
-          python auto-poster-cloud/scripts/find_latest_video.py
+          python scripts/find_latest_video.py
 
       - name: Upload to Cloudflare R2
         id: upload-r2
@@ -86,7 +86,7 @@ jobs:
           NICHE: ${{ github.event.inputs.niche }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
-          python auto-poster-cloud/scripts/upload_r2.py
+          python scripts/upload_r2.py
 
       - name: Post to YouTube
         id: post-youtube
@@ -100,7 +100,7 @@ jobs:
           PRIVACY: ${{ github.event.inputs.privacy }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
-          python auto-poster-cloud/scripts/post_youtube.py
+          python scripts/post_youtube.py
 
       - name: Post to Instagram
         id: post-instagram
@@ -112,7 +112,7 @@ jobs:
           DESCRIPTION: ${{ github.event.inputs.description }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
-          python auto-poster-cloud/scripts/post_instagram.py
+          python scripts/post_instagram.py
 
       - name: Post to Facebook
         id: post-facebook
@@ -125,7 +125,7 @@ jobs:
           DESCRIPTION: ${{ github.event.inputs.description }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
-          python auto-poster-cloud/scripts/post_facebook.py
+          python scripts/post_facebook.py
 
       - name: Write Job Summary
         if: always()
@@ -149,9 +149,9 @@ jobs:
           FB_ERROR: ${{ steps.post-facebook.outputs.facebook_error }}
           GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
         run: |
-          python auto-poster-cloud/scripts/write_summary.py
+          python scripts/write_summary.py
 
       - name: Run R2 Cleanup (Mock)
         if: always()
         run: |
-          python auto-poster-cloud/scripts/cleanup_r2.py
+          python scripts/cleanup_r2.py
