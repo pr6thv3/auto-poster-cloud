@@ -110,6 +110,7 @@ jobs:
           TITLE: ${{ github.event.inputs.title }}
           DESCRIPTION: ${{ github.event.inputs.description }}
           PRIVACY: ${{ github.event.inputs.privacy }}
+          VIDEO_PATH: ${{ steps.find-video.outputs.video_path }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
           python scripts/post_youtube.py
@@ -122,6 +123,7 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           GRAPH_API_VERSION: ${{ secrets.GRAPH_API_VERSION }}
           DESCRIPTION: ${{ github.event.inputs.description }}
+          PUBLIC_VIDEO_URL: ${{ steps.upload-r2.outputs.public_video_url }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
           python scripts/post_instagram.py
@@ -135,6 +137,7 @@ jobs:
           GRAPH_API_VERSION: ${{ secrets.GRAPH_API_VERSION }}
           TITLE: ${{ github.event.inputs.title }}
           DESCRIPTION: ${{ github.event.inputs.description }}
+          PUBLIC_VIDEO_URL: ${{ steps.upload-r2.outputs.public_video_url }}
           MOCK_MODE: ${{ github.event.inputs.mock_mode }}
         run: |
           python scripts/post_facebook.py
