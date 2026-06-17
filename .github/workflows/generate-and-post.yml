@@ -1,0 +1,157 @@
+name: Generate and Post Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Video subject/topic"
+        required: true
+        type: string
+      title:
+        description: "Video title for social platforms"
+        required: true
+        type: string
+      description:
+        description: "Video description/caption"
+        required: true
+        type: string
+      niche:
+        description: "Niche/category (e.g. ai, history)"
+        required: true
+        default: "ai"
+        type: string
+      platforms:
+        description: "Comma-separated platforms: youtube, instagram, facebook"
+        required: true
+        default: "youtube"
+        type: string
+      privacy:
+        description: "Privacy setting (private, unlisted, public)"
+        required: true
+        default: "private"
+        type: string
+      mock_mode:
+        description: "Run in mock mode (does not call real APIs)"
+        required: true
+        default: "true"
+        type: string
+      job_id:
+        description: "Unique job identifier for tracking"
+        required: false
+        type: string
+
+concurrency:
+  group: auto-poster
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r auto-poster-cloud/requirements.txt
+
+      - name: Run MoneyPrinterTurbo (or Mock)
+        id: run-mpt
+        env:
+          TOPIC: ${{ github.event.inputs.topic }}
+          TITLE: ${{ github.event.inputs.title }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+        run: |
+          python auto-poster-cloud/scripts/run_moneyprinterturbo.py
+
+      - name: Find Output Video
+        id: find-video
+        run: |
+          python auto-poster-cloud/scripts/find_latest_video.py
+
+      - name: Upload to Cloudflare R2
+        id: upload-r2
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
+          NICHE: ${{ github.event.inputs.niche }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+        run: |
+          python auto-poster-cloud/scripts/upload_r2.py
+
+      - name: Post to YouTube
+        id: post-youtube
+        if: contains(github.event.inputs.platforms, 'youtube')
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          TITLE: ${{ github.event.inputs.title }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+          PRIVACY: ${{ github.event.inputs.privacy }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+        run: |
+          python auto-poster-cloud/scripts/post_youtube.py
+
+      - name: Post to Instagram
+        id: post-instagram
+        if: contains(github.event.inputs.platforms, 'instagram')
+        env:
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          GRAPH_API_VERSION: ${{ secrets.GRAPH_API_VERSION }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+        run: |
+          python auto-poster-cloud/scripts/post_instagram.py
+
+      - name: Post to Facebook
+        id: post-facebook
+        if: contains(github.event.inputs.platforms, 'facebook')
+        env:
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          GRAPH_API_VERSION: ${{ secrets.GRAPH_API_VERSION }}
+          TITLE: ${{ github.event.inputs.title }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+        run: |
+          python auto-poster-cloud/scripts/post_facebook.py
+
+      - name: Write Job Summary
+        if: always()
+        env:
+          TOPIC: ${{ github.event.inputs.topic }}
+          TITLE: ${{ github.event.inputs.title }}
+          NICHE: ${{ github.event.inputs.niche }}
+          PLATFORMS: ${{ github.event.inputs.platforms }}
+          PRIVACY: ${{ github.event.inputs.privacy }}
+          MOCK_MODE: ${{ github.event.inputs.mock_mode }}
+          VIDEO_PATH: ${{ steps.find-video.outputs.video_path }}
+          PUBLIC_VIDEO_URL: ${{ steps.upload-r2.outputs.public_video_url }}
+          YT_VIDEO_ID: ${{ steps.post-youtube.outputs.youtube_video_id }}
+          YT_STATUS: ${{ steps.post-youtube.outputs.youtube_status }}
+          YT_ERROR: ${{ steps.post-youtube.outputs.youtube_error }}
+          IG_MEDIA_ID: ${{ steps.post-instagram.outputs.ig_media_id }}
+          IG_STATUS: ${{ steps.post-instagram.outputs.instagram_status }}
+          IG_ERROR: ${{ steps.post-instagram.outputs.instagram_error }}
+          FB_VIDEO_ID: ${{ steps.post-facebook.outputs.fb_video_id }}
+          FB_STATUS: ${{ steps.post-facebook.outputs.facebook_status }}
+          FB_ERROR: ${{ steps.post-facebook.outputs.facebook_error }}
+          GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
+        run: |
+          python auto-poster-cloud/scripts/write_summary.py
+
+      - name: Run R2 Cleanup (Mock)
+        if: always()
+        run: |
+          python auto-poster-cloud/scripts/cleanup_r2.py
