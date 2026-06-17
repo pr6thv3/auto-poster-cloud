@@ -109,5 +109,24 @@ Run the deploy command from the `cloud-pipeline/worker/` directory:
 npx wrangler deploy
 ```
 
-Once deployed, Cloudflare will output the Worker URL (e.g., `https://auto-poster-trigger-worker.<your-subdomain>.workers.dev`). Use this URL on your phone or in API calls!
+Once deployed, Cloudflare will output the Worker URL (e.g., `https://auto-poster-trigger-worker.<your-subdomain>.workers.dev`).
+
+---
+
+## 📅 Scheduled Postings (Cron & Content Queue)
+
+The pipeline is set up to run once daily at **12:00 UTC (noon)** via Cloudflare Cron Triggers. When the cron fires:
+1. The Cloudflare Worker fetches your **[`docs/content-queue.json`](file:///D:/ai-stack/auto-poster-cloud/docs/content-queue.json)** directly from the GitHub API.
+2. It parses the queue, identifies the first item where `"posted"` is not `true` (or falsy).
+3. It triggers a GHA workflow execution using `workflow_dispatch` with that item's configuration.
+
+### Testing the Cron Schedule Locally
+You can test the worker's cron response locally without waiting for the scheduled time:
+1. Run Wrangler in development mode:
+   ```bash
+   npx wrangler dev
+   ```
+2. Trigger the scheduled cron event manually by hitting the test route in your browser:
+   `http://localhost:8787/__scheduled`
+3. Verify in your console logs that the worker correctly fetches `content-queue.json` and triggers the GHA dispatch request.
 

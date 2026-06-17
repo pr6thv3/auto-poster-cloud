@@ -98,24 +98,12 @@ export default {
         };
 
         // Trigger GitHub Actions
-        const githubUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/actions/workflows/${env.GITHUB_WORKFLOW_FILE}/dispatches`;
-        
-        const ghResponse = await fetch(githubUrl, {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': `Bearer ${env.GITHUB_DISPATCH_TOKEN}`,
-            'X-GitHub-Api-Version': '2022-11-28',
-            'User-Agent': 'Cloudflare-Worker'
-          },
-          body: JSON.stringify(githubPayload)
-        });
+        const triggerResult = await triggerWorkflow(env, githubPayload);
 
-        if (ghResponse.status !== 204) {
-          const errorText = await ghResponse.text();
+        if (triggerResult.status !== 'success') {
           return new Response(JSON.stringify({ 
             status: 'error', 
-            message: `GitHub API error: Status ${ghResponse.status}. Details: ${errorText}`
+            message: triggerResult.message
           }), { 
             status: 502, 
             headers: { 'Content-Type': 'application/json' } 
@@ -146,6 +134,9 @@ export default {
     }
 
     return new Response('Method Not Allowed', { status: 405 });
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(handleScheduled(env));
   }
 };
 
@@ -555,4 +546,110 @@ function serveHTML(token) {
   return new Response(html, {
     headers: { 'Content-Type': 'text/html;charset=UTF-8' }
   });
+}
+
+// Helper: Trigger GitHub Actions workflow_dispatch
+async function triggerWorkflow(env, payload) {
+  const githubUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/actions/workflows/${env.GITHUB_WORKFLOW_FILE}/dispatches`;
+  
+  const res = await fetch(githubUrl, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': `Bearer ${env.GITHUB_DISPATCH_TOKEN}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'Cloudflare-Worker'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (res.status === 204) {
+    return { status: 'success' };
+  } else {
+    const errorText = await res.text();
+    return { status: 'error', message: `GitHub API status ${res.status}. Details: ${errorText}` };
+  }
+}
+
+// Helper: Fetch docs/content-queue.json and trigger next unposted video
+async function handleScheduled(env) {
+  console.log('Cron triggered! Fetching content queue...');
+  
+  if (!env.GITHUB_OWNER || !env.GITHUB_REPO || !env.GITHUB_DISPATCH_TOKEN || !env.GITHUB_WORKFLOW_FILE) {
+    console.error('Error: Missing GitHub configuration secrets (GITHUB_OWNER, GITHUB_REPO, GITHUB_DISPATCH_TOKEN, GITHUB_WORKFLOW_FILE)');
+    return;
+  }
+
+  const contentsUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/docs/content-queue.json`;
+  
+  try {
+    const res = await fetch(contentsUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${env.GITHUB_DISPATCH_TOKEN}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'Cloudflare-Worker'
+      }
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Failed to fetch content queue from GitHub. Status: ${res.status}. Details: ${errText}`);
+      return;
+    }
+
+    const data = await res.json();
+    if (!data.content) {
+      console.error('Error: Content field is missing from GitHub contents API response.');
+      return;
+    }
+
+    // Decode base64 content
+    const decodedContent = atob(data.content.replace(/\s/g, ''));
+    const queue = JSON.parse(decodedContent);
+
+    if (!Array.isArray(queue)) {
+      console.error('Error: Content queue is not a valid JSON array.');
+      return;
+    }
+
+    // Find first item where posted is false (or falsy)
+    const item = queue.find(i => !i.posted);
+    if (!item) {
+      console.log('All queue items have been posted. Nothing to do.');
+      return;
+    }
+
+    console.log(`Found unposted item: "${item.topic}". Triggering pipeline...`);
+
+    const jobId = 'cron_' + Math.random().toString(36).substring(2, 10);
+    const platforms = Array.isArray(item.platforms) 
+      ? item.platforms.join(',') 
+      : (item.platforms || 'youtube,instagram,facebook');
+
+    const payload = {
+      ref: 'main',
+      inputs: {
+        topic: item.topic,
+        title: item.title,
+        description: item.description,
+        niche: item.niche || 'general',
+        platforms: platforms,
+        privacy: item.privacy || 'private',
+        mock_mode: item.mock_mode === undefined ? 'true' : String(item.mock_mode),
+        job_id: jobId
+      }
+    };
+
+    const triggerRes = await triggerWorkflow(env, payload);
+    if (triggerRes.status === 'success') {
+      console.log(`Successfully triggered pipeline for "${item.topic}". Job ID: ${jobId}`);
+    } else {
+      console.error(`Failed to trigger pipeline for "${item.topic}": ${triggerRes.message}`);
+    }
+
+  } catch (err) {
+    console.error(`Error in scheduled handler: ${err.message}`);
+  }
 }
