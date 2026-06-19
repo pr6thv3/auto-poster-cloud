@@ -59,40 +59,34 @@ export default {
 
         // Validate Inputs
         const topic = body.topic?.trim();
-        const title = body.title?.trim();
-        const description = body.description?.trim();
-        const niche = body.niche?.trim() || 'general';
-        const platforms = body.platforms || 'youtube'; // Can be string or array
+        const niche = body.niche?.trim() || 'ai';
         const privacy = body.privacy || 'private';
-        const mockMode = body.mock_mode === undefined ? 'true' : String(body.mock_mode);
+        const generationMode = body.generation_mode || 'mock';
+        const metadataMode = body.metadata_mode || 'mock';
+        const postingMode = body.posting_mode || 'mock';
         const jobId = body.job_id || 'job_' + Math.random().toString(36).substring(2, 10);
 
-        if (!topic || !title || !description) {
+        if (!topic) {
           return new Response(JSON.stringify({ 
             status: 'error', 
-            message: 'Missing required fields: topic, title, description' 
+            message: 'Missing required field: topic' 
           }), { 
             status: 400, 
             headers: { 'Content-Type': 'application/json' } 
           });
         }
 
-        // Format platforms as comma-separated string if passed as list
-        const formattedPlatforms = Array.isArray(platforms) 
-          ? platforms.join(',') 
-          : String(platforms);
-
         // GitHub Dispatch API payload
         const githubPayload = {
           ref: 'main',
           inputs: {
             topic: topic,
-            title: title,
-            description: description,
             niche: niche,
-            platforms: formattedPlatforms,
             privacy: privacy,
-            mock_mode: mockMode,
+            generation_mode: generationMode,
+            metadata_mode: metadataMode,
+            posting_mode: postingMode,
+            queue_item_id: '',
             job_id: jobId
           }
         };
@@ -147,7 +141,7 @@ function serveHTML(token) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto Poster Cloud Trigger</title>
+  <title>YouTube Shorts Trigger UI</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -156,8 +150,9 @@ function serveHTML(token) {
       --glass-border: rgba(63, 63, 70, 0.4);
       --text: #f4f4f5;
       --text-muted: #a1a1aa;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
+      --accent: #ff0000;
+      --accent-hover: #cc0000;
+      --accent-glow: rgba(255, 0, 0, 0.2);
       --success: #10b981;
       --error: #ef4444;
     }
@@ -181,7 +176,7 @@ function serveHTML(token) {
       position: relative;
     }
 
-    /* Gradient Background blobs */
+    /* Red/Orange glow blobs for YouTube theme */
     body::before, body::after {
       content: '';
       position: absolute;
@@ -190,30 +185,30 @@ function serveHTML(token) {
       border-radius: 50%;
       filter: blur(100px);
       z-index: -1;
-      opacity: 0.5;
+      opacity: 0.35;
     }
 
     body::before {
-      background: rgba(99, 102, 241, 0.4);
+      background: rgba(255, 0, 0, 0.3);
       top: 10%;
       left: 10%;
     }
 
     body::after {
-      background: rgba(168, 85, 247, 0.3);
+      background: rgba(249, 115, 22, 0.2);
       bottom: 15%;
       right: 10%;
     }
 
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
       padding: 30px;
       backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
       animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -245,7 +240,7 @@ function serveHTML(token) {
 
     label {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
       margin-bottom: 8px;
@@ -254,7 +249,6 @@ function serveHTML(token) {
     }
 
     input[type="text"],
-    textarea,
     select {
       width: 100%;
       padding: 12px 16px;
@@ -268,63 +262,16 @@ function serveHTML(token) {
     }
 
     input[type="text"]:focus,
-    textarea:focus,
     select:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
+      box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-    }
-
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 4px;
-    }
-
-    .checkbox-card {
-      flex: 1 1 100px;
-      position: relative;
-    }
-
-    .checkbox-card input[type="checkbox"] {
-      position: absolute;
-      opacity: 0;
-      cursor: pointer;
-      height: 0;
-      width: 0;
-    }
-
-    .checkbox-label {
-      display: block;
-      padding: 12px 10px;
-      background: rgba(9, 9, 11, 0.6);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-
-    .checkbox-card input:checked + .checkbox-label {
-      border-color: var(--accent);
-      background: rgba(99, 102, 241, 0.15);
-      color: var(--text);
-      box-shadow: 0 0 0 1px var(--accent);
     }
 
     .btn-submit {
@@ -339,7 +286,7 @@ function serveHTML(token) {
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
       margin-top: 10px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 4px 12px var(--accent-glow);
     }
 
     .btn-submit:hover {
@@ -406,8 +353,8 @@ function serveHTML(token) {
 </head>
 <body>
   <div class="container">
-    <h1>Auto Poster Cloud</h1>
-    <div class="subtitle">Trigger GHA Video Posting Pipeline</div>
+    <h1>YouTube Shorts Pipeline</h1>
+    <div class="subtitle">Trigger GHA Auto-Posting Workflow</div>
 
     <form id="triggerForm">
       <input type="hidden" name="token" value="${token}">
@@ -415,17 +362,7 @@ function serveHTML(token) {
 
       <div class="form-group">
         <label for="topic">Video Subject / Topic</label>
-        <input type="text" id="topic" name="topic" placeholder="e.g. 3 AI websites you should use" required>
-      </div>
-
-      <div class="form-group">
-        <label for="title">Post Title</label>
-        <input type="text" id="title" name="title" placeholder="e.g. Unbelievable AI Websites!" required>
-      </div>
-
-      <div class="form-group">
-        <label for="description">Caption / Description</label>
-        <textarea id="description" name="description" placeholder="e.g. These websites will save you hours of work..." required></textarea>
+        <input type="text" id="topic" name="topic" placeholder="e.g. 3 AI websites that feel illegal to know" required>
       </div>
 
       <div class="row">
@@ -434,7 +371,7 @@ function serveHTML(token) {
           <input type="text" id="niche" name="niche" value="ai" required>
         </div>
         <div class="form-group">
-          <label for="privacy">Privacy</label>
+          <label for="privacy">Privacy Status</label>
           <select id="privacy" name="privacy">
             <option value="private" selected>Private</option>
             <option value="unlisted">Unlisted</option>
@@ -444,33 +381,31 @@ function serveHTML(token) {
       </div>
 
       <div class="form-group">
-        <label>Target Platforms</label>
-        <div class="checkbox-group">
-          <div class="checkbox-card">
-            <input type="checkbox" id="plat_yt" name="platforms" value="youtube" checked>
-            <label for="plat_yt" class="checkbox-label">YouTube</label>
-          </div>
-          <div class="checkbox-card">
-            <input type="checkbox" id="plat_ig" name="platforms" value="instagram" checked>
-            <label for="plat_ig" class="checkbox-label">Instagram</label>
-          </div>
-          <div class="checkbox-card">
-            <input type="checkbox" id="plat_fb" name="platforms" value="facebook" checked>
-            <label for="plat_fb" class="checkbox-label">Facebook</label>
-          </div>
-        </div>
+        <label for="generationMode">Video Generation</label>
+        <select id="generationMode" name="generation_mode">
+          <option value="mock" selected>Mock Generation (Bypass MPT)</option>
+          <option value="real">Real Generation (MoneyPrinterTurbo)</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <label for="mockMode">Execution Mode</label>
-        <select id="mockMode" name="mock_mode">
-          <option value="true" selected>Mock Run (Safe)</option>
-          <option value="false">Live Posting (Real API)</option>
+        <label for="metadataMode">Metadata Generation</label>
+        <select id="metadataMode" name="metadata_mode">
+          <option value="mock" selected>Mock Metadata (Static Stub)</option>
+          <option value="real">Real Metadata (Gemini/OpenAI LLM)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="postingMode">YouTube Posting</label>
+        <select id="postingMode" name="posting_mode">
+          <option value="mock" selected>Mock Post (Bypass Upload)</option>
+          <option value="real">Real Post (Live YouTube Upload)</option>
         </select>
       </div>
 
       <button type="submit" class="btn-submit" id="submitBtn">
-        <span id="btnText">Generate & Post</span>
+        <span id="btnText">Trigger Workflow</span>
         <div class="loader" id="btnLoader"></div>
       </button>
     </form>
@@ -498,16 +433,7 @@ function serveHTML(token) {
       resultCard.className = 'result-card';
       resultCard.style.display = 'none';
 
-      // Parse platforms checkboxes
-      const selectedPlatforms = [];
-      document.querySelectorAll('input[name="platforms"]:checked').forEach(cb => {
-        selectedPlatforms.push(cb.value);
-      });
-
       const formData = new FormData(form);
-      // Replace platforms with formatted string
-      formData.delete('platforms');
-      formData.append('platforms', selectedPlatforms.join(','));
 
       try {
         const response = await fetch('/run', {
@@ -525,7 +451,7 @@ function serveHTML(token) {
           resultCard.innerHTML = \`
             <strong>Success!</strong> \${result.message}<br>
             Job ID: <code>\${result.job_id}</code><br>
-            <a href="\${result.workflow_url}" target="_blank" class="result-link">View GitHub Actions Run</a>
+            <a href="\${result.workflow_url}" target="_blank" class="result-link">View GitHub Actions Runs</a>
           \`;
         } else {
           resultCard.className = 'result-card error';
@@ -550,7 +476,13 @@ function serveHTML(token) {
 
 // Helper: Trigger GitHub Actions workflow_dispatch
 async function triggerWorkflow(env, payload) {
-  const githubUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/actions/workflows/${env.GITHUB_WORKFLOW_FILE}/dispatches`;
+  // Gracefully fallback to generate-youtube-short.yml if the old config name is used
+  const workflowFile = env.GITHUB_WORKFLOW_FILE || 'generate-youtube-short.yml';
+  const targetWorkflow = (workflowFile === 'generate-and-post.yml' || workflowFile === 'generate-and-post') 
+    ? 'generate-youtube-short.yml' 
+    : workflowFile;
+
+  const githubUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/actions/workflows/${targetWorkflow}/dispatches`;
   
   const res = await fetch(githubUrl, {
     method: 'POST',
@@ -571,12 +503,12 @@ async function triggerWorkflow(env, payload) {
   }
 }
 
-// Helper: Fetch docs/content-queue.json and trigger next unposted video
+// Helper: Fetch docs/content-queue.json and trigger next pending unposted video
 async function handleScheduled(env) {
   console.log('Cron triggered! Fetching content queue...');
   
-  if (!env.GITHUB_OWNER || !env.GITHUB_REPO || !env.GITHUB_DISPATCH_TOKEN || !env.GITHUB_WORKFLOW_FILE) {
-    console.error('Error: Missing GitHub configuration secrets (GITHUB_OWNER, GITHUB_REPO, GITHUB_DISPATCH_TOKEN, GITHUB_WORKFLOW_FILE)');
+  if (!env.GITHUB_OWNER || !env.GITHUB_REPO || !env.GITHUB_DISPATCH_TOKEN) {
+    console.error('Error: Missing GitHub configuration secrets (GITHUB_OWNER, GITHUB_REPO, GITHUB_DISPATCH_TOKEN)');
     return;
   }
 
@@ -614,33 +546,47 @@ async function handleScheduled(env) {
       return;
     }
 
-    // Find first item where posted is false (or falsy)
-    const item = queue.find(i => !i.posted);
+    // Find first item where posted is false AND status is pending
+    const item = queue.find(i => i.posted === false && i.status === 'pending');
     if (!item) {
-      console.log('All queue items have been posted. Nothing to do.');
+      console.log('No pending, unposted queue items found. Nothing to do.');
       return;
     }
 
-    console.log(`Found unposted item: "${item.topic}". Triggering pipeline...`);
+    console.log(`Found pending unposted item ID ${item.id}: "${item.topic}". Triggering pipeline...`);
 
     const jobId = 'cron_' + Math.random().toString(36).substring(2, 10);
-    const platforms = Array.isArray(item.platforms) 
-      ? item.platforms.join(',') 
-      : (item.platforms || 'youtube,instagram,facebook');
+
+    // Safety guardrails for scheduled trigger
+    let generationMode = item.generation_mode || 'mock';
+    let metadataMode = item.metadata_mode || 'mock';
+    
+    let postingMode = item.posting_mode || 'mock';
+    if (postingMode === 'real' && env.ALLOW_LIVE_CRON !== 'true') {
+      console.warn(`[SAFETY] Cron posting_mode is 'real' but ALLOW_LIVE_CRON is not 'true'. Overriding to 'mock'.`);
+      postingMode = 'mock';
+    }
+
+    let privacy = item.privacy || 'private';
+    if (privacy === 'public' && env.ALLOW_PUBLIC_CRON !== 'true') {
+      console.warn(`[SAFETY] Cron privacy is 'public' but ALLOW_PUBLIC_CRON is not 'true'. Overriding to 'private'.`);
+      privacy = 'private';
+    }
 
     const payload = {
       ref: 'main',
       inputs: {
         topic: item.topic,
-        title: item.title,
-        description: item.description,
-        niche: item.niche || 'general',
-        platforms: platforms,
-        privacy: item.privacy || 'private',
-        mock_mode: item.mock_mode === undefined ? 'true' : String(item.mock_mode),
+        niche: item.niche || 'ai',
+        privacy: privacy,
+        generation_mode: generationMode,
+        metadata_mode: metadataMode,
+        posting_mode: postingMode,
+        queue_item_id: String(item.id),
         job_id: jobId
       }
     };
+
 
     const triggerRes = await triggerWorkflow(env, payload);
     if (triggerRes.status === 'success') {

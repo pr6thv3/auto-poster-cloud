@@ -1,14 +1,13 @@
-# Setup Guide: auto-poster-cloud
+# Setup Guide: auto-poster-cloud (YouTube Shorts Only)
 
-This guide outlines the step-by-step process to configure the Cloud-Executed, Phone-Triggered Video Posting Pipeline.
+This guide outlines the step-by-step process to configure the Cloud-Executed, Web/Cron-Triggered YouTube Shorts Auto-Posting Pipeline.
 
 ## 📋 Prerequisites
-Before setting up the repository, ensure you have the following accounts and permissions ready:
+Before setting up the repository, ensure you have the following accounts and API credentials ready:
 - A GitHub Account
-- A Cloudflare Account (with Workers and R2 enabled)
+- A Cloudflare Account (with Workers and optional R2 enabled)
 - A Google Cloud Platform (GCP) project with the **YouTube Data API v3** enabled
-- A Meta Developer App with **Instagram Graph API** and **Facebook Login** configured
-- A Facebook Page connected to a professional Instagram (Business or Creator) account
+- A LLM Provider API Key: **OpenAI API Key** or **Gemini API Key** (for metadata generation in real mode)
 
 ---
 
@@ -16,60 +15,28 @@ Before setting up the repository, ensure you have the following accounts and per
 
 Navigate to your GitHub repository -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**. Add the following keys:
 
-### 1. Cloudflare R2 Secrets
-* `R2_ACCOUNT_ID`: Your Cloudflare Account ID (found on your Cloudflare dashboard Home page or R2 page).
-* `R2_ACCESS_KEY_ID`: S3 API Access Key ID for your bucket.
-* `R2_SECRET_ACCESS_KEY`: S3 API Secret Access Key.
-* `R2_BUCKET`: `shorts-staging` (the name of your R2 bucket).
-* `R2_PUBLIC_BASE_URL`: The custom domain or public endpoint mapped to your bucket (e.g., `https://media.yourdomain.com`).
-
-### 2. YouTube OAuth2 Secrets
+### 1. YouTube OAuth2 Secrets
 * `YOUTUBE_CLIENT_ID`: Your Google OAuth2 Client ID.
 * `YOUTUBE_CLIENT_SECRET`: Your Google OAuth2 Client Secret.
 * `YOUTUBE_REFRESH_TOKEN`: The offline refresh token obtained for your YouTube channel.
 
-### 3. Meta Graph API Secrets
-* `META_PAGE_ACCESS_TOKEN`: Long-lived Page Access Token (or permanent System User token).
-* `IG_USER_ID`: Your Instagram Business Account ID.
-* `FACEBOOK_PAGE_ID`: Your Facebook Page ID.
-* `GRAPH_API_VERSION`: `v25.0` (or your pinned API version).
+### 2. LLM Provider Secrets (For Metadata)
+* `LLM_PROVIDER`: Set to either `openai` or `gemini`.
+* `OPENAI_API_KEY`: Required if `LLM_PROVIDER` is `openai`.
+* `OPENAI_MODEL_NAME`: Optional (defaults to `gpt-4o-mini`).
+* `GEMINI_API_KEY`: Required if `LLM_PROVIDER` is `gemini`.
+* `GEMINI_MODEL_NAME`: Optional (defaults to `gemini-1.5-flash`).
+
+### 3. Cloudflare R2 Secrets (Optional for Debug Archive)
+* `R2_ACCOUNT_ID`: Your Cloudflare Account ID.
+* `R2_ACCESS_KEY_ID`: S3 API Access Key ID for your bucket.
+* `R2_SECRET_ACCESS_KEY`: S3 API Secret Access Key.
+* `R2_BUCKET`: The name of your R2 bucket.
+* `R2_PUBLIC_BASE_URL`: The custom domain or public endpoint mapped to your bucket.
 
 ### 4. Pipeline Trigger Secrets
-* `CLOUDFLARE_TRIGGER_SECRET`: A secure random string used as a shared secret between your phone (the Cloudflare Worker) and GitHub Actions.
-
----
-
-## 🪣 Cloudflare R2 Bucket Configuration
-
-1. Create a bucket named `shorts-staging` in **R2** -> **Create Bucket**.
-2. Set up **Public Access** in the bucket settings:
-   - Either enable the default `r2.dev` subdomain (good for testing, but not recommended for production due to rate limiting).
-   - **Recommended:** Connect a custom domain (e.g., `media.yourdomain.com`) in the bucket Settings -> **Domain Names**.
-3. Add a **Lifecycle Rule** (Object TTL) to automatically delete staging files after 7 days to keep storage usage within the free tier:
-   - Go to R2 bucket Settings -> **Lifecycle Rules** -> **Add Rule**.
-   - Action: **Delete objects**.
-   - Age: **7 days** (or 24 hours).
-
----
-
-## 🔑 API Credential Exchanges (Human Tasks)
-
-### 1. YouTube Resumable Upload
-* In Google Cloud Console, configure the OAuth Consent Screen as **External** and add your own Google email as a **Test User**.
-* If your Google Cloud app remains in "Testing" mode, the OAuth tokens will expire every 7 days unless refreshed, and uploads will default to **private**.
-* Apply for API Audit/Verification if you need videos to be uploaded directly as **public**.
-
-### 2. Meta Graph Token Exchange
-* Get a short-lived user token from the **Graph API Explorer** with permissions: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `instagram_basic`, `instagram_content_publish`.
-* Exchange it for a 60-day user token via:
-  ```
-  GET https://graph.facebook.com/{version}/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}
-  ```
-* Retrieve the permanent Page Access token using the 60-day token:
-  ```
-  GET https://graph.facebook.com/{version}/me/accounts?fields=id,name,access_token,instagram_business_account&access_token={60_day_token}
-  ```
-* Store the returned `access_token` as `META_PAGE_ACCESS_TOKEN`.
+* `GITHUB_DISPATCH_TOKEN`: Fine-grained GitHub PAT with `actions:write` and `contents:write` scopes to allow the worker to trigger runs and the workflow to update the queue.
+* `WORKER_TRIGGER_SECRET`: A secure random string used as a shared secret between your Worker trigger calls and the Worker.
 
 ---
 
@@ -84,7 +51,7 @@ npx wrangler login
 ```
 
 ### 2. Configure Worker Secrets
-You must configure the required secrets in your Cloudflare environment. These secrets are encrypted and kept hidden on Cloudflare servers. Run the following commands:
+You must configure the required secrets in your Cloudflare environment. Run the following commands:
 
 ```bash
 # GitHub repository owner (username or org name)
@@ -93,13 +60,13 @@ npx wrangler secret put GITHUB_OWNER
 # GitHub repository name (e.g. auto-poster-cloud)
 npx wrangler secret put GITHUB_REPO
 
-# Target workflow file name (e.g. generate-and-post.yml)
+# Target workflow file name (generate-youtube-short.yml)
 npx wrangler secret put GITHUB_WORKFLOW_FILE
 
-# Fine-grained GitHub PAT with actions:write scope to trigger dispatch
+# Fine-grained GitHub PAT with actions:write and contents:write scope to trigger dispatch and update queue
 npx wrangler secret put GITHUB_DISPATCH_TOKEN
 
-# Shared trigger secret (matches CLOUDFLARE_TRIGGER_SECRET in GHA)
+# Shared trigger secret
 npx wrangler secret put WORKER_TRIGGER_SECRET
 ```
 
@@ -109,24 +76,17 @@ Run the deploy command from the `cloud-pipeline/worker/` directory:
 npx wrangler deploy
 ```
 
-Once deployed, Cloudflare will output the Worker URL (e.g., `https://auto-poster-trigger-worker.<your-subdomain>.workers.dev`).
-
 ---
 
 ## 📅 Scheduled Postings (Cron & Content Queue)
 
-The pipeline is set up to run once daily at **12:00 UTC (noon)** via Cloudflare Cron Triggers. When the cron fires:
-1. The Cloudflare Worker fetches your **[`docs/content-queue.json`](file:///D:/ai-stack/auto-poster-cloud/docs/content-queue.json)** directly from the GitHub API.
-2. It parses the queue, identifies the first item where `"posted"` is not `true` (or falsy).
-3. It triggers a GHA workflow execution using `workflow_dispatch` with that item's configuration.
+The pipeline is set up to run three times daily via Cloudflare Cron Triggers:
+- **9:00 AM IST** (03:30 UTC): cron expression `30 3 * * *`
+- **2:00 PM IST** (08:30 UTC): cron expression `30 8 * * *`
+- **7:00 PM IST** (13:30 UTC): cron expression `30 13 * * *`
 
-### Testing the Cron Schedule Locally
-You can test the worker's cron response locally without waiting for the scheduled time:
-1. Run Wrangler in development mode:
-   ```bash
-   npx wrangler dev
-   ```
-2. Trigger the scheduled cron event manually by hitting the test route in your browser:
-   `http://localhost:8787/__scheduled`
-3. Verify in your console logs that the worker correctly fetches `content-queue.json` and triggers the GHA dispatch request.
-
+When a cron trigger fires:
+1. The Cloudflare Worker fetches **[`docs/content-queue.json`](file:///docs/content-queue.json)** directly from the GitHub API.
+2. It parses the queue, identifies the first item where `"posted"` is `false` and `"status"` is `"pending"`.
+3. It triggers GHA workflow `generate-youtube-short.yml` via `workflow_dispatch` with the item's parameters (and `queue_item_id`).
+4. Upon successful posting, the GHA run updates `"posted": true`, `"status": "success"`, and `"youtube_video_id"` in `docs/content-queue.json` and commits it back.

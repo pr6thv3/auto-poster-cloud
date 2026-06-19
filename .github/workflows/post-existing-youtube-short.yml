@@ -1,0 +1,237 @@
+name: Post Existing Video to YouTube
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url_or_path:
+        description: "Public URL or local path of the existing video file to post"
+        required: true
+        type: string
+      topic:
+        description: "Video subject/topic (for reference)"
+        required: false
+        type: string
+      niche:
+        description: "Niche/category (e.g. ai, history)"
+        required: true
+        default: "ai"
+        type: string
+      metadata_mode:
+        description: "Metadata generation mode (mock, real)"
+        required: true
+        default: "mock"
+        type: string
+      posting_mode:
+        description: "Posting execution mode (mock, real)"
+        required: true
+        default: "mock"
+        type: string
+      privacy:
+        description: "Privacy setting (private, unlisted, public)"
+        required: true
+        default: "private"
+        type: string
+      queue_item_id:
+        description: "Queue item ID (for scheduled runs)"
+        required: false
+        default: ""
+        type: string
+      job_id:
+        description: "Unique job identifier for tracking"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: auto-poster
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fix ImageMagick Policy
+        run: |
+          sudo sed -i 's/<policy domain="path" rights="none" pattern="@\*"/<!-- <policy domain="path" rights="none" pattern="@\*" -->/g' /etc/ImageMagick-6/policy.xml || true
+          sudo sed -i 's/<policy domain="path" rights="none" pattern="@\*"/<!-- <policy domain="path" rights="none" pattern="@\*" -->/g' /etc/ImageMagick-7/policy.xml || true
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Fetch Video File
+        id: fetch-video
+        env:
+          VIDEO_URL_OR_PATH: ${{ github.event.inputs.video_url_or_path }}
+        run: |
+          python -c "
+          import urllib.request
+          import os
+          import shutil
+          
+          val = os.environ['VIDEO_URL_OR_PATH'].strip()
+          dest = 'storage/tasks/manual/final-1.mp4'
+          os.makedirs('storage/tasks/manual', exist_ok=True)
+          
+          if val.startswith('http://') or val.startswith('https://'):
+              print(f'Downloading {val} to {dest}...')
+              urllib.request.urlretrieve(val, dest)
+              print('Download complete!')
+          else:
+              print(f'Using local path: {val}')
+              if not os.path.exists(val):
+                  # In case of mock testing, write a placeholder if local file is missing
+                  if '${{ github.event.inputs.posting_mode }}' == 'mock':
+                      print('Local file missing but posting_mode is mock. Creating dummy video.')
+                      with open(dest, 'wb') as f:
+                          f.write(b'0' * 150000)
+                  else:
+                      print(f'Error: local file does not exist at {val}')
+                      exit(1)
+              else:
+                  shutil.copy(val, dest)
+                  print('Copy complete!')
+          "
+
+      - name: Create Placeholder MoneyPrinterTurbo Log
+        run: |
+          echo "Bypassed video generation for manual existing video upload." > moneyprinter-log.txt
+
+      - name: Generate YouTube Metadata
+        id: generate-metadata
+        env:
+          TOPIC: ${{ github.event.inputs.topic || 'Existing Video' }}
+          NICHE: ${{ github.event.inputs.niche }}
+          METADATA_MODE: ${{ github.event.inputs.metadata_mode }}
+          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL_NAME: ${{ secrets.OPENAI_MODEL_NAME }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL_NAME: ${{ secrets.GEMINI_MODEL_NAME }}
+        run: |
+          python scripts/generate_youtube_metadata.py
+
+      - name: Find Output Video & Validate
+        id: find-video
+        env:
+          GENERATION_MODE: ${{ github.event.inputs.posting_mode }}
+        run: |
+          python scripts/find_latest_video.py
+
+      - name: Upload to Cloudflare R2 (Optional)
+        id: upload-r2
+        if: secrets.R2_ACCOUNT_ID != ''
+        continue-on-error: true
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
+          NICHE: ${{ github.event.inputs.niche }}
+          MOCK_MODE: ${{ github.event.inputs.posting_mode == 'mock' && 'true' || 'false' }}
+        run: |
+          python scripts/upload_r2.py
+
+      - name: Post to YouTube
+        id: post-youtube
+        continue-on-error: true
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          PRIVACY: ${{ github.event.inputs.privacy }}
+          VIDEO_PATH: ${{ steps.find-video.outputs.video_path }}
+          POSTING_MODE: ${{ github.event.inputs.posting_mode }}
+          QUEUE_ITEM_ID: ${{ github.event.inputs.queue_item_id }}
+          MOCK_MODE: 'false'
+        run: |
+          python scripts/post_youtube.py
+
+      - name: Update docs/content-queue.json in Repository
+        if: always() && github.event.inputs.queue_item_id != ''
+        env:
+          QUEUE_ITEM_ID: ${{ github.event.inputs.queue_item_id }}
+          YT_STATUS: ${{ steps.post-youtube.outputs.youtube_status }}
+          YT_VIDEO_ID: ${{ steps.post-youtube.outputs.youtube_video_id }}
+          YT_ERROR: ${{ steps.post-youtube.outputs.youtube_error }}
+        run: |
+          python scripts/update_queue.py
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add docs/content-queue.json
+          git commit -m "Update queue item ${{ github.event.inputs.queue_item_id }} [skip ci]" || echo "No changes to commit"
+          if [ -n "${{ secrets.GITHUB_DISPATCH_TOKEN }}" ]; then
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_DISPATCH_TOKEN }}@github.com/${{ github.repository }}.git
+          else
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          fi
+          git push origin main || echo "Failed to push updates"
+
+      - name: Write Job Summary
+        if: always()
+        env:
+          TOPIC: ${{ github.event.inputs.topic || 'Manual Video' }}
+          NICHE: ${{ github.event.inputs.niche }}
+          PRIVACY: ${{ github.event.inputs.privacy }}
+          GENERATION_MODE: 'mock'
+          METADATA_MODE: ${{ github.event.inputs.metadata_mode }}
+          POSTING_MODE: ${{ github.event.inputs.posting_mode }}
+          VIDEO_PATH: ${{ steps.find-video.outputs.video_path }}
+          PUBLIC_VIDEO_URL: ${{ steps.upload-r2.outputs.public_video_url }}
+          GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
+        run: |
+          python scripts/write_summary.py
+
+      - name: Upload Logs and Results Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posting-logs-${{ github.event.inputs.job_id || github.run_id }}
+          path: |
+            platform-results.json
+            run-log.json
+            youtube-result.json
+            youtube-metadata.json
+            video-info.json
+            moneyprinter-log.txt
+
+      - name: Run R2 Cleanup (Mock)
+        if: always()
+        run: |
+          python scripts/cleanup_r2.py
+
+      - name: Check for Failures
+        if: always()
+        run: |
+          if [ -f youtube-result.json ]; then
+            if grep -q '"youtube_status": "failed"' youtube-result.json; then
+              echo "Error: YouTube posting task failed!"
+              exit 1
+            fi
+          fi
+
+      - name: Comment on Tracking Issue on Failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ vars.TRACKING_ISSUE_NUMBER }}
+        run: |
+          if [ -n "$ISSUE_NUMBER" ]; then
+            COMMENT_BODY="❌ **auto-poster-cloud YouTube Shorts Manual Post Pipeline Failed!**\n\n* **Run ID**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n* **Job ID**: ${{ github.event.inputs.job_id }}\n* **Topic**: Manual Video Post\n\nPlease check the Actions logs and the job summary for failure details."
+            gh issue comment "$ISSUE_NUMBER" --body "$COMMENT_BODY"
+          else
+            echo "No TRACKING_ISSUE_NUMBER variable set. Skipping issue comment."
+          fi

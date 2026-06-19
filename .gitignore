@@ -8,3 +8,11 @@ dist/
 wrangler-temp/
 .wrangler/
 .dev.vars
+platform-results.json
+run-log.json
+youtube-result.json
+youtube-metadata.json
+video-info.json
+moneyprinter-log.txt
+cloud-pipeline/worker/node_modules/
+

@@ -1,16 +1,34 @@
 [
   {
+    "id": "1",
+    "enabled": true,
+    "posted": false,
+    "status": "pending",
     "topic": "3 AI websites you did not know existed",
-    "title": "Unbelievable AI Websites!",
-    "description": "These 3 websites will save you hours of work. #ai #productivity",
     "niche": "ai",
-    "posted": false
+    "privacy": "private",
+    "generation_mode": "mock",
+    "metadata_mode": "mock",
+    "posting_mode": "mock",
+    "slot": "1",
+    "attempts": 0,
+    "last_error": "",
+    "youtube_video_id": null
   },
   {
+    "id": "2",
+    "enabled": true,
+    "posted": false,
+    "status": "pending",
     "topic": "The history of the first computer bug",
-    "title": "The First Computer Bug 🐛",
-    "description": "How a literal moth in a relay caused the term 'bug' to be coined. #techhistory",
     "niche": "history",
-    "posted": false
+    "privacy": "private",
+    "generation_mode": "mock",
+    "metadata_mode": "mock",
+    "posting_mode": "mock",
+    "slot": "2",
+    "attempts": 0,
+    "last_error": "",
+    "youtube_video_id": null
   }
 ]

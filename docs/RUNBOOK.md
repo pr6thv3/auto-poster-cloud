@@ -1,73 +1,93 @@
-# Runbook: auto-poster-cloud
+# Runbook: auto-poster-cloud (YouTube Shorts Only)
 
-This document serves as the operations guide for triggering, monitoring, and troubleshooting the cloud video posting pipeline.
+This document serves as the operations guide for triggering, monitoring, and troubleshooting the YouTube Shorts posting pipeline.
 
-## 🚀 Triggering the Pipeline
+## 🚀 Manual Execution via GitHub Actions
 
-### Option 1: Manual Trigger via GitHub Mobile / Web UI
+### Option 1: Generate & Post Workflow
 1. Go to your GitHub Repository -> **Actions** tab.
-2. Select the **Generate and Post Video** workflow.
-3. Click **Run workflow** and fill in the inputs:
+2. Select the **Generate and Post YouTube Short** workflow.
+3. Click **Run workflow** and specify:
    - **topic**: "e.g., 3 productivity tips for developers"
-   - **title**: "Social post title"
-   - **description**: "Post caption/hashtags"
-   - **platforms**: "youtube,instagram,facebook" (or a subset)
-   - **privacy**: "private" (use for testing) or "public"
-   - **mock_mode**: "true" (to verify GHA runs without posting) or "false" (live)
-4. Click **Run workflow**.
+   - **niche**: "ai" (or your niche folder name)
+   - **generation_mode**: `mock` (creates dummy MP4) or `real` (runs MoneyPrinterTurbo)
+   - **metadata_mode**: `mock` (static title/desc) or `real` (queries OpenAI/Gemini LLM)
+   - **posting_mode**: `mock` (skips upload) or `real` (posts to YouTube)
+   - **privacy**: `private` (recommended for testing), `unlisted`, or `public`
+
+### Option 2: Post Existing Video Workflow
+1. Go to Actions -> **Post Existing Video to YouTube**.
+2. Click **Run workflow** and specify:
+   - **video_url_or_path**: Public HTTPS URL or local file path of the MP4 video.
+   - **topic**: Video topic name.
+   - **niche**: Niche category.
+   - **metadata_mode**: `mock` or `real`.
+   - **posting_mode**: `mock` or `real`.
+   - **privacy**: `private`, `unlisted`, or `public`.
 
 ---
 
 ## 📅 Scheduled Trigger (Content Queue)
 
-To support automated postings on a schedule without hardcoding topics in the cron worker, a queue file is placed in this repository: `docs/content-queue.json`.
+Automated posting reads from `docs/content-queue.json`.
 
-### Queue Structure (`docs/content-queue.json`):
+### Queue Schema:
 ```json
 [
   {
+    "id": "1",
+    "enabled": true,
+    "posted": false,
+    "status": "pending",
     "topic": "3 AI websites you did not know existed",
-    "title": "Unbelievable AI Websites!",
-    "description": "These 3 websites will save you hours of work. #ai #productivity",
     "niche": "ai",
-    "posted": false
-  },
-  {
-    "topic": "The history of the first computer bug",
-    "title": "The First Computer Bug 🐛",
-    "description": "How a literal moth in a relay caused the term 'bug' to be coined. #techhistory",
-    "niche": "history",
-    "posted": false
+    "privacy": "private",
+    "generation_mode": "mock",
+    "metadata_mode": "mock",
+    "posting_mode": "mock",
+    "slot": "1",
+    "attempts": 0,
+    "last_error": "",
+    "youtube_video_id": ""
   }
 ]
 ```
 
-### Scheduled Execution Logic:
-1. The Cloudflare Cron trigger fires at the scheduled time.
-2. The Worker requests the `docs/content-queue.json` from the repository main branch.
-3. The Worker finds the first item where `"posted": false`.
-4. It calls `workflow_dispatch` passing the item's parameters.
-5. Once the run completes, the user commits `"posted": true` (or the pipeline handles it automatically in a future phase).
+### Scheduled Handler Logic:
+1. Cloudflare trigger fires at 9 AM, 2 PM, or 7 PM IST.
+2. Worker fetches queue file from the main branch.
+3. Worker picks the first item where `"posted": false` and `"status": "pending"`.
+4. Worker dispatches GHA with item inputs.
+5. GHA uploads and updates the item fields (setting `"posted": true`, `"status": "success"`, `"youtube_video_id"`).
 
 ---
 
-## 📊 Monitoring Runs
+## 🧪 Testing Matrix
 
-1. **GitHub Job Summary**: Every workflow run generates a Markdown summary visible at the bottom of the Action Run details page. It details exactly what files were generated, the Cloudflare R2 staging URL, and individual status for YouTube, Instagram, and Facebook.
-2. **GitHub Mobile app**: Enable push notifications for workflow status to get instant notifications when a job completes or fails.
+To verify reliability before live posting, run through this progressive testing matrix:
+
+1. **Mock End-to-End**:
+   - `generation_mode=mock`, `metadata_mode=mock`, `posting_mode=mock`
+   - Bypasses all APIs, tests workflow pipeline orchestration, and updates queue in under 30 seconds.
+2. **Real Generation Only**:
+   - `generation_mode=real`, `metadata_mode=mock`, `posting_mode=mock`
+   - Validates MoneyPrinterTurbo cloning, config.toml generation, script generation, and local file storage.
+3. **Real Generation & Metadata**:
+   - `generation_mode=real`, `metadata_mode=real`, `posting_mode=mock`
+   - Validates LLM metadata completion (title length, description format, #Shorts presence) and writes to `youtube-metadata.json`.
+4. **Post Existing Video (Manual)**:
+   - Run **Post Existing Video to YouTube** with a known vertical MP4 link, `posting_mode=real`, and `privacy=private`.
+   - Verifies OAuth2 refreshing and resumable YouTube uploads.
+5. **Full Private Post**:
+   - `generation_mode=real`, `metadata_mode=real`, `posting_mode=real`, `privacy=private`
+   - Verifies the full pipeline end-to-end without publishing publicly.
+6. **Unlisted / Public**:
+   - Transition to `unlisted` or `public` once private tests pass successfully.
 
 ---
 
-## 🛠️ Recovery Procedures
-
-### 1. Job Fails During Generation
-* **Symptom**: MoneyPrinterTurbo crashes or errors out.
-* **Resolution**: Check the Actions run logs. If it's a network timeout, click **Re-run failed jobs**. If it's an API error (e.g. LLM rate limit), verify your LLM API keys in Secrets.
-
-### 2. Failure on a Single Platform (e.g., Instagram fails, YouTube succeeds)
-* **Symptom**: Part of the posting fails while other platforms succeed.
-* **Resolution**: 
-  1. Open the GHA run details and look at the job summary. Copy the **Cloudflare R2 Public URL** (which is already uploaded and valid).
-  2. Go to Actions -> Select **Post Existing Video** workflow.
-  3. Click **Run workflow** and paste the R2 URL as `video_url`, select only the failed platform (e.g., `instagram`), and set `mock_mode` to `false`.
-  4. This posts the already-generated video without wasting Actions minutes or LLM API calls on regeneration!
+## 🛡️ Reliability & Safety Safeguards
+- **Format Validation**: Any real MP4 upload is checked via `ffprobe` to confirm it is vertical 9:16, <= 60 seconds duration, and encoded with H.264 video / AAC audio.
+- **Quota Exceeded Check**: If the YouTube API responds with `dailyLimitExceeded` or `quotaExceeded` (403/429), the script terminates cleanly with status `quota_exceeded`, avoiding blind retries.
+- **Duplicate Protection**: If the queue item already contains a `youtube_video_id` or the workflow input includes it, the upload step skips automatically.
+- **n8n Fallback**: Telegram, Hermes, and complex n8n workflows are removed. n8n remains available strictly as a fallback tool for local testing.
