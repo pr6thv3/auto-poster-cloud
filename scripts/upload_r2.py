@@ -38,8 +38,13 @@ def main():
         bucket_name = os.environ.get('R2_BUCKET', 'shorts-staging')
         
         if not all([account_id, access_key, secret_key]):
-            print("Error: Missing Cloudflare R2 credentials (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY)")
-            sys.exit(1)
+            print("Cloudflare R2 credentials missing. Skipping upload step as R2 is optional.")
+            github_output = os.environ.get('GITHUB_OUTPUT')
+            if github_output:
+                with open(github_output, "a") as f:
+                    f.write("public_video_url=Not Uploaded\n")
+                    f.write("r2_key=N/A\n")
+            sys.exit(0)
             
         # We need to find the video path from previous step (or we scan storage/tasks/)
         # For simplicity, we search glob for *.mp4 under storage/tasks/ again

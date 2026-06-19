@@ -132,7 +132,6 @@ jobs:
 
       - name: Upload to Cloudflare R2 (Optional)
         id: upload-r2
-        if: secrets.R2_ACCOUNT_ID != ''
         continue-on-error: true
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
