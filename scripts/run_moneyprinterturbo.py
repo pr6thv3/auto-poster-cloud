@@ -42,9 +42,9 @@ def main():
         video_source = os.environ.get('VIDEO_SOURCE', 'pexels')
         pexels_key = os.environ.get('PEXELS_API_KEY', '')
         openai_key = os.environ.get('OPENAI_API_KEY', '')
-        openai_model = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4o-mini')
+        openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
         gemini_key = os.environ.get('GEMINI_API_KEY', '')
-        gemini_model = os.environ.get('GEMINI_MODEL_NAME', 'gemini-1.5-flash')
+        gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-1.5-flash'
         
         config_path = os.path.join(repo_dir, "config.toml")
         print(f"[REAL] Generating config.toml at {config_path}...")

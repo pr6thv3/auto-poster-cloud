@@ -31,9 +31,9 @@ def generate_mock_metadata(topic, niche):
 def generate_real_metadata(topic, niche, script_text):
     llm_provider = os.environ.get('LLM_PROVIDER', '').lower()
     openai_key = os.environ.get('OPENAI_API_KEY')
-    openai_model = os.environ.get('OPENAI_MODEL_NAME', 'gpt-4o-mini')
+    openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
     gemini_key = os.environ.get('GEMINI_API_KEY')
-    gemini_model = os.environ.get('GEMINI_MODEL_NAME', 'gemini-1.5-flash')
+    gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-1.5-flash'
 
     # Autodetect provider if not explicitly configured
     if not llm_provider:
