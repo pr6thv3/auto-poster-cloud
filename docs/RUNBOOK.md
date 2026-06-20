@@ -11,7 +11,8 @@ This document serves as the operations guide for triggering, monitoring, and tro
    - **topic**: "e.g., 3 productivity tips for developers"
    - **niche**: "ai" (or your niche folder name)
    - **generation_mode**: `mock` (creates dummy MP4) or `real` (runs MoneyPrinterTurbo)
-   - **metadata_mode**: `mock` (static title/desc) or `real` (queries OpenAI/Gemini LLM)
+   - **metadata_mode**: `mock` (static title/desc) or `real` (queries OpenAI/Gemini/NVIDIA LLM)
+   - **llm_provider**: `nvidia` (optional override to test NVIDIA NIM; otherwise falls back to repository default `LLM_PROVIDER` secret, which defaults to `gemini`)
    - **posting_mode**: `mock` (skips upload) or `real` (posts to YouTube)
    - **privacy**: `private` (recommended for testing), `unlisted`, or `public`
 
@@ -75,13 +76,16 @@ To verify reliability before live posting, run through this progressive testing 
 3. **Real Generation & Metadata**:
    - `generation_mode=real`, `metadata_mode=real`, `posting_mode=mock`
    - Validates LLM metadata completion (title length, description format, #Shorts presence) and writes to `youtube-metadata.json`.
-4. **Post Existing Video (Manual)**:
+4. **NVIDIA NIM LLM Provider Test**:
+   - `generation_mode=mock`, `metadata_mode=real`, `posting_mode=mock`, `llm_provider=nvidia` (or setting `LLM_PROVIDER` secret to `nvidia`)
+   - Bypasses video generation (mock), but calls NVIDIA NIM completions to generate real metadata (title, description, tags, hashtags) and writes to `youtube-metadata.json`. Useful for validation without rendering/generating a real video.
+5. **Post Existing Video (Manual)**:
    - Run **Post Existing Video to YouTube** with a known vertical MP4 link, `posting_mode=real`, and `privacy=private`.
    - Verifies OAuth2 refreshing and resumable YouTube uploads.
-5. **Full Private Post**:
+6. **Full Private Post**:
    - `generation_mode=real`, `metadata_mode=real`, `posting_mode=real`, `privacy=private`
    - Verifies the full pipeline end-to-end without publishing publicly.
-6. **Unlisted / Public**:
+7. **Unlisted / Public**:
    - Transition to `unlisted` or `public` once private tests pass successfully.
 
 ---

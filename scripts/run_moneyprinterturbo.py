@@ -38,11 +38,35 @@ def main():
             ], check=True)
         
         # 2. Write config.toml inside the cloned repo
-        llm_provider = os.environ.get('LLM_PROVIDER', 'openai')
+        llm_provider = os.environ.get('LLM_PROVIDER', 'openai').strip().lower()
         video_source = os.environ.get('VIDEO_SOURCE', 'pexels')
         pexels_key = os.environ.get('PEXELS_API_KEY', '')
-        openai_key = os.environ.get('OPENAI_API_KEY', '')
-        openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
+        
+        openai_key = ''
+        openai_base_url = ''
+        openai_model = ''
+        
+        if llm_provider == "nvidia":
+            nvidia_key = os.environ.get('NVIDIA_API_KEY', '').strip()
+            nvidia_base = os.environ.get('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1').strip()
+            nvidia_model = os.environ.get('NVIDIA_MODEL_NAME', '').strip()
+            
+            if not nvidia_key:
+                print("Error: NVIDIA_API_KEY is required for LLM_PROVIDER=nvidia")
+                sys.exit(1)
+            if not nvidia_model:
+                print("Error: NVIDIA_MODEL_NAME is required for LLM_PROVIDER=nvidia")
+                sys.exit(1)
+                
+            llm_provider = "openai"
+            openai_key = nvidia_key
+            openai_base_url = nvidia_base
+            openai_model = nvidia_model
+        else:
+            openai_key = os.environ.get('OPENAI_API_KEY', '')
+            openai_base_url = os.environ.get('OPENAI_BASE_URL', '')
+            openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
+            
         gemini_key = os.environ.get('GEMINI_API_KEY', '')
         gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-2.5-flash'
         
@@ -54,6 +78,7 @@ video_source = "{video_source}"
 pexels_api_keys = ["{pexels_key}"]
 llm_provider = "{llm_provider}"
 openai_api_key = "{openai_key}"
+openai_base_url = "{openai_base_url}"
 openai_model_name = "{openai_model}"
 gemini_api_key = "{gemini_key}"
 gemini_model_name = "{gemini_model}"

@@ -36,6 +36,11 @@ on:
         required: false
         default: ""
         type: string
+      llm_provider:
+        description: "LLM Provider override (gemini, openai, nvidia)"
+        required: false
+        default: ""
+        type: string
       job_id:
         description: "Unique job identifier for tracking"
         required: false
@@ -120,11 +125,14 @@ jobs:
           TOPIC: ${{ github.event.inputs.topic || 'Existing Video' }}
           NICHE: ${{ github.event.inputs.niche }}
           METADATA_MODE: ${{ github.event.inputs.metadata_mode }}
-          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+          LLM_PROVIDER: ${{ github.event.inputs.llm_provider || secrets.LLM_PROVIDER || 'gemini' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL_NAME: ${{ secrets.OPENAI_MODEL_NAME }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL_NAME: ${{ secrets.GEMINI_MODEL_NAME }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_BASE_URL: ${{ secrets.NVIDIA_BASE_URL }}
+          NVIDIA_MODEL_NAME: ${{ secrets.NVIDIA_MODEL_NAME }}
         run: |
           python scripts/generate_youtube_metadata.py
 

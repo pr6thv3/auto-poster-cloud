@@ -29,11 +29,34 @@ def generate_mock_metadata(topic, niche):
     }
 
 def generate_real_metadata(topic, niche, script_text):
-    llm_provider = os.environ.get('LLM_PROVIDER', '').lower()
-    openai_key = os.environ.get('OPENAI_API_KEY')
-    openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
+    llm_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
     gemini_key = os.environ.get('GEMINI_API_KEY')
     gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-2.5-flash'
+
+    openai_key = ''
+    openai_base_url = ''
+    openai_model = ''
+
+    if llm_provider == "nvidia":
+        nvidia_key = os.environ.get('NVIDIA_API_KEY', '').strip()
+        nvidia_base = os.environ.get('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1').strip()
+        nvidia_model = os.environ.get('NVIDIA_MODEL_NAME', '').strip()
+        
+        if not nvidia_key:
+            print("Error: NVIDIA_API_KEY is required for LLM_PROVIDER=nvidia")
+            sys.exit(1)
+        if not nvidia_model:
+            print("Error: NVIDIA_MODEL_NAME is required for LLM_PROVIDER=nvidia")
+            sys.exit(1)
+            
+        llm_provider = "openai"
+        openai_key = nvidia_key
+        openai_base_url = nvidia_base
+        openai_model = nvidia_model
+    else:
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        openai_base_url = os.environ.get('OPENAI_BASE_URL', '')
+        openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
 
     # Autodetect provider if not explicitly configured
     if not llm_provider:
@@ -42,7 +65,7 @@ def generate_real_metadata(topic, niche, script_text):
         elif openai_key:
             llm_provider = "openai"
         else:
-            print("Error: No API keys configured for LLM. Set OPENAI_API_KEY or GEMINI_API_KEY.")
+            print("Error: No API keys configured for LLM. Set OPENAI_API_KEY, GEMINI_API_KEY, or NVIDIA_API_KEY.")
             sys.exit(1)
 
     system_prompt = (
@@ -64,9 +87,9 @@ def generate_real_metadata(topic, niche, script_text):
     try:
         if llm_provider == "openai":
             if not openai_key:
-                raise Exception("Missing OPENAI_API_KEY")
-            print(f"[REAL] Generating metadata using OpenAI ({openai_model})...")
-            url = "https://api.openai.com/v1/chat/completions"
+                raise Exception("Missing API key for OpenAI-compatible provider.")
+            print(f"[REAL] Generating metadata using OpenAI-compatible provider ({openai_model})...")
+            url = f"{openai_base_url.rstrip('/')}/chat/completions" if openai_base_url else "https://api.openai.com/v1/chat/completions"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {openai_key}"

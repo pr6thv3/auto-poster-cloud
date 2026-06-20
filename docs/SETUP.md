@@ -21,11 +21,14 @@ Navigate to your GitHub repository -> **Settings** -> **Secrets and variables** 
 * `YOUTUBE_REFRESH_TOKEN`: The offline refresh token obtained for your YouTube channel.
 
 ### 2. LLM Provider Secrets (For Metadata)
-* `LLM_PROVIDER`: Set to either `openai` or `gemini`.
+* `LLM_PROVIDER`: Set to either `openai`, `gemini`, or `nvidia` (Gemini remains default).
 * `OPENAI_API_KEY`: Required if `LLM_PROVIDER` is `openai`.
 * `OPENAI_MODEL_NAME`: Optional (defaults to `gpt-4o-mini`).
 * `GEMINI_API_KEY`: Required if `LLM_PROVIDER` is `gemini`.
-* `GEMINI_MODEL_NAME`: Optional (defaults to `gemini-1.5-flash`).
+* `GEMINI_MODEL_NAME`: Optional (defaults to `gemini-2.5-flash`).
+* `NVIDIA_API_KEY`: Required if `LLM_PROVIDER` is `nvidia` (e.g., `nvapi-...`).
+* `NVIDIA_BASE_URL`: Optional if `LLM_PROVIDER` is `nvidia` (defaults to `https://integrate.api.nvidia.com/v1`).
+* `NVIDIA_MODEL_NAME`: Required if `LLM_PROVIDER` is `nvidia` (e.g., `mistralai/mistral-medium-3.5-128b`).
 
 ### 3. Cloudflare R2 Secrets (Optional for Debug Archive)
 * `R2_ACCOUNT_ID`: Your Cloudflare Account ID.
