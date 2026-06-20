@@ -15,4 +15,5 @@ youtube-metadata.json
 video-info.json
 moneyprinter-log.txt
 cloud-pipeline/worker/node_modules/
+*.mp4
 
