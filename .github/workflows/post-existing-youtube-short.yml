@@ -97,8 +97,16 @@ jobs:
           
           if val.startswith('http://') or val.startswith('https://'):
               print(f'Downloading {val} to {dest}...')
-              urllib.request.urlretrieve(val, dest)
-              print('Download complete!')
+              req = urllib.request.Request(val, headers={'User-Agent': 'Mozilla/5.0 auto-poster-cloud/1.0'})
+              with urllib.request.urlopen(req, timeout=120) as resp:
+                  with open(dest, 'wb') as f:
+                      while True:
+                          chunk = resp.read(1024 * 1024)
+                          if not chunk:
+                              break
+                          f.write(chunk)
+              size_mb = os.path.getsize(dest) / (1024 * 1024)
+              print(f'Download complete! Size: {size_mb:.2f} MB')
           else:
               print(f'Using local path: {val}')
               if not os.path.exists(val):
