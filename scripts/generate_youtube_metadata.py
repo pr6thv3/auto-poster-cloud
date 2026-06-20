@@ -33,7 +33,7 @@ def generate_real_metadata(topic, niche, script_text):
     openai_key = os.environ.get('OPENAI_API_KEY')
     openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
     gemini_key = os.environ.get('GEMINI_API_KEY')
-    gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-1.5-flash'
+    gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-2.5-flash'
 
     # Autodetect provider if not explicitly configured
     if not llm_provider:
