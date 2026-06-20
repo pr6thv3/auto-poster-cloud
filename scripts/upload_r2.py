@@ -32,12 +32,21 @@ def main():
             print("Error: boto3 package not installed. Run pip install boto3")
             sys.exit(1)
             
-        account_id = os.environ.get('R2_ACCOUNT_ID')
-        access_key = os.environ.get('R2_ACCESS_KEY_ID')
-        secret_key = os.environ.get('R2_SECRET_ACCESS_KEY')
-        bucket_name = os.environ.get('R2_BUCKET', 'shorts-staging')
+        account_id = os.environ.get('R2_ACCOUNT_ID', '').strip()
+        access_key = os.environ.get('R2_ACCESS_KEY_ID', '').strip()
+        secret_key = os.environ.get('R2_SECRET_ACCESS_KEY', '').strip()
+        bucket_name = os.environ.get('R2_BUCKET', 'shorts-staging').strip()
         
-        if not all([account_id, access_key, secret_key]):
+        # Clean up account_id in case it contains https:// or other URL prefixes/suffixes
+        if account_id.startswith('https://'):
+            account_id = account_id[8:]
+        elif account_id.startswith('http://'):
+            account_id = account_id[7:]
+        if account_id.endswith('.r2.cloudflarestorage.com'):
+            account_id = account_id[:-25]
+        account_id = account_id.strip()
+        
+        if not account_id or not access_key or not secret_key:
             print("Cloudflare R2 credentials missing. Skipping upload step as R2 is optional.")
             github_output = os.environ.get('GITHUB_OUTPUT')
             if github_output:
