@@ -64,6 +64,7 @@ export default {
         const generationMode = body.generation_mode || 'mock';
         const metadataMode = body.metadata_mode || 'mock';
         const postingMode = body.posting_mode || 'mock';
+        const llmProvider = body.llm_provider || '';
         const jobId = body.job_id || 'job_' + Math.random().toString(36).substring(2, 10);
 
         if (!topic) {
@@ -86,6 +87,7 @@ export default {
             generation_mode: generationMode,
             metadata_mode: metadataMode,
             posting_mode: postingMode,
+            llm_provider: llmProvider,
             queue_item_id: '',
             job_id: jobId
           }
@@ -397,6 +399,16 @@ function serveHTML(token) {
         <select id="metadataMode" name="metadata_mode">
           <option value="mock" selected>Mock Metadata (Static Stub)</option>
           <option value="real">Real Metadata (Gemini/OpenAI LLM)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="llmProvider">LLM Provider (Metadata)</label>
+        <select id="llmProvider" name="llm_provider">
+          <option value="" selected>Default (Secret/Gemini)</option>
+          <option value="gemini">Gemini (gemini-2.5-flash)</option>
+          <option value="nvidia">NVIDIA NIM (mistral-medium)</option>
+          <option value="openai">OpenAI (gpt-4o-mini)</option>
         </select>
       </div>
 
