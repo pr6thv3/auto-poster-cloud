@@ -8,13 +8,13 @@ import yaml
 IDEAS_CATALOG = {
     "ai": [
         {
-            "topic": "This AI tool clones any website in one click",
-            "angle": "website cloning automation",
-            "hook": "Stop coding website designs from scratch today.",
-            "curiosity_gap": "This AI website builder clones any design instantly.",
-            "visual_promise": "Type in a URL and watch the entire layout replicate.",
-            "payoff": "Export clean HTML and CSS in seconds.",
-            "keywords": ["website builder", "ai design", "clone website"],
+            "topic": "This AI tool turns a website idea into a landing page",
+            "angle": "landing page layout recreation",
+            "hook": "Stop coding landing page mockups from scratch today.",
+            "curiosity_gap": "This AI website builder generates a website draft from a prompt.",
+            "visual_promise": "Watch it recreate a landing page layout instantly.",
+            "payoff": "Create a landing page mockup and export clean HTML.",
+            "keywords": ["website builder", "ai design", "landing page mockup"],
             "format": "viral_curiosity_24s",
             "freshness_window_days": 14,
             "risk_flags": []

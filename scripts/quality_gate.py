@@ -294,6 +294,53 @@ def main():
         if not payoff or len(str(payoff).strip()) < 5:
             warnings.append("Payoff is unclear or missing.")
             
+    # 9. Claim Safety Checks (Phase 1)
+    unsafe_phrases = [
+        "clone any website",
+        "clones any website",
+        "copy any website",
+        "copies any website",
+        "steal website",
+        "steals website",
+        "stealing website",
+        "duplicate any site",
+        "duplicates any site",
+        "rip a website",
+        "rips a website",
+        "one click clone",
+        "one-click clone",
+        "one click clones",
+        "one-click clones",
+        "copy someone's site",
+        "copy someone\u2019s site",
+        "copies someone's site",
+        "copies someone\u2019s site"
+    ]
+    safe_override_terms = [
+        "user-owned",
+        "draft",
+        "mockup",
+        "layout recreation",
+        "recreate a landing page",
+        "rebuild your own"
+    ]
+    
+    topic_val = brief.get("topic", "")
+    hook_val = brief.get("hook", "")
+    if not hook_val:
+        hook_val = brief.get("hook_0_3s", "")
+    payoff_val = brief.get("payoff", "")
+    if not payoff_val:
+        payoff_val = brief.get("narration_beats", [""])[3] if len(brief.get("narration_beats", [])) > 3 else ""
+        
+    for field_name, val in [("topic", topic_val), ("hook", hook_val), ("payoff", payoff_val)]:
+        val_lower = val.lower()
+        has_unsafe = any(unsafe in val_lower for unsafe in unsafe_phrases)
+        if has_unsafe:
+            has_override = any(override in val_lower for override in safe_override_terms)
+            if not has_override:
+                reasons.append(f"Unsafe cloning/copying phrasing detected in {field_name}: '{val}' without safe override terms.")
+
     # Compile Report
     if reasons:
         status = "failed"

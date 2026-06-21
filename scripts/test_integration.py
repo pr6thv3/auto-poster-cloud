@@ -474,6 +474,40 @@ def main():
     assert res_code == 0, "Expected warning, not failure, for hook with no engaging pattern"
     assert any("does not match any engaging patterns" in w for w in report_data["warnings"])
 
+    # (r) Unsafe cloning/copying phrasing fails
+    res_code, report_data = check_brief({
+        "topic": "This AI tool clones any website in one click",
+        "hook": "Stop coding website designs from scratch today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected failure for unsafe cloning phrase"
+    assert any("Unsafe cloning/copying phrasing" in r for r in report_data["reasons"]), "Expected unsafe cloning reason"
+
+    # (s) Safe rewritten cloning/copying phrasing passes
+    res_code, report_data = check_brief({
+        "topic": "This AI tool turns a website idea into a landing page",
+        "hook": "Stop coding landing page mockups from scratch today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected success for safe rewritten cloning phrasing"
+
+    # (t) Unsafe cloning phrase with safe override term passes
+    res_code, report_data = check_brief({
+        "topic": "This AI tool clones any website to recreate a landing page layout",
+        "hook": "Stop coding landing page mockups from scratch today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected success for unsafe cloning phrase with safe override"
+
     print("Verification: Quality gate hardening tests passed.")
 
     # Cleanup and restore files
@@ -635,6 +669,71 @@ def main():
     # Clean up mock youtube result
     if os.path.exists("youtube-result.json"):
         os.remove("youtube-result.json")
+
+    # 10. Test Analytics Loop
+    print("\n--- Testing Analytics Loop ---")
+    # Save current docs/content-history.json
+    original_history_for_analytics = []
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            original_history_for_analytics = json.load(f)
+            
+    # Write a mock history with a mix of real-looking IDs, mock IDs, and empty IDs
+    mock_history_for_analytics = [
+        {
+            "idea_id": "idea_test_1",
+            "youtube_video_id": "pJ0zoo0nPAY",  # Real-looking
+            "topic": "Topic 1"
+        },
+        {
+            "idea_id": "idea_test_2",
+            "youtube_video_id": "mock_yt_123",  # Mock ID
+            "topic": "Topic 2"
+        },
+        {
+            "idea_id": "idea_test_3",
+            "youtube_video_id": "",             # Empty
+            "topic": "Topic 3"
+        }
+    ]
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(mock_history_for_analytics, f, indent=2)
+        
+    # Run fetch analytics script in mock mode
+    env_analytics = env.copy()
+    env_analytics["MOCK_MODE"] = "true"
+    run_cmd([sys.executable, "scripts/fetch_youtube_analytics.py"], env_override=env_analytics)
+    
+    # Load and verify history changes
+    with open(history_file, "r", encoding="utf-8") as f:
+        updated_history = json.load(f)
+        
+    # All entries must have an analytics block
+    for entry in updated_history:
+        assert "analytics" in entry, "Expected entry to have 'analytics' dictionary"
+        assert isinstance(entry["analytics"], dict), "Expected 'analytics' to be a dictionary"
+        
+    # Entry 1 (real-looking video id) must have simulated stats
+    entry1 = next(i for i in updated_history if i["idea_id"] == "idea_test_1")
+    assert entry1["analytics"]["views"] == 420, "Expected views to be updated to 420"
+    assert entry1["analytics"]["likes"] == 69, "Expected likes to be updated to 69"
+    assert entry1["analytics"]["comments"] == 7, "Expected comments to be updated to 7"
+    assert entry1["analytics"]["privacy"] == "private", "Expected privacy to be updated"
+    assert entry1["analytics"]["checked_at"] is not None, "Expected checked_at to be populated"
+    
+    # Entry 2 (mock video id) should not be updated with live stats (remains default null)
+    entry2 = next(i for i in updated_history if i["idea_id"] == "idea_test_2")
+    assert entry2["analytics"]["views"] is None, "Expected mock ID views to remain None"
+    assert entry2["analytics"]["checked_at"] is None, "Expected mock ID checked_at to remain None"
+    
+    # Entry 3 (empty video id) should not be updated
+    entry3 = next(i for i in updated_history if i["idea_id"] == "idea_test_3")
+    assert entry3["analytics"]["views"] is None, "Expected empty ID views to remain None"
+    
+    # Restore original content history
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(original_history_for_analytics, f, indent=2)
+    print("Verification: Analytics loop testing passed and content history restored.")
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 

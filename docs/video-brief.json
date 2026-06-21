@@ -1,41 +1,107 @@
 {
   "profile_id": "ai_tools",
-  "idea_id": "idea_ai_tools_3",
-  "topic": "How to create an AI voiceover using your own voice",
-  "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
-  "freshness_score": 100,
+  "idea_id": "idea_ai_tools_1",
+  "topic": "This AI tool turns a website idea into a landing page",
+  "hook": "Stop coding landing page mockups from scratch today.",
+  "freshness_score": 65,
   "script_outline": [
-    "0:00 - 0:05: Hook: Create an AI voiceover using your own voice with consent in seconds. Here is how.",
-    "0:05 - 0:15: Step 1: Preparation / Setup",
-    "0:15 - 0:35: Step 2: Implementation core steps",
-    "0:35 - 0:45: Step 3: Final result / Output check",
-    "0:45 - 0:50: Outro / Try it yourself CTA"
+    "0:00 - 0:02: Fast visual showing This AI tool turns a website idea into a landing page. Large center text overlay.",
+    "0:02 - 0:04: Show the interface or starting point of This AI tool turns a website idea into a landing page.",
+    "0:04 - 0:06: Reveal the setup: Watch it recreate a landing page layout instantly..",
+    "0:06 - 0:08: Zoom-in on key menu option or selector.",
+    "0:08 - 0:10: Fast scroll showing processing/creation.",
+    "0:10 - 0:12: Highlight the friction point: This AI website builder generates a website draft from a prompt..",
+    "0:12 - 0:14: Side-by-side template comparison.",
+    "0:14 - 0:16: Toggle the advanced config switch to active.",
+    "0:16 - 0:18: Output generation screen showing the magic.",
+    "0:18 - 0:20: Final result reveal: Create a landing page mockup and export clean HTML..",
+    "0:20 - 0:22: High-retention analytics graph or final usage demo.",
+    "0:22 - 0:24: Pulsing Call to Action button with subscribe icon."
   ],
   "scene_plan": [
     {
-      "time_range": "0:00 - 0:05",
-      "visual": "Before/After split screen showing the final tutorial result.",
-      "audio": "Hook narration with engaging tone."
+      "scene_id": 1,
+      "time_range": "0:00 - 0:02",
+      "visual": "Fast visual showing This AI tool turns a website idea into a landing page. Large center text overlay.",
+      "audio": "Stop coding landing page mockups from scratch today.",
+      "movement": "Slow zoom-in"
     },
     {
-      "time_range": "0:05 - 0:15",
-      "visual": "Navigate to the site and show where to click first.",
-      "audio": "Step 1 details: Go to the website and import your file."
+      "scene_id": 2,
+      "time_range": "0:02 - 0:04",
+      "visual": "Show the interface or starting point of This AI tool turns a website idea into a landing page.",
+      "audio": "Stop coding landing page mockups from scratch today.",
+      "movement": "Pan right"
     },
     {
-      "time_range": "0:15 - 0:35",
-      "visual": "Clicking buttons and adjusting sliders in real time.",
-      "audio": "Step 2 details: Adjust settings and hit generate to process it."
+      "scene_id": 3,
+      "time_range": "0:04 - 0:06",
+      "visual": "Reveal the setup: Watch it recreate a landing page layout instantly..",
+      "audio": "Stop coding landing page mockups from scratch today.",
+      "movement": "Rapid zoom-in"
     },
     {
-      "time_range": "0:35 - 0:45",
-      "visual": "Show the final downloaded asset/output in high quality.",
-      "audio": "Step 3 details: Look at this perfect output. It took just seconds."
+      "scene_id": 4,
+      "time_range": "0:06 - 0:08",
+      "visual": "Zoom-in on key menu option or selector.",
+      "audio": "This AI website builder generates a website draft from a prompt.",
+      "movement": "Click zoom"
     },
     {
-      "time_range": "0:45 - 0:50",
-      "visual": "CTA social buttons and text overlays.",
-      "audio": "Outro: Try it out and follow for more tutorials!"
+      "scene_id": 5,
+      "time_range": "0:08 - 0:10",
+      "visual": "Fast scroll showing processing/creation.",
+      "audio": "This AI website builder generates a website draft from a prompt.",
+      "movement": "Fast scroll down"
+    },
+    {
+      "scene_id": 6,
+      "time_range": "0:10 - 0:12",
+      "visual": "Highlight the friction point: This AI website builder generates a website draft from a prompt..",
+      "audio": "Watch it recreate a landing page layout instantly.",
+      "movement": "Icon shake"
+    },
+    {
+      "scene_id": 7,
+      "time_range": "0:12 - 0:14",
+      "visual": "Side-by-side template comparison.",
+      "audio": "Watch it recreate a landing page layout instantly.",
+      "movement": "Split-screen slide"
+    },
+    {
+      "scene_id": 8,
+      "time_range": "0:14 - 0:16",
+      "visual": "Toggle the advanced config switch to active.",
+      "audio": "Watch it recreate a landing page layout instantly.",
+      "movement": "Toggle zoom"
+    },
+    {
+      "scene_id": 9,
+      "time_range": "0:16 - 0:18",
+      "visual": "Output generation screen showing the magic.",
+      "audio": "Create a landing page mockup and export clean HTML.",
+      "movement": "Slide-in"
+    },
+    {
+      "scene_id": 10,
+      "time_range": "0:18 - 0:20",
+      "visual": "Final result reveal: Create a landing page mockup and export clean HTML..",
+      "audio": "Create a landing page mockup and export clean HTML.",
+      "movement": "Slow pan left"
+    },
+    {
+      "scene_id": 11,
+      "time_range": "0:20 - 0:22",
+      "visual": "High-retention analytics graph or final usage demo.",
+      "audio": "Follow for more daily tips!",
+      "movement": "Device rotation"
+    },
+    {
+      "scene_id": 12,
+      "time_range": "0:22 - 0:24",
+      "visual": "Pulsing Call to Action button with subscribe icon.",
+      "audio": "Follow for more daily tips!",
+      "movement": "Button pulse"
     }
   ],
   "voice_style": {
@@ -56,8 +122,8 @@
       "screen recordings of the tools in action"
     ]
   },
-  "title_guidance": "Create an engaging title under 50 characters summarizing: How to create an AI voiceover using your own voice",
-  "hashtag_guidance": "Include #Shorts, the niche #ai, and keywords: personal voiceover, ai voice, voice cloning",
+  "title_guidance": "Create an engaging title under 50 characters summarizing: This AI tool turns a website idea into a landing page",
+  "hashtag_guidance": "Include #Shorts, the niche #ai, and keywords: website builder, ai design, landing page mockup",
   "banned_words": [
     "scam",
     "cheat",
@@ -65,7 +131,151 @@
     "illegal",
     "loophole"
   ],
-  "target_length_seconds": 50,
-  "preferred_duration_seconds": 50,
-  "hard_max_duration_seconds": 58
+  "format_id": "viral_curiosity_24s",
+  "target_length_seconds": 24,
+  "preferred_duration_seconds": 24,
+  "min_duration_seconds": 20,
+  "max_duration_seconds": 30,
+  "hard_min_duration_seconds": 18,
+  "hard_max_duration_seconds": 32,
+  "hook_0_3s": "Stop coding landing page mockups from scratch today.",
+  "payoff": "Create a landing page mockup and export clean HTML.",
+  "narration_beats": [
+    "Stop coding landing page mockups from scratch today.",
+    "This AI website builder generates a website draft from a prompt.",
+    "Watch it recreate a landing page layout instantly.",
+    "Create a landing page mockup and export clean HTML.",
+    "Follow for more."
+  ],
+  "text_overlay_plan": [
+    {
+      "time_range": "0:00 - 0:01",
+      "text": "STOP CODING LANDING"
+    },
+    {
+      "time_range": "0:01 - 0:02",
+      "text": "PAGE MOCKUPS FROM"
+    },
+    {
+      "time_range": "0:02 - 0:03",
+      "text": "SCRATCH TODAY. THIS"
+    },
+    {
+      "time_range": "0:03 - 0:04",
+      "text": "AI WEBSITE BUILDER"
+    },
+    {
+      "time_range": "0:04 - 0:05",
+      "text": "GENERATES A WEBSITE"
+    },
+    {
+      "time_range": "0:05 - 0:06",
+      "text": "DRAFT FROM A"
+    },
+    {
+      "time_range": "0:06 - 0:07",
+      "text": "PROMPT. WATCH IT"
+    },
+    {
+      "time_range": "0:07 - 0:08",
+      "text": "RECREATE A LANDING"
+    },
+    {
+      "time_range": "0:08 - 0:09",
+      "text": "PAGE LAYOUT INSTANTLY."
+    },
+    {
+      "time_range": "0:09 - 0:10",
+      "text": "CREATE A LANDING"
+    },
+    {
+      "time_range": "0:10 - 0:11",
+      "text": "PAGE MOCKUP AND"
+    },
+    {
+      "time_range": "0:11 - 0:12",
+      "text": "EXPORT CLEAN HTML."
+    },
+    {
+      "time_range": "0:12 - 0:13",
+      "text": "FOLLOW FOR MORE"
+    },
+    {
+      "time_range": "0:13 - 0:14",
+      "text": "DAILY TIPS!"
+    },
+    {
+      "time_range": "0:14 - 0:15",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:15 - 0:16",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:16 - 0:17",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:17 - 0:18",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:18 - 0:19",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:19 - 0:20",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:20 - 0:21",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:21 - 0:22",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:22 - 0:23",
+      "text": "CHECK THIS OUT"
+    },
+    {
+      "time_range": "0:23 - 0:24",
+      "text": "CHECK THIS OUT"
+    }
+  ],
+  "editing_rhythm": {
+    "scene_duration_seconds": "1-2",
+    "cut_frequency_seconds": "0.5-1.5",
+    "require_constant_motion": true,
+    "forbid_static_images_longer_than_seconds": 2
+  },
+  "sound_design": {
+    "background": "suspense music",
+    "transitions": [
+      "whoosh",
+      "impact",
+      "riser"
+    ],
+    "require_audio_feedback_per_scene": true
+  },
+  "visual_rules": {
+    "style": "large bold center",
+    "words_per_overlay": "1-4",
+    "update_frequency_seconds": "0.5-1",
+    "colors": "white text, black shadow",
+    "require_high_contrast": true
+  },
+  "safety_rules": [
+    "no financial advice or investment claims",
+    "verify tool legality (e.g. no scrape/bypass tools that violate terms of service)",
+    "disclose sponsored tools if applicable",
+    "keep video length under 60 seconds",
+    "avoid income guarantees",
+    "avoid \"do everything for you\" claims",
+    "avoid pretending tools are free unless verified",
+    "avoid fake urgency",
+    "avoid \"secret illegal tool\" framing"
+  ]
 }

@@ -2,71 +2,111 @@
   {
     "idea_id": "idea_ai_tools_1",
     "profile_id": "ai_tools",
+    "topic": "This AI tool turns a website idea into a landing page",
+    "angle": "landing page layout recreation",
+    "hook": "Stop coding landing page mockups from scratch today.",
+    "keywords": [
+      "website builder",
+      "ai design",
+      "landing page mockup"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "This AI website builder generates a website draft from a prompt.",
+    "visual_promise": "Watch it recreate a landing page layout instantly.",
+    "payoff": "Create a landing page mockup and export clean HTML.",
+    "risk_flags": []
+  },
+  {
+    "idea_id": "idea_ai_tools_2",
+    "profile_id": "ai_tools",
     "topic": "3 AI tools to start a side hustle",
     "angle": "side hustle automation",
-    "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+    "hook": "These 3 AI tools will build a side hustle for you in minutes.",
     "keywords": [
       "side hustle",
       "ai tools",
       "make money online"
     ],
-    "format": "list_top_3",
-    "freshness_window_days": 14
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "But most people are using them completely wrong.",
+    "visual_promise": "We show the exact screen, the generated output, and the earnings dashboard.",
+    "payoff": "Use them today before they become saturated.",
+    "risk_flags": []
   },
   {
-    "idea_id": "idea_ai_tools_2",
+    "idea_id": "idea_ai_tools_3",
     "profile_id": "ai_tools",
     "topic": "This AI website writes all your emails",
     "angle": "email productivity",
-    "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds.",
+    "hook": "Stop wasting hours writing emails.",
     "keywords": [
       "write emails",
       "ai website",
       "productivity hacks"
     ],
-    "format": "one_tool_highlight",
-    "freshness_window_days": 7
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 7,
+    "curiosity_gap": "This free AI website writes them exactly in your voice.",
+    "visual_promise": "Showing a blank email draft auto-filling in one click.",
+    "payoff": "It saves hours and sounds completely human.",
+    "risk_flags": []
   },
   {
-    "idea_id": "idea_ai_tools_3",
+    "idea_id": "idea_ai_tools_4",
     "profile_id": "ai_tools",
     "topic": "How to create an AI voiceover using your own voice",
     "angle": "voice cloning tutorial",
-    "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
+    "hook": "Create an AI voiceover using your own voice with consent in seconds.",
     "keywords": [
       "personal voiceover",
       "ai voice",
       "voice cloning"
     ],
-    "format": "tutorial",
-    "freshness_window_days": 30
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "But you need to verify your permission first to prevent scams.",
+    "visual_promise": "Record a 10 second audio clip and see it clone instantly.",
+    "payoff": "Safe, consent-based voiceovers are now instant.",
+    "risk_flags": [
+      "voice_cloning"
+    ]
   },
   {
-    "idea_id": "idea_ai_tools_4",
+    "idea_id": "idea_ai_tools_5",
     "profile_id": "ai_tools",
     "topic": "3 AI extensions for Google Chrome you need today",
     "angle": "browser extension recommendations",
-    "hook": "If you aren't using these 3 Google Chrome extensions, you're working too hard.",
+    "hook": "Stop using Google Chrome normally.",
     "keywords": [
       "chrome extensions",
       "google chrome",
       "ai plugins"
     ],
-    "format": "list_top_3",
-    "freshness_window_days": 14
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "These 3 AI Chrome extensions make it twenty times smarter.",
+    "visual_promise": "Quick cuts showing each extension sidebar activating in Chrome.",
+    "payoff": "They are free to install and change how you browse.",
+    "risk_flags": []
   },
   {
-    "idea_id": "idea_ai_tools_5",
+    "idea_id": "idea_ai_tools_6",
     "profile_id": "ai_tools",
     "topic": "This AI tool generates fully animated videos from text",
     "angle": "text to video animation",
-    "hook": "You can generate fully animated videos just by typing text. Here is how.",
+    "hook": "This AI tool turns text into a full video.",
     "keywords": [
       "text to video",
       "animated videos",
       "ai video generator"
     ],
-    "format": "one_tool_highlight",
-    "freshness_window_days": 10
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 10,
+    "curiosity_gap": "But the result looks almost unreal.",
+    "visual_promise": "You type one sentence. It builds scenes, captions, and motion.",
+    "payoff": "This could change how creators make Shorts.",
+    "risk_flags": []
   }
 ]

@@ -222,6 +222,7 @@ def main():
         "hard_min_duration_seconds": hard_min,
         "hard_max_duration_seconds": hard_max,
         "hook_0_3s": hook,
+        "payoff": payoff,
         "narration_beats": [
             hook,
             curiosity_gap,

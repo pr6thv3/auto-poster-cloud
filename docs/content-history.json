@@ -16,7 +16,14 @@
     "youtube_video_id": "mock_yt_hist_1",
     "similarity_group": "illegal_websites",
     "quality_score": 85,
-    "freshness_score": 90
+    "freshness_score": 90,
+    "analytics": {
+      "views": null,
+      "likes": null,
+      "comments": null,
+      "checked_at": null,
+      "privacy": null
+    }
   },
   {
     "idea_id": "hist_ai_2",
@@ -35,7 +42,14 @@
     "youtube_video_id": "mock_yt_hist_2",
     "similarity_group": "ai_coding_apps",
     "quality_score": 80,
-    "freshness_score": 75
+    "freshness_score": 75,
+    "analytics": {
+      "views": null,
+      "likes": null,
+      "comments": null,
+      "checked_at": null,
+      "privacy": null
+    }
   },
   {
     "idea_id": "hist_ai_3",
@@ -54,7 +68,14 @@
     "youtube_video_id": "mock_yt_hist_3",
     "similarity_group": "photoshop_alternative",
     "quality_score": 88,
-    "freshness_score": 95
+    "freshness_score": 95,
+    "analytics": {
+      "views": null,
+      "likes": null,
+      "comments": null,
+      "checked_at": null,
+      "privacy": null
+    }
   },
   {
     "idea_id": "idea_ai_tools_1",
@@ -73,7 +94,14 @@
     "youtube_video_id": "pJ0zoo0nPAY",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27910980597"
+    "source_run_id": "27910980597",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   },
   {
     "idea_id": "idea_ai_tools_2",
@@ -92,7 +120,14 @@
     "youtube_video_id": "7Lu-CSmLSVs",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27913652227"
+    "source_run_id": "27913652227",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   },
   {
     "idea_id": "idea_ai_tools_3",
@@ -111,7 +146,14 @@
     "youtube_video_id": "4wiuATE0Gos",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27914734343"
+    "source_run_id": "27914734343",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   },
   {
     "idea_id": "idea_ai_tools_4",
@@ -130,7 +172,14 @@
     "youtube_video_id": "tR-hHVtTEyo",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27915656306"
+    "source_run_id": "27915656306",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   },
   {
     "idea_id": "idea_ai_tools_5",
@@ -149,7 +198,14 @@
     "youtube_video_id": "fl5QPqoB9gU",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27916210700"
+    "source_run_id": "27916210700",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   },
   {
     "idea_id": "idea_ai_tools_1",
@@ -168,6 +224,13 @@
     "youtube_video_id": "9dHkHFWRjII",
     "freshness_score": 100,
     "quality_score": 100,
-    "source_run_id": "27917532122"
+    "source_run_id": "27917532122",
+    "analytics": {
+      "views": 420,
+      "likes": 69,
+      "comments": 7,
+      "checked_at": "2026-06-21T21:23:58.254755Z",
+      "privacy": "private"
+    }
   }
 ]

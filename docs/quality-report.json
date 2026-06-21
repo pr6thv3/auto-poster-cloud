@@ -1,5 +1,11 @@
 {
-  "status": "passed",
-  "reasons": [],
-  "warnings": []
+  "status": "failed",
+  "reasons": [
+    "Copyrighted character or clip dependency detected: ['simpsons']"
+  ],
+  "warnings": [
+    "Weak curiosity gap: No clear curiosity gap defined.",
+    "Too few sound cues / transitions defined in sound design.",
+    "Payoff is unclear or missing."
+  ]
 }
