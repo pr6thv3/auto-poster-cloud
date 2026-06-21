@@ -120,6 +120,236 @@ def main():
 
     print("Verification: step-summary-mock.md contains the correct Content Engine Audit markdown section!")
 
+    # === TEST FRESHNESS PENALTIES AND SCORING LOGIC ===
+    print("\n--- Testing Freshness Penalties and Scoring Logic ---")
+    ideas_file = "docs/generated-ideas.json"
+    history_file = "docs/content-history.json"
+    scored_file = "docs/scored-ideas.json"
+
+    # Backup original files if they exist
+    ideas_backup = None
+    if os.path.exists(ideas_file):
+        with open(ideas_file, "r", encoding="utf-8") as f:
+            ideas_backup = json.load(f)
+            
+    history_backup = None
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            history_backup = json.load(f)
+
+    # Setup mock history
+    mock_history = [
+        {
+            "idea_id": "hist_ai_1",
+            "profile_id": "ai_tools",
+            "topic": "3 AI tools to start a side hustle",
+            "angle": "side hustle automation",
+            "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+            "keywords": ["side hustle", "ai tools", "make money online"],
+            "format": "list_top_3",
+            "created_at": "2026-06-20T12:00:00Z",
+            "status": "success",
+            "youtube_video_id": "mock_yt_1"
+        }
+    ]
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(mock_history, f, indent=2)
+
+    # Setup mock ideas
+    mock_ideas = [
+        {
+            "idea_id": "idea_test_1",
+            "profile_id": "ai_tools",
+            "topic": "3 AI tools to start a side hustle", # Exact Topic Overlap, Money Repetition
+            "angle": "side hustle automation",
+            "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+            "keywords": ["side hustle", "ai tools", "make money online"],
+            "format": "list_top_3",
+            "freshness_window_days": 14
+        },
+        {
+            "idea_id": "idea_test_2",
+            "profile_id": "ai_tools",
+            "topic": "This AI website writes all your emails", # Fresh
+            "angle": "email productivity",
+            "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds.",
+            "keywords": ["write emails", "ai website", "productivity hacks"],
+            "format": "one_tool_highlight",
+            "freshness_window_days": 7
+        },
+        {
+            "idea_id": "idea_test_3",
+            "profile_id": "ai_tools",
+            "topic": "Another money making idea", # Money Repetition, Keyword Fatigue, Hook overlap
+            "angle": "different angle",
+            "hook": "Want to start something?",
+            "keywords": ["side hustle", "ai tools", "something else"],
+            "format": "tutorial",
+            "freshness_window_days": 7
+        }
+    ]
+    with open(ideas_file, "w", encoding="utf-8") as f:
+        json.dump(mock_ideas, f, indent=2)
+
+    # Run scorer
+    run_cmd([sys.executable, "scripts/score_idea_freshness.py"])
+
+    # Load scored ideas and assert penalties
+    with open(scored_file, "r", encoding="utf-8") as f:
+        scored = json.load(f)
+
+    # Idea 1 asserts
+    idea1 = next(i for i in scored if i["idea_id"] == "idea_test_1")
+    assert "exact_topic_overlap" in idea1["penalty_reasons"], "Expected exact_topic_overlap penalty"
+    assert "money_repetition" in idea1["penalty_reasons"], "Expected money_repetition penalty"
+    assert "keyword_fatigue" in idea1["penalty_reasons"], "Expected keyword_fatigue penalty"
+    assert "hook_pattern_overlap" in idea1["penalty_reasons"], "Expected hook_pattern_overlap penalty"
+    assert "format_fatigue" in idea1["penalty_reasons"], "Expected format_fatigue penalty"
+    assert idea1["freshness_score"] == 0, f"Expected freshness score 0 for regenerated exact topic, got {idea1['freshness_score']}"
+
+    # Idea 2 asserts
+    idea2 = next(i for i in scored if i["idea_id"] == "idea_test_2")
+    assert len(idea2["penalty_reasons"]) == 0, "Expected no penalties for fresh idea"
+    assert idea2["freshness_score"] == 100, "Expected freshness score 100 for fresh idea"
+
+    # Idea 3 asserts
+    idea3 = next(i for i in scored if i["idea_id"] == "idea_test_3")
+    assert "money_repetition" in idea3["penalty_reasons"], "Expected money_repetition penalty on idea 3"
+    assert "keyword_fatigue" in idea3["penalty_reasons"], "Expected keyword_fatigue penalty on idea 3"
+    print("Verification: Freshness penalties scoring tests passed.")
+
+    # === TEST QUALITY GATE HARDENING ===
+    print("\n--- Testing Quality Gate Hardening ---")
+    brief_file = "docs/video-brief.json"
+    report_file = "docs/quality-report.json"
+
+    # Backup original brief/report
+    brief_backup = None
+    if os.path.exists(brief_file):
+        with open(brief_file, "r", encoding="utf-8") as f:
+            brief_backup = json.load(f)
+            
+    report_backup = None
+    if os.path.exists(report_file):
+        with open(report_file, "r", encoding="utf-8") as f:
+            report_backup = json.load(f)
+
+    # Helper function to run quality gate on a test brief
+    def check_brief(test_brief):
+        with open(brief_file, "w", encoding="utf-8") as f:
+            json.dump(test_brief, f, indent=2)
+        res = subprocess.run([sys.executable, "scripts/quality_gate.py"], capture_output=True, text=True)
+        with open(report_file, "r", encoding="utf-8") as f:
+            report_data = json.load(f)
+        return res.returncode, report_data
+
+    # (a) Overpromising hook failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "This secret hack gives you guaranteed income.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": ["scam", "illegal"],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected quality gate to fail for overpromising hook"
+    assert report_data["status"] == "failed", "Expected status failed"
+    assert any("Overpromising" in r for r in report_data["reasons"]), "Expected overpromising reasons"
+
+    # (b) Banned wording failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "This is a scam tool that is illegal.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": ["scam", "illegal"],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected quality gate to fail for banned words"
+    assert report_data["status"] == "failed"
+    assert any("Banned words" in r for r in report_data["reasons"]), "Expected banned words warning"
+
+    # (c) Weak hook failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "You won't believe this is amazing.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected quality gate to fail for weak generic hook"
+    assert report_data["status"] == "failed"
+    assert any("Weak generic" in r for r in report_data["reasons"])
+
+    # (d) Hook longer than 16 words failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected quality gate to fail for long hook"
+    assert report_data["status"] == "failed"
+    assert any("too long" in r for r in report_data["reasons"])
+
+    # (e) Freshness score below 70 failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Discover this cool tool today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 65
+    })
+    assert res_code == 1, "Expected quality gate to fail for low freshness score"
+    assert report_data["status"] == "failed"
+    assert any("Freshness score" in r for r in report_data["reasons"])
+
+    # (f) Title too generic failure
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Discover this cool tool today.",
+        "title_guidance": "Short Title",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected quality gate to fail for generic title guidance"
+    assert report_data["status"] == "failed"
+    assert any("Title guidance" in r for r in report_data["reasons"])
+
+    # (g) Safe rewritten hook passes
+    res_code, report_data = check_brief({
+        "topic": "Clean topic about productivity website",
+        "hook": "Stop wasting hours writing emails. Let this free website help you.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": ["scam", "illegal"],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected quality gate to pass for safe brief"
+    assert report_data["status"] in ["passed", "warning"], f"Expected status passed or warning, got {report_data['status']}"
+
+    print("Verification: Quality gate hardening tests passed.")
+
+    # Cleanup and restore files
+    for f, b in [(ideas_file, ideas_backup), (history_file, history_backup)]:
+        if b is not None:
+            with open(f, "w", encoding="utf-8") as file_obj:
+                json.dump(b, file_obj, indent=2)
+        elif os.path.exists(f):
+            os.remove(f)
+
+    for f, b in [(brief_file, brief_backup), (report_file, report_backup)]:
+        if b is not None:
+            with open(f, "w", encoding="utf-8") as file_obj:
+                json.dump(b, file_obj, indent=2)
+        elif os.path.exists(f):
+            os.remove(f)
+
     # 9. Test History Writeback
     print("\n--- Testing History Writeback ---")
     

@@ -12,6 +12,11 @@ def calculate_word_overlap(str1, str2):
     intersection = words1.intersection(words2)
     return len(intersection) / max(len(words1), len(words2))
 
+def is_money_related(text):
+    text_lower = text.lower()
+    money_triggers = ["money", "side hustle", "earn", "wealth", "salary", "cash", "hustle"]
+    return any(trigger in text_lower for trigger in money_triggers)
+
 def parse_date(date_str):
     # Parse ISO 8601 date string, replacing Z with UTC offset
     return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
@@ -65,53 +70,137 @@ def main():
     for idea in ideas:
         score = 100
         penalties = []
+        penalty_reasons = []
+        recent_history_matches = []
         
-        # 1. Same topic match: Word overlap penalty of 40 points if overlap is > 40%
-        for hist_item in profile_history[:10]: # Check last 10 items
-            overlap = calculate_word_overlap(idea.get("topic", ""), hist_item.get("topic", ""))
-            if overlap > 0.4:
-                score -= 40
-                penalties.append(f"Similar topic overlap ({int(overlap*100)}%) with '{hist_item.get('topic')}' (-40)")
-                break # Only penalize once for topic
+        # 1. Exact topic match: -60 or similar topic match: -40
+        exact_match = False
+        matched_hist_item = None
+        for hist_item in profile_history:
+            if idea.get("topic", "").strip().lower() == hist_item.get("topic", "").strip().lower():
+                exact_match = True
+                matched_hist_item = hist_item
+                break
                 
-        # 2. Keyword reuse: Penalize 10 points for each keyword used in last 30 days
-        used_keywords_30d = set()
-        for hist_item in last_30_days_history:
-            for kw in hist_item.get("keywords", []):
-                used_keywords_30d.add(kw.lower())
-                
-        keyword_penalty_count = 0
-        for kw in idea.get("keywords", []):
-            if kw.lower() in used_keywords_30d:
-                score -= 10
-                keyword_penalty_count += 1
-        if keyword_penalty_count > 0:
-            penalties.append(f"Reused {keyword_penalty_count} keywords from last 30 days (-{keyword_penalty_count * 10})")
-            
-        # 3. Hook pattern match: Penalize 20 points if hook matches recently used patterns
-        # We check if hook starts with similar words (first 3 words) or matches typical patterns
+        if exact_match:
+            score -= 60
+            penalties.append(f"Exact topic overlap with '{matched_hist_item.get('topic')}' (-60)")
+            penalty_reasons.append("exact_topic_overlap")
+            recent_history_matches.append({
+                "type": "exact_topic",
+                "history_topic": matched_hist_item.get("topic"),
+                "video_id": matched_hist_item.get("youtube_video_id"),
+                "date": matched_hist_item.get("created_at")
+            })
+        else:
+            for hist_item in profile_history[:10]: # Check last 10 items for similarity
+                overlap = calculate_word_overlap(idea.get("topic", ""), hist_item.get("topic", ""))
+                if overlap > 0.4:
+                    score -= 40
+                    penalties.append(f"Similar topic overlap ({int(overlap*100)}%) with '{hist_item.get('topic')}' (-40)")
+                    penalty_reasons.append("similar_topic_overlap")
+                    recent_history_matches.append({
+                        "type": "similar_topic",
+                        "history_topic": hist_item.get("topic"),
+                        "video_id": hist_item.get("youtube_video_id"),
+                        "date": hist_item.get("created_at"),
+                        "overlap": overlap
+                    })
+                    break
+                    
+        # 2. Hook pattern match: -25
         for hist_item in profile_history[:5]:
             idea_hook_words = idea.get("hook", "").lower().split()[:3]
             hist_hook_words = hist_item.get("hook", "").lower().split()[:3]
             if len(idea_hook_words) >= 3 and len(hist_hook_words) >= 3 and idea_hook_words == hist_hook_words:
-                score -= 20
-                penalties.append(f"Hook pattern start '{' '.join(idea_hook_words)}' matches recent video (-20)")
+                score -= 25
+                penalties.append(f"Hook pattern start '{' '.join(idea_hook_words)}' matches recent video (-25)")
+                penalty_reasons.append("hook_pattern_overlap")
+                recent_history_matches.append({
+                    "type": "hook_pattern",
+                    "history_topic": hist_item.get("topic"),
+                    "video_id": hist_item.get("youtube_video_id"),
+                    "date": hist_item.get("created_at"),
+                    "hook": hist_item.get("hook")
+                })
                 break
                 
-        # 4. Format fatigue: Penalize 15 points if the format matches any of the last 2 history entries
-        if len(profile_history) >= 1 and idea.get("format") == profile_history[0].get("format"):
-            score -= 15
-            penalties.append(f"Format fatigue: Matches most recent video format '{idea.get('format')}' (-15)")
-        elif len(profile_history) >= 2 and idea.get("format") == profile_history[1].get("format"):
-            score -= 15
-            penalties.append(f"Format fatigue: Matches 2nd most recent video format '{idea.get('format')}' (-15)")
-            
-        # 5. Angle recency: Penalize 30 points if the same angle was used in the last 30 days
+        # 3. Angle recency: -25
         for hist_item in last_30_days_history:
-            if idea.get("angle", "").lower() == hist_item.get("angle", "").lower():
-                score -= 30
-                penalties.append(f"Angle recency conflict: Angle '{idea.get('angle')}' used recently (-30)")
+            if idea.get("angle", "").strip().lower() == hist_item.get("angle", "").strip().lower():
+                score -= 25
+                penalties.append(f"Angle recency conflict: Angle '{idea.get('angle')}' used recently (-25)")
+                penalty_reasons.append("angle_recency_conflict")
+                recent_history_matches.append({
+                    "type": "angle_recency",
+                    "history_topic": hist_item.get("topic"),
+                    "video_id": hist_item.get("youtube_video_id"),
+                    "date": hist_item.get("created_at"),
+                    "angle": hist_item.get("angle")
+                })
                 break
+
+        # 4. Keyword fatigue: 2+ same keywords from last 30 days is -20
+        used_keywords_30d = set()
+        for hist_item in last_30_days_history:
+            for kw in hist_item.get("keywords", []):
+                used_keywords_30d.add(kw.lower().strip())
+                
+        matching_kws = [kw for kw in idea.get("keywords", []) if kw.lower().strip() in used_keywords_30d]
+        if len(matching_kws) >= 2:
+            score -= 20
+            penalties.append(f"Reused 2+ keywords ({', '.join(matching_kws)}) from last 30 days (-20)")
+            penalty_reasons.append("keyword_fatigue")
+            for hist_item in last_30_days_history:
+                overlapping_kws = [kw for kw in idea.get("keywords", []) if kw.lower().strip() in [hk.lower().strip() for hk in hist_item.get("keywords", [])]]
+                if overlapping_kws:
+                    recent_history_matches.append({
+                        "type": "keyword_overlap",
+                        "history_topic": hist_item.get("topic"),
+                        "video_id": hist_item.get("youtube_video_id"),
+                        "date": hist_item.get("created_at"),
+                        "keywords": overlapping_kws
+                    })
+            
+        # 5. Format fatigue: Matches format of either of the last 2 history entries -> -15
+        format_fatigue = False
+        matched_format_hist = None
+        if len(profile_history) >= 1 and idea.get("format") == profile_history[0].get("format"):
+            format_fatigue = True
+            matched_format_hist = profile_history[0]
+        elif len(profile_history) >= 2 and idea.get("format") == profile_history[1].get("format"):
+            format_fatigue = True
+            matched_format_hist = profile_history[1]
+            
+        if format_fatigue:
+            score -= 15
+            penalties.append(f"Format fatigue: Matches recent video format '{idea.get('format')}' (-15)")
+            penalty_reasons.append("format_fatigue")
+            recent_history_matches.append({
+                "type": "format_fatigue",
+                "history_topic": matched_format_hist.get("topic"),
+                "video_id": matched_format_hist.get("youtube_video_id"),
+                "date": matched_format_hist.get("created_at"),
+                "format": idea.get("format")
+            })
+            
+        # 6. Money repetition: -20
+        if is_money_related(idea.get("topic", "")):
+            recent_money_match = None
+            for hist_item in last_30_days_history:
+                if is_money_related(hist_item.get("topic", "")):
+                    recent_money_match = hist_item
+                    break
+            if recent_money_match:
+                score -= 20
+                penalties.append(f"Money/side-hustle topic repeated recently: Matches '{recent_money_match.get('topic')}' (-20)")
+                penalty_reasons.append("money_repetition")
+                recent_history_matches.append({
+                    "type": "money_repetition",
+                    "history_topic": recent_money_match.get("topic"),
+                    "video_id": recent_money_match.get("youtube_video_id"),
+                    "date": recent_money_match.get("created_at")
+                })
                 
         # Clamp score between 0 and 100
         score = max(0, min(100, score))
@@ -119,7 +208,10 @@ def main():
         idea_copy = idea.copy()
         idea_copy["freshness_score"] = score
         idea_copy["penalties"] = penalties
+        idea_copy["penalty_reasons"] = penalty_reasons
+        idea_copy["recent_history_matches"] = recent_history_matches
         idea_copy["selected"] = False
+        idea_copy["selected_reason"] = None
         scored_ideas.append(idea_copy)
         
     # Mark the best idea as selected
@@ -127,6 +219,7 @@ def main():
         # Sort by freshness_score descending to find the highest scorer
         scored_ideas.sort(key=lambda x: x["freshness_score"], reverse=True)
         scored_ideas[0]["selected"] = True
+        scored_ideas[0]["selected_reason"] = f"Selected as the highest scoring fresh idea (Score: {scored_ideas[0]['freshness_score']})."
         # Re-sort by idea_id to preserve output order
         scored_ideas.sort(key=lambda x: x["idea_id"])
         

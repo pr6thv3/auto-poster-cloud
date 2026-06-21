@@ -37,6 +37,11 @@ safety_rules:
   - do not promise guaranteed returns or get-rich-quick results
   - do not link to unverified financial platforms
   - keep video length under 60 seconds
+  - avoid income guarantees
+  - avoid "do everything for you" claims
+  - avoid pretending tools are free unless verified
+  - avoid fake urgency
+  - avoid "secret illegal tool" framing
 banned_words:
   - guaranteed profit
   - get rich quick
