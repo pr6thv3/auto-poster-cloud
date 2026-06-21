@@ -68,6 +68,14 @@ def main():
             topic_brief += "Do not include intros, logos, greetings, or filler words.\n"
             topic_brief += "Avoid copyrighted characters or logos.\n"
             topic_brief += "CRITICAL: Do not make the final video shorter than 20 seconds. Do not make the final video longer than 30 seconds.\n"
+
+        # Dynamic word count guard to prevent short video generation
+        target_len = brief.get("target_length_seconds", 24)
+        min_words = int(target_len * 2.2)
+        max_words = int(target_len * 2.7)
+        topic_brief += f"\n=== SCRIPT LENGTH REQUIREMENT ===\n"
+        topic_brief += f"The generated script MUST contain between {min_words} and {max_words} words to align with the target video duration of {target_len} seconds.\n"
+        topic_brief += f"Do not write a short script. If your draft is too short, please expand the content by adding helpful details or context to reach the required word count.\n"
             
         topic = topic_brief
 
