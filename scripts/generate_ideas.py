@@ -8,6 +8,18 @@ import yaml
 IDEAS_CATALOG = {
     "ai": [
         {
+            "topic": "Create beautiful presentation slides instantly using artificial intelligence",
+            "angle": "presentation slide design automation",
+            "hook": "Stop spending hours designing presentation slides today.",
+            "curiosity_gap": "This new AI website builds entire slide decks from a single prompt.",
+            "visual_promise": "Type in your topic and watch the presentation populate.",
+            "payoff": "Export clean PowerPoint slides in seconds.",
+            "keywords": ["presentation slide", "ai presentation", "design deck"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
+        },
+        {
             "topic": "This AI tool turns a website idea into a landing page",
             "angle": "landing page layout recreation",
             "hook": "Stop coding landing page mockups from scratch today.",

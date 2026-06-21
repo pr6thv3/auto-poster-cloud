@@ -720,15 +720,18 @@ def main():
     assert entry1["analytics"]["comments"] == 7, "Expected comments to be updated to 7"
     assert entry1["analytics"]["privacy"] == "private", "Expected privacy to be updated"
     assert entry1["analytics"]["checked_at"] is not None, "Expected checked_at to be populated"
+    assert entry1["analytics"]["source"] == "mock", f"Expected source to be 'mock', got {entry1['analytics'].get('source')}"
     
     # Entry 2 (mock video id) should not be updated with live stats (remains default null)
     entry2 = next(i for i in updated_history if i["idea_id"] == "idea_test_2")
     assert entry2["analytics"]["views"] is None, "Expected mock ID views to remain None"
     assert entry2["analytics"]["checked_at"] is None, "Expected mock ID checked_at to remain None"
+    assert entry2["analytics"]["source"] == "not_checked", f"Expected source to be 'not_checked', got {entry2['analytics'].get('source')}"
     
     # Entry 3 (empty video id) should not be updated
     entry3 = next(i for i in updated_history if i["idea_id"] == "idea_test_3")
     assert entry3["analytics"]["views"] is None, "Expected empty ID views to remain None"
+    assert entry3["analytics"]["source"] == "not_checked", f"Expected source to be 'not_checked', got {entry3['analytics'].get('source')}"
     
     # Restore original content history
     with open(history_file, "w", encoding="utf-8") as f:

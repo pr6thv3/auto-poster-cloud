@@ -27,8 +27,11 @@ def main():
                 "likes": None,
                 "comments": None,
                 "checked_at": None,
-                "privacy": None
+                "privacy": None,
+                "source": "not_checked"
             }
+        elif "source" not in entry["analytics"]:
+            entry["analytics"]["source"] = "not_checked"
             
     # Gather video IDs to fetch
     video_entries = []
@@ -135,10 +138,12 @@ def main():
             entry["analytics"]["comments"] = stats["comments"]
             entry["analytics"]["privacy"] = stats["privacy"]
             entry["analytics"]["checked_at"] = current_time
+            entry["analytics"]["source"] = "mock" if is_mock else "youtube_api"
         else:
             print(f"Skipping stats update for video {vid_id} (not returned by API / private / deleted).")
             # Ensure checked_at is updated if we attempted the check
             entry["analytics"]["checked_at"] = current_time
+            entry["analytics"]["source"] = "not_checked"
 
     # Write back to history file
     try:
