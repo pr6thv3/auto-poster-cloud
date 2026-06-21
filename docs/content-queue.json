@@ -34,8 +34,8 @@
   {
     "id": "3",
     "enabled": true,
-    "posted": false,
-    "status": "pending",
+    "posted": true,
+    "status": "success",
     "topic": "3 AI websites you did not know existed",
     "niche": "ai",
     "privacy": "public",
@@ -43,8 +43,8 @@
     "metadata_mode": "real",
     "posting_mode": "real",
     "llm_provider": "gemini",
-    "attempts": 0,
-    "last_error": null,
-    "youtube_video_id": null
+    "attempts": 1,
+    "last_error": "",
+    "youtube_video_id": "8VlwPkbliwU"
   }
 ]
