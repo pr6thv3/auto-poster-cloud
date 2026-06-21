@@ -74,5 +74,24 @@
     "freshness_score": 100,
     "quality_score": 100,
     "source_run_id": "27910980597"
+  },
+  {
+    "idea_id": "idea_ai_tools_2",
+    "profile_id": "ai_tools",
+    "topic": "This AI website writes all your emails",
+    "angle": "email productivity",
+    "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds.",
+    "keywords": [
+      "write emails",
+      "ai website",
+      "productivity hacks"
+    ],
+    "format": "one_tool_highlight",
+    "created_at": "2026-06-21T18:41:51.513475Z",
+    "status": "success",
+    "youtube_video_id": "7Lu-CSmLSVs",
+    "freshness_score": 100,
+    "quality_score": 100,
+    "source_run_id": "27913652227"
   }
 ]
