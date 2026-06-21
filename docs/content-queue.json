@@ -2,8 +2,8 @@
   {
     "id": "1",
     "enabled": true,
-    "posted": false,
-    "status": "pending",
+    "posted": true,
+    "status": "success",
     "topic": "3 AI websites you did not know existed",
     "niche": "ai",
     "privacy": "private",
@@ -11,9 +11,9 @@
     "metadata_mode": "mock",
     "posting_mode": "mock",
     "slot": "1",
-    "attempts": 0,
+    "attempts": 1,
     "last_error": "",
-    "youtube_video_id": null
+    "youtube_video_id": "mock_yt_shorts_123"
   },
   {
     "id": "2",
