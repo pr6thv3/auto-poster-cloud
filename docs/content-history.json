@@ -93,5 +93,24 @@
     "freshness_score": 100,
     "quality_score": 100,
     "source_run_id": "27913652227"
+  },
+  {
+    "idea_id": "idea_ai_tools_3",
+    "profile_id": "ai_tools",
+    "topic": "How to create an AI voiceover using your own voice",
+    "angle": "voice cloning tutorial",
+    "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
+    "keywords": [
+      "personal voiceover",
+      "ai voice",
+      "voice cloning"
+    ],
+    "format": "tutorial",
+    "created_at": "2026-06-21T19:20:01.974544Z",
+    "status": "success",
+    "youtube_video_id": "4wiuATE0Gos",
+    "freshness_score": 100,
+    "quality_score": 100,
+    "source_run_id": "27914734343"
   }
 ]
