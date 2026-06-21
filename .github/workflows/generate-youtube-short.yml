@@ -42,6 +42,16 @@ on:
         required: false
         default: ""
         type: string
+      mpt_provider:
+        description: "LLM Provider for MoneyPrinterTurbo (gemini, openai, nvidia)"
+        required: false
+        default: ""
+        type: string
+      metadata_provider:
+        description: "LLM Provider for YouTube Metadata (gemini, openai, nvidia)"
+        required: false
+        default: ""
+        type: string
       allow_mock_metadata_fallback:
         description: "Allow mock metadata fallback if LLM fails (true, false)"
         required: false
@@ -127,6 +137,7 @@ jobs:
           POSTING_MODE: ${{ github.event.inputs.posting_mode }}
           ALLOW_MOCK_METADATA_FALLBACK: ${{ github.event.inputs.allow_mock_metadata_fallback || secrets.ALLOW_MOCK_METADATA_FALLBACK || 'false' }}
           LLM_PROVIDER: ${{ github.event.inputs.llm_provider || secrets.LLM_PROVIDER || 'gemini' }}
+          METADATA_PROVIDER: ${{ github.event.inputs.metadata_provider || github.event.inputs.llm_provider || secrets.METADATA_PROVIDER || secrets.LLM_PROVIDER || 'gemini' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL_NAME: ${{ secrets.OPENAI_MODEL_NAME }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -146,6 +157,7 @@ jobs:
           TITLE: ${{ steps.generate-metadata.outputs.youtube_title }}
           MOCK_MODE: 'false'
           LLM_PROVIDER: ${{ github.event.inputs.llm_provider || secrets.LLM_PROVIDER || 'gemini' }}
+          MPT_PROVIDER: ${{ github.event.inputs.mpt_provider || github.event.inputs.llm_provider || secrets.MPT_PROVIDER || secrets.LLM_PROVIDER || 'gemini' }}
           VIDEO_SOURCE: ${{ secrets.VIDEO_SOURCE }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -261,6 +273,9 @@ jobs:
           POSTING_MODE: ${{ github.event.inputs.posting_mode }}
           VIDEO_PATH: ${{ steps.find-video.outputs.video_path }}
           PUBLIC_VIDEO_URL: ${{ steps.upload-r2.outputs.public_video_url }}
+          LLM_PROVIDER: ${{ github.event.inputs.llm_provider || secrets.LLM_PROVIDER || 'gemini' }}
+          MPT_PROVIDER: ${{ github.event.inputs.mpt_provider || github.event.inputs.llm_provider || secrets.MPT_PROVIDER || secrets.LLM_PROVIDER || 'gemini' }}
+          METADATA_PROVIDER: ${{ github.event.inputs.metadata_provider || github.event.inputs.llm_provider || secrets.METADATA_PROVIDER || secrets.LLM_PROVIDER || 'gemini' }}
           GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
         run: |
           python scripts/write_summary.py

@@ -39,11 +39,18 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to read youtube-result.json: {e}")
 
+    # MPT Providers
+    requested_mpt_provider = os.environ.get('MPT_PROVIDER', '').strip().lower() or os.environ.get('LLM_PROVIDER', '').strip().lower() or 'gemini'
+    if generation_mode == 'real':
+        actual_mpt_provider_used = requested_mpt_provider
+    else:
+        actual_mpt_provider_used = 'mock'
+
     # Read audit fields from youtube-metadata.json
     meta_status = 'unknown'
     meta_provider = 'unknown'
     meta_error = None
-    meta_requested = 'gemini'
+    meta_requested = ''
     
     if os.path.exists("youtube-metadata.json"):
         try:
@@ -52,9 +59,21 @@ def main():
                 meta_status = meta.get("metadata_status", "unknown")
                 meta_provider = meta.get("metadata_provider_used", "unknown")
                 meta_error = meta.get("metadata_error", None)
-                meta_requested = meta.get("requested_metadata_provider", "gemini")
+                meta_requested = meta.get("requested_metadata_provider", "")
         except Exception as e:
             print(f"Warning: Failed to read youtube-metadata.json: {e}")
+
+    # Fallbacks for metadata providers
+    if not meta_requested:
+        meta_requested = os.environ.get('METADATA_PROVIDER', '').strip().lower() or os.environ.get('LLM_PROVIDER', '').strip().lower() or 'gemini'
+    if not meta_provider or meta_provider == 'unknown':
+        if metadata_mode == 'real':
+            meta_provider = meta_requested
+        else:
+            meta_provider = 'mock'
+
+    requested_metadata_provider = meta_requested
+    actual_metadata_provider_used = meta_provider
 
     # Helper function for status emoji
     def get_status_emoji(status):
@@ -136,9 +155,15 @@ def main():
 
 ---
 {content_engine_md}
-### 🔍 Metadata Generation Audit
-* **Requested Provider**: `{meta_requested}`
-* **Actual Provider Used**: `{meta_provider}`
+### 🔍 LLM Provider Audit
+
+#### 🎥 Video Generation (MoneyPrinterTurbo)
+* **Requested MPT Provider**: `{requested_mpt_provider}`
+* **Actual MPT Provider Used**: `{actual_mpt_provider_used}`
+
+#### 📝 Metadata Generation
+* **Requested Metadata Provider**: `{requested_metadata_provider}`
+* **Actual Metadata Provider Used**: `{actual_metadata_provider_used}`
 * **Status**: {get_meta_status_emoji(meta_status)}
 * **Fallback Occurred**: `{fallback_occurred}`
 {f"* **Error**: `{meta_error}`" if meta_error else ""}
@@ -193,8 +218,10 @@ def main():
         "generation_mode": generation_mode,
         "metadata_mode": metadata_mode,
         "posting_mode": posting_mode,
-        "requested_metadata_provider": meta_requested,
-        "actual_metadata_provider_used": meta_provider,
+        "requested_mpt_provider": requested_mpt_provider,
+        "actual_mpt_provider_used": actual_mpt_provider_used,
+        "requested_metadata_provider": requested_metadata_provider,
+        "actual_metadata_provider_used": actual_metadata_provider_used,
         "metadata_fallback_occurred": fallback_occurred,
         "metadata_status": meta_status,
         "metadata_error": meta_error,

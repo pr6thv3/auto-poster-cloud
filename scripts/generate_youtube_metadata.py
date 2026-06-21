@@ -115,7 +115,7 @@ def call_openai_compatible(provider_name, topic, niche, script_text, system_prom
     return json.loads(cleaned_text)
 
 def generate_real_metadata(topic, niche, script_text, system_prompt, user_prompt):
-    llm_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
+    llm_provider = os.environ.get('METADATA_PROVIDER', '').strip().lower() or os.environ.get('LLM_PROVIDER', '').strip().lower()
     
     # Defaults to gemini if not configured
     if not llm_provider:
@@ -205,7 +205,7 @@ def main():
     use_video_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
     
     # Record the requested provider
-    requested_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
+    requested_provider = os.environ.get('METADATA_PROVIDER', '').strip().lower() or os.environ.get('LLM_PROVIDER', '').strip().lower()
     if not requested_provider:
         if os.environ.get('GEMINI_API_KEY'):
             requested_provider = 'gemini'

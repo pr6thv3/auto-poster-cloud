@@ -82,7 +82,7 @@ def main():
             ], check=True)
         
         # 2. Write config.toml inside the cloned repo
-        llm_provider = os.environ.get('LLM_PROVIDER', 'openai').strip().lower()
+        llm_provider = os.environ.get('MPT_PROVIDER', '').strip().lower() or os.environ.get('LLM_PROVIDER', '').strip().lower() or 'openai'
         video_source = os.environ.get('VIDEO_SOURCE', 'pexels')
         pexels_key = os.environ.get('PEXELS_API_KEY', '')
         
