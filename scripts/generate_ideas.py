@@ -34,7 +34,7 @@ IDEAS_CATALOG = {
         {
             "topic": "3 AI extensions for Google Chrome you need today",
             "angle": "browser extension recommendations",
-            "hook": "If you aren't using these 3 Google Chrome extensions, you're working too hard.",
+            "hook": "Stop using Chrome normally. These 3 AI Chrome extensions make it smarter.",
             "keywords": ["chrome extensions", "google chrome", "ai plugins"],
             "format": "list_top_3",
             "freshness_window_days": 14

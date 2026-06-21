@@ -446,6 +446,18 @@ def main():
     })
     assert res_code == 0, "Expected quality gate to pass with safety voice cloning framing"
 
+    # (q) Hook lacks engaging pattern (Warn)
+    res_code, report_data = check_brief({
+        "topic": "Clean topic about productivity website",
+        "hook": "A brief overview of the tool. Nothing special here.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected warning, not failure, for hook with no engaging pattern"
+    assert any("does not match any engaging patterns" in w for w in report_data["warnings"])
+
     print("Verification: Quality gate hardening tests passed.")
 
     # Cleanup and restore files

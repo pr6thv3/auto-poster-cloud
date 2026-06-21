@@ -66,11 +66,24 @@ def main():
         if not overlap:
             warnings.append("Hook is vague or not concrete (contains no overlapping subject keywords from the topic).")
     
-    # Check for hook engaging keywords (but not weak generic ones)
-    engaging_keywords = ["want", "stop", "how", "secret", "free", "must", "mind-blowing", "need", "discover", "reveal"]
-    has_engaging = any(kw in hook.lower() for kw in engaging_keywords)
-    if not has_engaging:
-        warnings.append("Hook has no engaging trigger words (want, stop, how, free, need, discover, etc.).")
+    # Check for hook engaging patterns (time saved, workflow improvement, problem/solution, benefit, curiosity gap)
+    patterns = {
+        "time_saved": ["hour", "minute", "second", "time", "fast", "quick", "speed", "save", "day"],
+        "workflow_improvement": ["work", "job", "task", "workflow", "easier", "better", "productivity", "smarter", "automate", "automation", "improve", "hard", "use", "using", "simple", "easy", "change", "new"],
+        "problem_solution": ["stop", "prevent", "solve", "fix", "instead", "tired", "stuck", "wrong", "error", "fail", "broken", "break"],
+        "benefit_value": ["free", "earn", "make", "help", "benefit", "create", "build", "generate", "cheap", "worth", "value", "profit", "win", "best"],
+        "curiosity_gap": ["why", "how", "secret", "reveal", "hidden", "discover", "must", "missing", "need", "find", "show", "believe", "know", "question", "actually", "what", "who", "where", "look", "watch", "see"]
+    }
+    
+    hook_lower = hook.lower()
+    has_pattern = False
+    for pat_name, keywords in patterns.items():
+        if any(kw in hook_lower for kw in keywords):
+            has_pattern = True
+            break
+            
+    if not has_pattern:
+        warnings.append("Hook does not match any engaging patterns (problem/solution, benefit, curiosity gap, time saved, or workflow improvement).")
         
     # Weak generic hooks check
     weak_hooks = [
