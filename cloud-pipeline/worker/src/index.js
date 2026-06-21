@@ -5,7 +5,7 @@ export default {
     const url = new URL(request.url);
     
     // Check path
-    if (url.pathname !== '/' && url.pathname !== '/run') {
+    if (url.pathname !== '/' && url.pathname !== '/run' && url.pathname !== '/trigger-cron') {
       return new Response('Not Found', { status: 404 });
     }
 
@@ -35,6 +35,29 @@ export default {
         status: 401,
         headers: { 'WWW-Authenticate': 'Bearer' }
       });
+    }
+
+    // Handle Cron manual trigger path
+    if (url.pathname === '/trigger-cron') {
+      try {
+        console.log('HTTP trigger for scheduled handler initiated.');
+        await handleScheduled(env);
+        return new Response(JSON.stringify({
+          status: 'success',
+          message: 'Scheduled handler executed successfully.'
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({
+          status: 'error',
+          message: `Scheduled handler execution failed: ${err.message}`
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     // Handle GET: Serve HTML Trigger UI

@@ -2,16 +2,60 @@ import os
 import sys
 import subprocess
 import shutil
+import json
 
 def main():
     topic = os.environ.get('TOPIC', 'Default Topic')
     title = os.environ.get('TITLE', 'Default Title')
     mock_mode = os.environ.get('MOCK_MODE', 'true').lower() == 'true'
+    use_video_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
 
     print(f"--- Running MoneyPrinterTurbo Integration ---")
     print(f"Topic: {topic}")
     print(f"Title: {title}")
     print(f"Mock Mode: {mock_mode}")
+    print(f"Use Video Brief: {use_video_brief}")
+
+    if use_video_brief:
+        brief_path = os.path.join("docs", "video-brief.json")
+        if not os.path.exists(brief_path):
+            print(f"Error: video-brief.json is missing at {brief_path} (USE_VIDEO_BRIEF=true)")
+            sys.exit(1)
+        try:
+            with open(brief_path, "r", encoding="utf-8") as f:
+                brief = json.load(f)
+        except Exception as e:
+            print(f"Error: video-brief.json is invalid: {e} (USE_VIDEO_BRIEF=true)")
+            sys.exit(1)
+            
+        # Verify required keys
+        required_keys = ['profile_id', 'topic', 'hook', 'script_outline', 'scene_plan', 'voice_style', 'target_length_seconds']
+        missing_keys = [k for k in required_keys if k not in brief]
+        if missing_keys:
+            print(f"Error: video-brief.json is missing required keys: {missing_keys}")
+            sys.exit(1)
+            
+        print(f"Loaded video brief successfully. Profile ID: {brief['profile_id']}")
+        
+        # Override the topic parameter with a detailed prompt constructed from the brief
+        topic_brief = f"Topic: {brief['topic']}\n"
+        topic_brief += f"Hook: {brief['hook']}\n"
+        topic_brief += "Script Outline:\n"
+        for line in brief['script_outline']:
+            topic_brief += f"- {line}\n"
+        topic_brief += "Scene Plan:\n"
+        for scene in brief['scene_plan']:
+            time_range = scene.get('time_range', '')
+            visual = scene.get('visual', '')
+            audio = scene.get('audio', '')
+            topic_brief += f"- [{time_range}] Visual: {visual} | Audio: {audio}\n"
+        topic_brief += "Voice Style / Tone:\n"
+        topic_brief += f"- Tone: {', '.join(brief['voice_style'].get('tone', []))}\n"
+        topic_brief += f"- Style Rules: {', '.join(brief['voice_style'].get('style_rules', []))}\n"
+        topic_brief += f"Target Length: {brief['target_length_seconds']} seconds\n"
+        
+        topic = topic_brief
+
 
     if mock_mode:
         print("[MOCK] Simulating MoneyPrinterTurbo generation...")

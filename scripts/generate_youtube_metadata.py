@@ -19,8 +19,20 @@ def clean_json_response(text):
         text = "\n".join(lines).strip()
     return text
 
-def generate_mock_metadata(topic, niche):
+def generate_mock_metadata(topic, niche, brief=None):
     print("[MOCK] Generating placeholder YouTube metadata...")
+    if brief:
+        title = f"Facts: {brief['topic'][:40]}! #Shorts"
+        description = f"{brief['hook']}\n\nThis is about {brief['topic']}.\n\nSubscribe for more info!\n\n#Shorts"
+        tags = [niche, "learning", "shorts"]
+        hashtags = ["Shorts", niche]
+        return {
+            "title": title,
+            "description": description,
+            "tags": tags,
+            "hashtags": hashtags,
+            "categoryId": "28" if niche.lower() in ["ai", "science", "technology", "tech"] else "22"
+        }
     return {
         "title": f"Amazing facts about {topic[:40]}! #Shorts",
         "description": f"Here is what you need to know about {topic}.\n\nSubscribe for more content on {niche}!\n\n#Shorts #learning #{niche}",
@@ -190,6 +202,7 @@ def main():
     metadata_mode = os.environ.get('METADATA_MODE', 'mock').lower()
     posting_mode = os.environ.get('POSTING_MODE', 'mock').lower()
     allow_mock_fallback = os.environ.get('ALLOW_MOCK_METADATA_FALLBACK', 'false').lower() == 'true'
+    use_video_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
     
     # Record the requested provider
     requested_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
@@ -201,6 +214,48 @@ def main():
         else:
             requested_provider = 'gemini'
             
+    brief = None
+    banned_words = []
+    
+    if use_video_brief:
+        brief_path = os.path.join("docs", "video-brief.json")
+        if not os.path.exists(brief_path):
+            print(f"Error: video-brief.json is missing at {brief_path} (USE_VIDEO_BRIEF=true)")
+            sys.exit(1)
+        try:
+            with open(brief_path, "r", encoding="utf-8") as f:
+                brief = json.load(f)
+        except Exception as e:
+            print(f"Error: video-brief.json is invalid: {e} (USE_VIDEO_BRIEF=true)")
+            sys.exit(1)
+            
+        required_keys = ['profile_id', 'topic', 'hook', 'title_guidance', 'hashtag_guidance', 'banned_words']
+        missing_keys = [k for k in required_keys if k not in brief]
+        if missing_keys:
+            print(f"Error: video-brief.json is missing required keys: {missing_keys}")
+            sys.exit(1)
+            
+        topic = brief["topic"]
+        hook = brief["hook"]
+        profile_id = brief["profile_id"]
+        title_guidance = brief["title_guidance"]
+        hashtag_guidance = brief["hashtag_guidance"]
+        banned_words = brief["banned_words"]
+        
+        # Load profile yaml to find niche
+        profile_path = os.path.join("profiles", f"{profile_id}.yml")
+        niche = "general"
+        if os.path.exists(profile_path):
+            try:
+                import yaml
+                with open(profile_path, "r", encoding="utf-8") as pf:
+                    profile_data = yaml.safe_load(pf)
+                    niche = profile_data.get("niche", "general")
+            except Exception as pe:
+                print(f"Warning: Failed to load profile YAML {profile_path}: {pe}")
+        else:
+            print(f"Warning: Profile YAML {profile_path} not found. Defaulting niche to 'general'.")
+
     system_prompt = (
         "You are an expert YouTube Shorts metadata generator.\n"
         "Generate optimized metadata for a YouTube Short video. Return ONLY a raw JSON object containing the fields below. "
@@ -212,6 +267,16 @@ def main():
         '- "hashtags": An array of up to 5 hashtags (without the # prefix).\n'
         '- "categoryId": A string representing the YouTube category (use "28" for science/technology, "27" for education, "22" for people/blogs).\n'
     )
+    
+    if use_video_brief and brief:
+        system_prompt += (
+            f"\nAdditional generation constraints from the Video Brief:\n"
+            f"- Title Guidance: {title_guidance}\n"
+            f"- Hashtag Guidance: {hashtag_guidance}\n"
+            f"- CRITICAL: Do NOT use any of the following banned words/phrases in any output field: {', '.join(banned_words)}\n"
+            f"- Ensure the niche is: {niche}\n"
+            f"- Use hook: {hook}\n"
+        )
     
     user_prompt = f"Topic: {topic}\nNiche: {niche}\n"
     if script_text:
@@ -237,7 +302,7 @@ def main():
             
             if allow_fallback:
                 print("Falling back to mock metadata generation because fallback is allowed.")
-                metadata = generate_mock_metadata(topic, niche)
+                metadata = generate_mock_metadata(topic, niche, brief)
                 metadata_status = "fallback"
                 metadata_provider_used = "mock"
                 metadata_error = full_error
@@ -259,7 +324,7 @@ def main():
                 sys.exit(1)
     else:
         # metadata_mode == 'mock'
-        metadata = generate_mock_metadata(topic, niche)
+        metadata = generate_mock_metadata(topic, niche, brief)
         metadata_status = "mock"
         metadata_provider_used = "mock"
         metadata_error = None
@@ -270,6 +335,35 @@ def main():
     tags = metadata.get("tags", [])
     hashtags = metadata.get("hashtags", [])
     category_id = metadata.get("categoryId", "22")
+
+    # Sanitization function for banned words (case-insensitive substring/word match)
+    def sanitize_text(text, b_words):
+        if not text or not b_words:
+            return text
+        import re
+        for word in b_words:
+            pattern = re.compile(re.escape(word), re.IGNORECASE)
+            if pattern.search(text):
+                print(f"Warning: Banned word '{word}' detected in generated text. Sanitizing it.")
+                text = pattern.sub("", text)
+        text = re.sub(r' +', ' ', text)
+        return text.strip()
+
+    def sanitize_list(lst, b_words):
+        if not lst or not b_words:
+            return lst
+        cleaned = []
+        for item in lst:
+            cleaned_item = sanitize_text(item, b_words)
+            if cleaned_item:
+                cleaned.append(cleaned_item)
+        return cleaned
+
+    if use_video_brief and banned_words:
+        title = sanitize_text(title, banned_words)
+        description = sanitize_text(description, banned_words)
+        tags = sanitize_list(tags, banned_words)
+        hashtags = sanitize_list(hashtags, banned_words)
 
     if len(title) > 100:
         title = title[:97] + "..."

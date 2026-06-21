@@ -83,6 +83,47 @@ def main():
 
     fallback_occurred = (meta_status == 'fallback')
 
+    # Content Engine Audit variables
+    use_video_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
+    profile_id = "N/A"
+    selected_idea = "N/A"
+    freshness_score = "N/A"
+    quality_status = "N/A"
+    
+    if use_video_brief:
+        brief_path = "docs/video-brief.json"
+        if os.path.exists(brief_path):
+            try:
+                with open(brief_path, "r", encoding="utf-8") as f:
+                    brief_data = json.load(f)
+                    profile_id = brief_data.get("profile_id", "N/A")
+                    selected_idea = brief_data.get("topic", "N/A")
+                    freshness_score = brief_data.get("freshness_score", "N/A")
+            except Exception as e:
+                print(f"Warning: Failed to load {brief_path} for summary: {e}")
+                
+        quality_path = "docs/quality-report.json"
+        if os.path.exists(quality_path):
+            try:
+                with open(quality_path, "r", encoding="utf-8") as f:
+                    q_data = json.load(f)
+                    quality_status = q_data.get("status", "N/A")
+            except Exception as e:
+                print(f"Warning: Failed to load {quality_path} for summary: {e}")
+
+    content_engine_md = ""
+    if use_video_brief:
+        content_engine_md = f"""
+### 🧠 Content Engine Audit
+* **Use Video Brief**: `{use_video_brief}`
+* **Profile ID**: `{profile_id}`
+* **Selected Idea**: `{selected_idea}`
+* **Freshness Score**: `{freshness_score}`
+* **Quality Gate Status**: `{quality_status.upper()}`
+
+---
+"""
+
     markdown = f"""# 🎬 YouTube Shorts Auto-Posting Run Summary
 
 ### 📊 Configuration Parameters
@@ -94,7 +135,7 @@ def main():
 * **Posting Mode**: `{posting_mode}`
 
 ---
-
+{content_engine_md}
 ### 🔍 Metadata Generation Audit
 * **Requested Provider**: `{meta_requested}`
 * **Actual Provider Used**: `{meta_provider}`
@@ -160,6 +201,11 @@ def main():
         "video_path": video_path,
         "public_video_url": public_video_url,
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "use_video_brief": use_video_brief,
+        "profile_id": profile_id,
+        "selected_idea": selected_idea,
+        "freshness_score": freshness_score,
+        "quality_status": quality_status,
         "results": platform_results
     }
     try:

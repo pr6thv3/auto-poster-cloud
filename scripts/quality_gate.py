@@ -76,6 +76,7 @@ def main():
             print("Failures:")
             for r in reasons:
                 print(f" - {r}")
+            sys.exit(1)
     except Exception as e:
         print(f"Error writing quality report: {e}")
         sys.exit(1)
