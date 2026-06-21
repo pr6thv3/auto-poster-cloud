@@ -48,3 +48,5 @@ banned_words:
   - hack
   - illegal
   - loophole
+preferred_duration_seconds: 50
+hard_max_duration_seconds: 58

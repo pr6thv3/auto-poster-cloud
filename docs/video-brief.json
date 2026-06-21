@@ -1,41 +1,41 @@
 {
   "profile_id": "ai_tools",
-  "idea_id": "idea_ai_tools_1",
-  "topic": "3 AI tools to start a side hustle",
-  "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+  "idea_id": "idea_ai_tools_3",
+  "topic": "How to create an AI voiceover using your own voice",
+  "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
   "freshness_score": 100,
   "script_outline": [
-    "0:00 - 0:05: Hook: Want to start a side hustle? These 3 AI tools will do all the work for you.",
-    "0:05 - 0:15: Introduction and first tool highlight",
-    "0:15 - 0:30: Second tool highlight with major utility",
-    "0:30 - 0:45: Third tool highlight (the best one)",
-    "0:45 - 0:50: Outro and Call-To-Action (CTA)"
+    "0:00 - 0:05: Hook: Create an AI voiceover using your own voice with consent in seconds. Here is how.",
+    "0:05 - 0:15: Step 1: Preparation / Setup",
+    "0:15 - 0:35: Step 2: Implementation core steps",
+    "0:35 - 0:45: Step 3: Final result / Output check",
+    "0:45 - 0:50: Outro / Try it yourself CTA"
   ],
   "scene_plan": [
     {
       "time_range": "0:00 - 0:05",
-      "visual": "Fast cuts of the 3 tools, zoom on text overlay with topic name.",
-      "audio": "Hook narration with high energy."
+      "visual": "Before/After split screen showing the final tutorial result.",
+      "audio": "Hook narration with engaging tone."
     },
     {
       "time_range": "0:05 - 0:15",
-      "visual": "Screen recording of Tool 1 interface showing a quick demo.",
-      "audio": "Explain what Tool 1 is and why it helps."
+      "visual": "Navigate to the site and show where to click first.",
+      "audio": "Step 1 details: Go to the website and import your file."
     },
     {
-      "time_range": "0:15 - 0:30",
-      "visual": "Screen recording of Tool 2 showing automated processing.",
-      "audio": "Explain the major benefit of Tool 2."
+      "time_range": "0:15 - 0:35",
+      "visual": "Clicking buttons and adjusting sliders in real time.",
+      "audio": "Step 2 details: Adjust settings and hit generate to process it."
     },
     {
-      "time_range": "0:30 - 0:45",
-      "visual": "Screen recording of Tool 3 executing a complex task in 1-click.",
-      "audio": "Show the mind-blowing feature of Tool 3."
+      "time_range": "0:35 - 0:45",
+      "visual": "Show the final downloaded asset/output in high quality.",
+      "audio": "Step 3 details: Look at this perfect output. It took just seconds."
     },
     {
       "time_range": "0:45 - 0:50",
-      "visual": "CTA overlay text (e.g. Subscribe/Link in bio) with animated button.",
-      "audio": "Encourage user to follow/subscribe for more tech hacks."
+      "visual": "CTA social buttons and text overlays.",
+      "audio": "Outro: Try it out and follow for more tutorials!"
     }
   ],
   "voice_style": {
@@ -56,8 +56,8 @@
       "screen recordings of the tools in action"
     ]
   },
-  "title_guidance": "Create an engaging title under 50 characters summarizing: 3 AI tools to start a side hustle",
-  "hashtag_guidance": "Include #Shorts, the niche #ai, and keywords: side hustle, ai tools, make money online",
+  "title_guidance": "Create an engaging title under 50 characters summarizing: How to create an AI voiceover using your own voice",
+  "hashtag_guidance": "Include #Shorts, the niche #ai, and keywords: personal voiceover, ai voice, voice cloning",
   "banned_words": [
     "scam",
     "cheat",
@@ -65,5 +65,7 @@
     "illegal",
     "loophole"
   ],
-  "target_length_seconds": 50
+  "target_length_seconds": 50,
+  "preferred_duration_seconds": 50,
+  "hard_max_duration_seconds": 58
 }

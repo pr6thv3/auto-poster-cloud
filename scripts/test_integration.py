@@ -103,7 +103,7 @@ def main():
     assert run_log.get("profile_id") == brief.get("profile_id"), "profile_id does not match in run-log.json"
     assert run_log.get("selected_idea") == brief.get("topic"), "selected_idea does not match brief topic in run-log.json"
     assert run_log.get("freshness_score") == brief.get("freshness_score"), "freshness_score does not match brief score in run-log.json"
-    assert run_log.get("quality_status") == "passed", "quality_status does not match in run-log.json"
+    assert run_log.get("quality_status") in ["passed", "warning"], f"quality_status was {run_log.get('quality_status')}"
 
     print("Verification: run-log.json includes correct Content Engine Audit properties!")
 
@@ -116,7 +116,7 @@ def main():
     assert "Content Engine Audit" in summary_text, "Content Engine Audit section missing in step summary markdown"
     assert f"**Use Video Brief**: `True`" in summary_text, "Use Video Brief field missing or incorrect in step summary markdown"
     assert f"**Profile ID**: `{brief.get('profile_id')}`" in summary_text, "Profile ID field incorrect in step summary markdown"
-    assert "**Quality Gate Status**: `PASSED`" in summary_text, "Quality Gate Status incorrect in step summary markdown"
+    assert "**Quality Gate Status**: `PASSED`" in summary_text or "**Quality Gate Status**: `WARNING`" in summary_text, "Quality Gate Status incorrect in step summary markdown"
 
     print("Verification: step-summary-mock.md contains the correct Content Engine Audit markdown section!")
 
@@ -332,6 +332,119 @@ def main():
     })
     assert res_code == 0, "Expected quality gate to pass for safe brief"
     assert report_data["status"] in ["passed", "warning"], f"Expected status passed or warning, got {report_data['status']}"
+
+    # (h) Target length above 58 seconds (Fail)
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Stop wasting hours writing emails. Let this free website help you.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "target_length_seconds": 60,
+        "hard_max_duration_seconds": 58
+    })
+    assert res_code == 1, "Expected failure for target length > 58s"
+    assert any("Target length" in r for r in report_data["reasons"])
+
+    # (i) Script outline too long for target duration (Fail when exceeds hard max)
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Stop wasting hours writing emails. Let this free website help you.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["0:00 - 0:05: Hook", "0:05 - 0:59: Loop"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "target_length_seconds": 48,
+        "hard_max_duration_seconds": 58
+    })
+    assert res_code == 1, "Expected failure for outline duration exceeding hard max"
+    assert any("exceeds the hard maximum" in r for r in report_data["reasons"])
+
+    # (j) Script outline duration warn when exceeds target length
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Stop wasting hours writing emails. Let this free website help you.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["0:00 - 0:05: Hook", "0:05 - 0:50: Loop"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "target_length_seconds": 48,
+        "hard_max_duration_seconds": 58
+    })
+    assert res_code == 0, "Expected success/warning status, not fail"
+    assert any("longer than the target duration" in w for w in report_data["warnings"])
+
+    # (k) Hook vague / not concrete: less than 6 words (Fail)
+    res_code, report_data = check_brief({
+        "topic": "Clean topic about productivity website",
+        "hook": "Check this tool",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected failure for hook < 6 words"
+    assert any("too short and vague" in r for r in report_data["reasons"])
+
+    # (l) Hook vague / not concrete: no overlapping keywords with topic (Warn)
+    res_code, report_data = check_brief({
+        "topic": "This website helps with programming",
+        "hook": "Stop scrolling! Look at this incredible new software today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected warning, not failure, for vague hook with no overlap"
+    assert any("overlapping subject keywords" in w for w in report_data["warnings"])
+
+    # (m) Topic overpromising money/productivity claims (Fail)
+    res_code, report_data = check_brief({
+        "topic": "How to get rich with infinite money",
+        "hook": "Stop scrolling! Here is a cool way to program apps.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected failure for overpromising topic"
+    assert any("Overpromising/unsafe phrases" in r for r in report_data["reasons"])
+
+    # (n) Topic overpromising claims (Warn)
+    res_code, report_data = check_brief({
+        "topic": "How to make money online easily",
+        "hook": "Stop scrolling! Here is a cool way to program apps.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected warning, not failure, for soft overpromising claim"
+    assert any("productivity/money claims detected" in w for w in report_data["warnings"])
+
+    # (o) Voice-cloning lacks consent framing (Fail)
+    res_code, report_data = check_brief({
+        "topic": "How to clone anyone's voice",
+        "hook": "This tool lets you clone any voice for free.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 1, "Expected failure for voice cloning lacking safety terms"
+    assert any("safety consent/self-use framing" in r for r in report_data["reasons"])
+
+    # (p) Voice-cloning with consent framing (Pass)
+    res_code, report_data = check_brief({
+        "topic": "How to create an AI voiceover using your own voice",
+        "hook": "You can create an AI voiceover using your own voice with consent in seconds.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100
+    })
+    assert res_code == 0, "Expected quality gate to pass with safety voice cloning framing"
 
     print("Verification: Quality gate hardening tests passed.")
 

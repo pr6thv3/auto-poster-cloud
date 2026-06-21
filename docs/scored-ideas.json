@@ -12,9 +12,71 @@
     ],
     "format": "list_top_3",
     "freshness_window_days": 14,
-    "freshness_score": 100,
-    "penalties": [],
-    "selected": true
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with '3 AI tools to start a side hustle' (-60)",
+      "Hook pattern start 'want to start' matches recent video (-25)",
+      "Angle recency conflict: Angle 'side hustle automation' used recently (-25)",
+      "Reused 2+ keywords (side hustle, ai tools, make money online) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'list_top_3' (-15)",
+      "Money/side-hustle topic repeated recently: Matches '3 AI tools to start a side hustle' (-20)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue",
+      "money_repetition"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z",
+        "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z",
+        "angle": "side hustle automation"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z",
+        "keywords": [
+          "side hustle",
+          "ai tools",
+          "make money online"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z",
+        "format": "list_top_3"
+      },
+      {
+        "type": "money_repetition",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
   },
   {
     "idea_id": "idea_ai_tools_2",
@@ -29,28 +91,83 @@
     ],
     "format": "one_tool_highlight",
     "freshness_window_days": 7,
-    "freshness_score": 100,
-    "penalties": [],
-    "selected": false
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'This AI website writes all your emails' (-60)",
+      "Hook pattern start 'stop wasting hours' matches recent video (-25)",
+      "Angle recency conflict: Angle 'email productivity' used recently (-25)",
+      "Reused 2+ keywords (write emails, ai website, productivity hacks) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'one_tool_highlight' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z",
+        "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z",
+        "angle": "email productivity"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z",
+        "keywords": [
+          "write emails",
+          "ai website",
+          "productivity hacks"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z",
+        "format": "one_tool_highlight"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
   },
   {
     "idea_id": "idea_ai_tools_3",
     "profile_id": "ai_tools",
-    "topic": "How to clone your voice with AI for free",
+    "topic": "How to create an AI voiceover using your own voice",
     "angle": "voice cloning tutorial",
-    "hook": "You can clone your own voice with AI in under 60 seconds. Here is how.",
+    "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
     "keywords": [
-      "voice cloning",
+      "personal voiceover",
       "ai voice",
-      "free tutorial"
+      "voice cloning"
     ],
     "format": "tutorial",
     "freshness_window_days": 30,
-    "freshness_score": 85,
-    "penalties": [
-      "Format fatigue: Matches 2nd most recent video format 'tutorial' (-15)"
-    ],
-    "selected": false
+    "freshness_score": 100,
+    "penalties": [],
+    "penalty_reasons": [],
+    "recent_history_matches": [],
+    "selected": true,
+    "selected_reason": "Selected as the highest scoring fresh idea (Score: 100)."
   },
   {
     "idea_id": "idea_ai_tools_4",
@@ -65,9 +182,24 @@
     ],
     "format": "list_top_3",
     "freshness_window_days": 14,
-    "freshness_score": 100,
-    "penalties": [],
-    "selected": false
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'list_top_3' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "3 AI tools to start a side hustle",
+        "video_id": "pJ0zoo0nPAY",
+        "date": "2026-06-21T16:53:35.295340Z",
+        "format": "list_top_3"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
   },
   {
     "idea_id": "idea_ai_tools_5",
@@ -82,8 +214,23 @@
     ],
     "format": "one_tool_highlight",
     "freshness_window_days": 10,
-    "freshness_score": 100,
-    "penalties": [],
-    "selected": false
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'one_tool_highlight' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "This AI website writes all your emails",
+        "video_id": "7Lu-CSmLSVs",
+        "date": "2026-06-21T18:41:51.513475Z",
+        "format": "one_tool_highlight"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
   }
 ]

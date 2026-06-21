@@ -40,3 +40,5 @@ banned_words:
   - gamble
   - fixed
   - rigged
+preferred_duration_seconds: 50
+hard_max_duration_seconds: 58

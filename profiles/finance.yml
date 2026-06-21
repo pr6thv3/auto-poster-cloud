@@ -48,3 +48,5 @@ banned_words:
   - 100x return
   - buy this stock
   - to the moon
+preferred_duration_seconds: 50
+hard_max_duration_seconds: 58

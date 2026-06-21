@@ -108,7 +108,9 @@ def main():
         "title_guidance": "Create an engaging title under 50 characters summarizing: " + topic,
         "hashtag_guidance": "Include #Shorts, the niche #" + profile.get("niche", "tech") + ", and keywords: " + ", ".join(selected_idea.get("keywords", [])),
         "banned_words": profile.get("banned_words", []),
-        "target_length_seconds": 50
+        "target_length_seconds": profile.get("preferred_duration_seconds", 48),
+        "preferred_duration_seconds": profile.get("preferred_duration_seconds", 48),
+        "hard_max_duration_seconds": profile.get("hard_max_duration_seconds", 58)
     }
     
     output_path = os.path.join("docs", "video-brief.json")

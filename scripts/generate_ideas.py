@@ -24,10 +24,10 @@ IDEAS_CATALOG = {
             "freshness_window_days": 7
         },
         {
-            "topic": "How to clone your voice with AI for free",
+            "topic": "How to create an AI voiceover using your own voice",
             "angle": "voice cloning tutorial",
-            "hook": "You can clone your own voice with AI in under 60 seconds. Here is how.",
-            "keywords": ["voice cloning", "ai voice", "free tutorial"],
+            "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
+            "keywords": ["personal voiceover", "ai voice", "voice cloning"],
             "format": "tutorial",
             "freshness_window_days": 30
         },

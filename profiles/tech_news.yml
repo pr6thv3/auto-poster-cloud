@@ -41,3 +41,5 @@ banned_words:
   - shocking truth
   - mind blown
   - strictly confidential
+preferred_duration_seconds: 50
+hard_max_duration_seconds: 58

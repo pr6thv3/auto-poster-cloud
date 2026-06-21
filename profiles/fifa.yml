@@ -41,3 +41,5 @@ banned_words:
   - glitch
   - exploit
   - hack
+preferred_duration_seconds: 50
+hard_max_duration_seconds: 58
