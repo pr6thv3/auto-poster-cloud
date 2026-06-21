@@ -30,5 +30,21 @@
     "attempts": 1,
     "last_error": "",
     "youtube_video_id": "IHXuFyCUxBc"
+  },
+  {
+    "id": "3",
+    "enabled": true,
+    "posted": false,
+    "status": "pending",
+    "topic": "3 AI websites you did not know existed",
+    "niche": "ai",
+    "privacy": "public",
+    "generation_mode": "real",
+    "metadata_mode": "real",
+    "posting_mode": "real",
+    "llm_provider": "gemini",
+    "attempts": 0,
+    "last_error": null,
+    "youtube_video_id": null
   }
 ]
