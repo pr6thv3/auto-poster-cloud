@@ -150,5 +150,24 @@
     "freshness_score": 100,
     "quality_score": 100,
     "source_run_id": "27916210700"
+  },
+  {
+    "idea_id": "idea_ai_tools_1",
+    "profile_id": "ai_tools",
+    "topic": "This AI tool clones any website in one click",
+    "angle": "website cloning automation",
+    "hook": "Stop coding website designs from scratch today.",
+    "keywords": [
+      "website builder",
+      "ai design",
+      "clone website"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-21T21:12:05.407864Z",
+    "status": "success",
+    "youtube_video_id": "9dHkHFWRjII",
+    "freshness_score": 100,
+    "quality_score": 100,
+    "source_run_id": "27917532122"
   }
 ]
