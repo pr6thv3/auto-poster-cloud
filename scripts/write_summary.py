@@ -4,7 +4,7 @@ import json
 import datetime
 
 def main():
-    print("--- Writing GitHub Actions Job Summary ---")
+    print("--- Running GitHub Actions Job Summary ---")
     
     summary_file = os.environ.get('GITHUB_STEP_SUMMARY')
     if not summary_file:
@@ -39,6 +39,23 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to read youtube-result.json: {e}")
 
+    # Read audit fields from youtube-metadata.json
+    meta_status = 'unknown'
+    meta_provider = 'unknown'
+    meta_error = None
+    meta_requested = 'gemini'
+    
+    if os.path.exists("youtube-metadata.json"):
+        try:
+            with open("youtube-metadata.json", "r", encoding="utf-8") as f:
+                meta = json.load(f)
+                meta_status = meta.get("metadata_status", "unknown")
+                meta_provider = meta.get("metadata_provider_used", "unknown")
+                meta_error = meta.get("metadata_error", None)
+                meta_requested = meta.get("requested_metadata_provider", "gemini")
+        except Exception as e:
+            print(f"Warning: Failed to read youtube-metadata.json: {e}")
+
     # Helper function for status emoji
     def get_status_emoji(status):
         if status == 'success':
@@ -52,6 +69,20 @@ def main():
         else:
             return '🟡 PENDING'
 
+    def get_meta_status_emoji(status):
+        if status == 'success':
+            return '✅ SUCCESS'
+        elif status == 'mock':
+            return '⚪ MOCK'
+        elif status == 'fallback':
+            return '⚠️ FALLBACK'
+        elif status == 'failed':
+            return '❌ FAILED'
+        else:
+            return '❓ UNKNOWN'
+
+    fallback_occurred = (meta_status == 'fallback')
+
     markdown = f"""# 🎬 YouTube Shorts Auto-Posting Run Summary
 
 ### 📊 Configuration Parameters
@@ -61,6 +92,15 @@ def main():
 * **Generation Mode**: `{generation_mode}`
 * **Metadata Mode**: `{metadata_mode}`
 * **Posting Mode**: `{posting_mode}`
+
+---
+
+### 🔍 Metadata Generation Audit
+* **Requested Provider**: `{meta_requested}`
+* **Actual Provider Used**: `{meta_provider}`
+* **Status**: {get_meta_status_emoji(meta_status)}
+* **Fallback Occurred**: `{fallback_occurred}`
+{f"* **Error**: `{meta_error}`" if meta_error else ""}
 
 ---
 
@@ -112,6 +152,11 @@ def main():
         "generation_mode": generation_mode,
         "metadata_mode": metadata_mode,
         "posting_mode": posting_mode,
+        "requested_metadata_provider": meta_requested,
+        "actual_metadata_provider_used": meta_provider,
+        "metadata_fallback_occurred": fallback_occurred,
+        "metadata_status": meta_status,
+        "metadata_error": meta_error,
         "video_path": video_path,
         "public_video_url": public_video_url,
         "timestamp": datetime.datetime.utcnow().isoformat() + "Z",

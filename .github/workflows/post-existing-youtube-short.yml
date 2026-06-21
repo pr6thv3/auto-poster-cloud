@@ -41,6 +41,11 @@ on:
         required: false
         default: ""
         type: string
+      allow_mock_metadata_fallback:
+        description: "Allow mock metadata fallback if LLM fails (true, false)"
+        required: false
+        default: "false"
+        type: string
       job_id:
         description: "Unique job identifier for tracking"
         required: false
@@ -133,6 +138,8 @@ jobs:
           TOPIC: ${{ github.event.inputs.topic || 'Existing Video' }}
           NICHE: ${{ github.event.inputs.niche }}
           METADATA_MODE: ${{ github.event.inputs.metadata_mode }}
+          POSTING_MODE: ${{ github.event.inputs.posting_mode }}
+          ALLOW_MOCK_METADATA_FALLBACK: ${{ github.event.inputs.allow_mock_metadata_fallback || secrets.ALLOW_MOCK_METADATA_FALLBACK || 'false' }}
           LLM_PROVIDER: ${{ github.event.inputs.llm_provider || secrets.LLM_PROVIDER || 'gemini' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL_NAME: ${{ secrets.OPENAI_MODEL_NAME }}

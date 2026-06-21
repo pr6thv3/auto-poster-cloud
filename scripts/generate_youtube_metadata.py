@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import requests
+import time
 
 def clean_json_response(text):
     """
@@ -28,46 +29,178 @@ def generate_mock_metadata(topic, niche):
         "categoryId": "28" if niche.lower() in ["ai", "science", "technology", "tech"] else "22"
     }
 
-def generate_real_metadata(topic, niche, script_text):
-    llm_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
+def call_gemini(topic, niche, script_text, system_prompt, user_prompt):
     gemini_key = os.environ.get('GEMINI_API_KEY')
     gemini_model = os.environ.get('GEMINI_MODEL_NAME', '').strip() or 'gemini-2.5-flash'
+    if not gemini_key:
+        raise Exception("Missing GEMINI_API_KEY")
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={gemini_key}"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": system_prompt + "\n\n" + user_prompt}]
+            }
+        ],
+        "generationConfig": {
+            "responseMimeType": "application/json"
+        }
+    }
 
-    openai_key = ''
-    openai_base_url = ''
-    openai_model = ''
+    # Retry once on transient errors (429, 5xx, timeout)
+    for attempt in range(1, 3):
+        try:
+            print(f"[REAL] Generating metadata using Gemini ({gemini_model}) - Attempt {attempt}...")
+            res = requests.post(url, headers=headers, json=payload, timeout=30)
+            
+            # Check for transient status codes to retry
+            if res.status_code in [429, 500, 502, 503, 504] and attempt == 1:
+                print(f"Warning: Gemini API returned status {res.status_code}. Retrying in 2 seconds...")
+                time.sleep(2)
+                continue
+                
+            res.raise_for_status()
+            res_json = res.json()
+            raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
+            cleaned_text = clean_json_response(raw_text)
+            return json.loads(cleaned_text)
+        except requests.exceptions.RequestException as e:
+            if attempt == 1:
+                print(f"Warning: Gemini request failed: {e}. Retrying in 2 seconds...")
+                time.sleep(2)
+                continue
+            raise e
+        except Exception as e:
+            raise e
 
-    if llm_provider == "nvidia":
+def call_openai_compatible(provider_name, topic, niche, script_text, system_prompt, user_prompt, base_url, api_key, model_name):
+    if not api_key:
+        raise Exception(f"Missing API key for {provider_name}.")
+    if not model_name:
+        raise Exception(f"Missing model name for {provider_name}.")
+
+    print(f"[REAL] Generating metadata using {provider_name} ({model_name})...")
+    url = f"{base_url.rstrip('/')}/chat/completions" if base_url else "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    payload = {
+        "model": model_name,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "response_format": {"type": "json_object"}
+    }
+    res = requests.post(url, headers=headers, json=payload, timeout=30)
+    res.raise_for_status()
+    res_json = res.json()
+    raw_text = res_json["choices"][0]["message"]["content"]
+    cleaned_text = clean_json_response(raw_text)
+    return json.loads(cleaned_text)
+
+def generate_real_metadata(topic, niche, script_text, system_prompt, user_prompt):
+    llm_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
+    
+    # Defaults to gemini if not configured
+    if not llm_provider:
+        gemini_key = os.environ.get('GEMINI_API_KEY')
+        nvidia_key = os.environ.get('NVIDIA_API_KEY')
+        if gemini_key:
+            llm_provider = "gemini"
+        elif nvidia_key:
+            llm_provider = "nvidia"
+        else:
+            raise Exception("No LLM provider keys configured in environment.")
+
+    errors = []
+    
+    if llm_provider == "gemini":
+        try:
+            metadata = call_gemini(topic, niche, script_text, system_prompt, user_prompt)
+            return metadata, "gemini", None
+        except Exception as e:
+            err_msg = f"Gemini failed: {str(e)}"
+            print(err_msg)
+            errors.append(err_msg)
+            
+            # Switch to NVIDIA if configured
+            nvidia_key = os.environ.get('NVIDIA_API_KEY', '').strip()
+            if nvidia_key:
+                print("Transitioning to NVIDIA NIM fallback provider...")
+                nvidia_base = os.environ.get('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1').strip()
+                nvidia_model = os.environ.get('NVIDIA_MODEL_NAME', '').strip()
+                try:
+                    metadata = call_openai_compatible(
+                        "nvidia", topic, niche, script_text, system_prompt, user_prompt,
+                        nvidia_base, nvidia_key, nvidia_model
+                    )
+                    return metadata, "nvidia", "; ".join(errors)
+                except Exception as n_err:
+                    err_msg_nv = f"NVIDIA fallback failed: {str(n_err)}"
+                    print(err_msg_nv)
+                    errors.append(err_msg_nv)
+            else:
+                print("NVIDIA NIM is not configured (NVIDIA_API_KEY is missing). Fallback omitted.")
+                
+    elif llm_provider == "nvidia":
         nvidia_key = os.environ.get('NVIDIA_API_KEY', '').strip()
         nvidia_base = os.environ.get('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1').strip()
         nvidia_model = os.environ.get('NVIDIA_MODEL_NAME', '').strip()
-        
-        if not nvidia_key:
-            print("Error: NVIDIA_API_KEY is required for LLM_PROVIDER=nvidia")
-            sys.exit(1)
-        if not nvidia_model:
-            print("Error: NVIDIA_MODEL_NAME is required for LLM_PROVIDER=nvidia")
-            sys.exit(1)
+        try:
+            metadata = call_openai_compatible(
+                "nvidia", topic, niche, script_text, system_prompt, user_prompt,
+                nvidia_base, nvidia_key, nvidia_model
+            )
+            return metadata, "nvidia", None
+        except Exception as e:
+            err_msg = f"NVIDIA failed: {str(e)}"
+            print(err_msg)
+            errors.append(err_msg)
             
-        llm_provider = "openai"
-        openai_key = nvidia_key
-        openai_base_url = nvidia_base
-        openai_model = nvidia_model
-    else:
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        openai_base_url = os.environ.get('OPENAI_BASE_URL', '')
+    elif llm_provider == "openai":
+        openai_key = os.environ.get('OPENAI_API_KEY', '').strip()
+        openai_base = os.environ.get('OPENAI_BASE_URL', '').strip()
         openai_model = os.environ.get('OPENAI_MODEL_NAME', '').strip() or 'gpt-4o-mini'
+        try:
+            metadata = call_openai_compatible(
+                "openai", topic, niche, script_text, system_prompt, user_prompt,
+                openai_base, openai_key, openai_model
+            )
+            return metadata, "openai", None
+        except Exception as e:
+            err_msg = f"OpenAI failed: {str(e)}"
+            print(err_msg)
+            errors.append(err_msg)
+    else:
+        raise Exception(f"Unsupported LLM provider: {llm_provider}")
+        
+    # If we reached here, all attempts failed
+    raise Exception(f"All LLM attempts failed: {'; '.join(errors)}")
 
-    # Autodetect provider if not explicitly configured
-    if not llm_provider:
-        if gemini_key:
-            llm_provider = "gemini"
-        elif openai_key:
-            llm_provider = "openai"
+def main():
+    print("--- Running YouTube Metadata Generator ---")
+    topic = os.environ.get('TOPIC', 'Default Topic')
+    niche = os.environ.get('NICHE', 'general')
+    script_text = os.environ.get('SCRIPT_TEXT', '')
+    
+    metadata_mode = os.environ.get('METADATA_MODE', 'mock').lower()
+    posting_mode = os.environ.get('POSTING_MODE', 'mock').lower()
+    allow_mock_fallback = os.environ.get('ALLOW_MOCK_METADATA_FALLBACK', 'false').lower() == 'true'
+    
+    # Record the requested provider
+    requested_provider = os.environ.get('LLM_PROVIDER', '').strip().lower()
+    if not requested_provider:
+        if os.environ.get('GEMINI_API_KEY'):
+            requested_provider = 'gemini'
+        elif os.environ.get('NVIDIA_API_KEY'):
+            requested_provider = 'nvidia'
         else:
-            print("Error: No API keys configured for LLM. Set OPENAI_API_KEY, GEMINI_API_KEY, or NVIDIA_API_KEY.")
-            sys.exit(1)
-
+            requested_provider = 'gemini'
+            
     system_prompt = (
         "You are an expert YouTube Shorts metadata generator.\n"
         "Generate optimized metadata for a YouTube Short video. Return ONLY a raw JSON object containing the fields below. "
@@ -83,97 +216,66 @@ def generate_real_metadata(topic, niche, script_text):
     user_prompt = f"Topic: {topic}\nNiche: {niche}\n"
     if script_text:
         user_prompt += f"Video Script:\n{script_text}\n"
-
-    try:
-        if llm_provider == "openai":
-            if not openai_key:
-                raise Exception("Missing API key for OpenAI-compatible provider.")
-            print(f"[REAL] Generating metadata using OpenAI-compatible provider ({openai_model})...")
-            url = f"{openai_base_url.rstrip('/')}/chat/completions" if openai_base_url else "https://api.openai.com/v1/chat/completions"
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {openai_key}"
-            }
-            payload = {
-                "model": openai_model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                "response_format": {"type": "json_object"}
-            }
-            res = requests.post(url, headers=headers, json=payload, timeout=30)
-            res.raise_for_status()
-            res_json = res.json()
-            raw_text = res_json["choices"][0]["message"]["content"]
-            
-        elif llm_provider == "gemini":
-            if not gemini_key:
-                raise Exception("Missing GEMINI_API_KEY")
-            print(f"[REAL] Generating metadata using Gemini ({gemini_model})...")
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={gemini_key}"
-            headers = {
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "contents": [
-                    {
-                        "role": "user",
-                        "parts": [
-                            {"text": system_prompt + "\n\n" + user_prompt}
-                        ]
-                    }
-                ],
-                "generationConfig": {
-                    "responseMimeType": "application/json"
-                }
-            }
-            res = requests.post(url, headers=headers, json=payload, timeout=30)
-            res.raise_for_status()
-            res_json = res.json()
-            raw_text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-            
-        else:
-            raise Exception(f"Unsupported LLM provider: {llm_provider}")
-
-        cleaned_text = clean_json_response(raw_text)
-        metadata = json.loads(cleaned_text)
-        return metadata
-
-    except Exception as e:
-        print(f"LLM Metadata Generation failed: {e}. Falling back to mock metadata.")
-        return generate_mock_metadata(topic, niche)
-
-def main():
-    print("--- Running YouTube Metadata Generator ---")
-    topic = os.environ.get('TOPIC', 'Default Topic')
-    niche = os.environ.get('NICHE', 'general')
-    script_text = os.environ.get('SCRIPT_TEXT', '')
+        
+    metadata = {}
+    metadata_status = "mock"
+    metadata_provider_used = "mock"
+    metadata_error = None
     
-    # Check modes
-    metadata_mode = os.environ.get('METADATA_MODE', 'mock').lower()
+    # Decide if mock metadata fallback is allowed
+    allow_fallback = (posting_mode == "mock" or allow_mock_fallback)
     
     if metadata_mode == 'real':
-        metadata = generate_real_metadata(topic, niche, script_text)
+        try:
+            metadata, provider_used, prior_errors = generate_real_metadata(topic, niche, script_text, system_prompt, user_prompt)
+            metadata_status = "success"
+            metadata_provider_used = provider_used
+            metadata_error = prior_errors
+        except Exception as e:
+            full_error = str(e)
+            print(f"Real metadata generation failed: {full_error}")
+            
+            if allow_fallback:
+                print("Falling back to mock metadata generation because fallback is allowed.")
+                metadata = generate_mock_metadata(topic, niche)
+                metadata_status = "fallback"
+                metadata_provider_used = "mock"
+                metadata_error = full_error
+            else:
+                print("Error: Metadata fallback is NOT allowed under the current safety rules.")
+                metadata_final = {
+                    "title": "",
+                    "description": "",
+                    "tags": [],
+                    "hashtags": [],
+                    "categoryId": "22",
+                    "metadata_status": "failed",
+                    "metadata_provider_used": "failed",
+                    "metadata_error": full_error,
+                    "requested_metadata_provider": requested_provider
+                }
+                with open("youtube-metadata.json", "w", encoding="utf-8") as f:
+                    json.dump(metadata_final, f, indent=2)
+                sys.exit(1)
     else:
+        # metadata_mode == 'mock'
         metadata = generate_mock_metadata(topic, niche)
+        metadata_status = "mock"
+        metadata_provider_used = "mock"
+        metadata_error = None
 
-    # Validation and post-processing
+    # Post-processing title/description limits
     title = metadata.get("title", f"Facts about {topic}")
     description = metadata.get("description", "")
     tags = metadata.get("tags", [])
     hashtags = metadata.get("hashtags", [])
     category_id = metadata.get("categoryId", "22")
 
-    # Limit title length
     if len(title) > 100:
         title = title[:97] + "..."
-        
-    # Limit description length
     if len(description) > 5000:
         description = description[:4990] + "..."
 
-    # Ensure #Shorts appears in title or description
     has_shorts = "#shorts" in title.lower() or "#shorts" in description.lower()
     if not has_shorts:
         description += "\n\n#Shorts"
@@ -183,7 +285,11 @@ def main():
         "description": description,
         "tags": tags,
         "hashtags": hashtags,
-        "categoryId": category_id
+        "categoryId": category_id,
+        "metadata_status": metadata_status,
+        "metadata_provider_used": metadata_provider_used,
+        "metadata_error": metadata_error,
+        "requested_metadata_provider": requested_provider
     }
 
     # Write to file
