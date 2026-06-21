@@ -8,6 +8,18 @@ import yaml
 IDEAS_CATALOG = {
     "ai": [
         {
+            "topic": "This AI tool clones any website in one click",
+            "angle": "website cloning automation",
+            "hook": "Stop coding website designs from scratch today.",
+            "curiosity_gap": "This AI website builder clones any design instantly.",
+            "visual_promise": "Type in a URL and watch the entire layout replicate.",
+            "payoff": "Export clean HTML and CSS in seconds.",
+            "keywords": ["website builder", "ai design", "clone website"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
+        },
+        {
             "topic": "3 AI tools to start a side hustle",
             "angle": "side hustle automation",
             "hook": "These 3 AI tools will build a side hustle for you in minutes.",
@@ -307,8 +319,8 @@ def main():
         sys.exit(1)
         
     generated_ideas = []
-    # Build 5 ideas based on catalog
-    for i, catalog_idea in enumerate(catalog_ideas[:5]):
+    # Build all ideas based on catalog
+    for i, catalog_idea in enumerate(catalog_ideas):
         idea = {
             "idea_id": f"idea_{profile_id}_{i+1}",
             "profile_id": profile_id,
