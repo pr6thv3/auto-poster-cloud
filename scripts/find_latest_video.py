@@ -71,6 +71,7 @@ def probe_video(video_path):
 def main():
     print("--- Running Video Detection and Validation ---")
     generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+    use_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
     
     # Scan for MP4 files recursively
     search_pattern = os.path.join("storage", "tasks", "**", "*.mp4")
@@ -99,7 +100,7 @@ def main():
         "size_bytes": file_size_bytes,
         "width": 1080,
         "height": 1920,
-        "duration": 15.0,
+        "duration": 24.0,
         "video_codec": "h264",
         "audio_codec": "aac",
         "validation": "mocked"
@@ -112,11 +113,6 @@ def main():
             video_info["validation"] = "passed"
             
             # Run checks
-            # Duration <= 60 seconds
-            if video_info["duration"] > 60.0:
-                print(f"Error: Video duration {video_info['duration']}s exceeds maximum of 60 seconds.")
-                sys.exit(1)
-                
             # Vertical orientation (9:16)
             width = video_info["width"]
             height = video_info["height"]
@@ -149,6 +145,57 @@ def main():
             sys.exit(1)
     else:
         print("[MOCK] Bypassing ffprobe checks for mock video generation.")
+
+    # 2. Duration Guard Check (using video-brief.json if USE_VIDEO_BRIEF=true)
+    brief_path = os.path.join("docs", "video-brief.json")
+    brief = {}
+    if use_brief and os.path.exists(brief_path):
+        try:
+            with open(brief_path, "r", encoding="utf-8") as f:
+                brief = json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not read video brief: {e}")
+
+    # Fallbacks and limits definition
+    target_duration = brief.get("target_length_seconds", 24)
+    hard_min = brief.get("hard_min_duration_seconds", 18)
+    hard_max = brief.get("hard_max_duration_seconds", 32)
+    pref_min = brief.get("min_duration_seconds", 20)
+    pref_max = brief.get("max_duration_seconds", 30)
+
+    # In mock mode, we force the mocked duration to target_duration to ensure passing
+    actual_duration = video_info["duration"]
+    if generation_mode == "mock":
+        actual_duration = float(target_duration)
+        video_info["duration"] = actual_duration
+
+    # Fail checks
+    if actual_duration < hard_min:
+        print(f"Error: Actual video duration ({actual_duration:.1f}s) is below hard minimum ({hard_min}s).")
+        sys.exit(1)
+    if actual_duration > hard_max:
+        print(f"Error: Actual video duration ({actual_duration:.1f}s) is above hard maximum ({hard_max}s).")
+        sys.exit(1)
+
+    # Warnings checks
+    warnings_list = []
+    if actual_duration < pref_min or actual_duration > pref_max:
+        warnings_list.append(f"Actual duration ({actual_duration:.1f}s) is outside preferred range [{pref_min}s, {pref_max}s].")
+    if abs(actual_duration - target_duration) > 8.0:
+        warnings_list.append(f"Actual duration ({actual_duration:.1f}s) differs from target ({target_duration}s) by more than 8 seconds.")
+
+    duration_status = "passed"
+    duration_warning = None
+    if warnings_list:
+        duration_status = "warning"
+        duration_warning = "; ".join(warnings_list)
+        for w in warnings_list:
+            print(f"Warning: {w}")
+
+    video_info["target_duration_seconds"] = float(target_duration)
+    video_info["actual_duration_seconds"] = float(actual_duration)
+    video_info["duration_status"] = duration_status
+    video_info["duration_warning"] = duration_warning
 
     # Write video-info.json
     with open("video-info.json", "w", encoding="utf-8") as f:

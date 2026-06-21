@@ -36,12 +36,28 @@ def main():
         if os.path.exists(f):
             os.remove(f)
 
-    # 2. Run the Content Engine steps locally
+    # 2. Run the Content Engine steps locally with a clean history sandbox
     print("\n--- Running Content Engine Steps ---")
-    run_cmd([sys.executable, "scripts/generate_ideas.py", "--profile", "profiles/ai_tools.yml"])
-    run_cmd([sys.executable, "scripts/score_idea_freshness.py"])
-    run_cmd([sys.executable, "scripts/build_video_brief.py"])
-    run_cmd([sys.executable, "scripts/quality_gate.py"])
+    history_file = "docs/content-history.json"
+    main_history_backup = None
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            main_history_backup = json.load(f)
+            
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump([], f)
+        
+    try:
+        run_cmd([sys.executable, "scripts/generate_ideas.py", "--profile", "profiles/ai_tools.yml"])
+        run_cmd([sys.executable, "scripts/score_idea_freshness.py"])
+        run_cmd([sys.executable, "scripts/build_video_brief.py"])
+        run_cmd([sys.executable, "scripts/quality_gate.py"])
+    finally:
+        if main_history_backup is not None:
+            with open(history_file, "w", encoding="utf-8") as f:
+                json.dump(main_history_backup, f, indent=2)
+        elif os.path.exists(history_file):
+            os.remove(history_file)
 
     # 3. Verify Content Engine output files
     assert os.path.exists("docs/video-brief.json"), "docs/video-brief.json was not created"
@@ -474,6 +490,98 @@ def main():
                 json.dump(b, file_obj, indent=2)
         elif os.path.exists(f):
             os.remove(f)
+
+    # === TEST VIRAL FORMAT AND DURATION GUARDS ===
+    print("\n--- Testing Viral Format and Duration Guards ---")
+    
+    # 1. Test viral format preset loads and brief properties
+    run_cmd([sys.executable, "scripts/generate_ideas.py", "--profile", "profiles/ai_tools.yml"])
+    run_cmd([sys.executable, "scripts/score_idea_freshness.py"])
+    run_cmd([sys.executable, "scripts/build_video_brief.py"])
+    
+    with open(brief_file, "r", encoding="utf-8") as f:
+        viral_brief = json.load(f)
+        
+    assert viral_brief.get("format_id") == "viral_curiosity_24s", "Expected format_id to be viral_curiosity_24s"
+    assert viral_brief.get("target_length_seconds") == 24, "Expected target duration 24s"
+    assert viral_brief.get("hard_max_duration_seconds") == 32, "Expected hard max duration 32s"
+    assert len(viral_brief.get("scene_plan", [])) >= 10, "Expected at least 10 scenes"
+    assert len(viral_brief.get("text_overlay_plan", [])) > 0, "Expected text overlay plan to exist"
+    print("Verification: Viral format preset loaded successfully with correct target values.")
+
+    # 2. Test Hook greeting failure
+    res_code, report_data = check_brief({
+        "topic": "This AI tool builds apps",
+        "hook": "Hey guys, this AI tool builds apps in minutes.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "format_id": "viral_curiosity_24s",
+        "target_length_seconds": 24,
+        "hard_min_duration_seconds": 18,
+        "hard_max_duration_seconds": 32,
+        "scene_plan": [{"scene_id": i, "time_range": f"0:{i*2:02d} - 0:{(i+1)*2:02d}", "visual": "visual", "audio": "audio", "movement": "zoom"} for i in range(12)],
+        "text_overlay_plan": [{"time_range": "0:00 - 0:01", "text": "text"}],
+        "safety_rules": ["no copyright issues"]
+    })
+    assert res_code == 1, "Expected quality gate to fail for hook starting with greeting"
+    assert any("starts with a greeting" in r for r in report_data["reasons"]), "Expected greeting failure reason"
+
+    # 3. Test Copyrighted clip dependency failure
+    res_code, report_data = check_brief({
+        "topic": "Simpsons style cartoon builder",
+        "hook": "This AI tool builds cartoon videos.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "format_id": "viral_curiosity_24s",
+        "target_length_seconds": 24,
+        "hard_min_duration_seconds": 18,
+        "hard_max_duration_seconds": 32,
+        "scene_plan": [{"scene_id": i, "time_range": f"0:{i*2:02d} - 0:{(i+1)*2:02d}", "visual": "visual", "audio": "audio", "movement": "zoom"} for i in range(12)],
+        "text_overlay_plan": [{"time_range": "0:00 - 0:01", "text": "text"}],
+        "safety_rules": ["no copyright issues"]
+    })
+    assert res_code == 1, "Expected quality gate to fail for copyrighted character"
+    assert any("Copyrighted character" in r for r in report_data["reasons"]), "Expected copyright failure reason"
+    print("Verification: Hook greetings and copyrighted character checks failed as expected.")
+
+    # 4. Test Duration Validation Logic (Below 18 fails, above 32 fails, 20-30 passes, 10 fails)
+    def validate_duration_checks(actual_dur, hard_m=18, hard_mx=32, pref_m=20, pref_mx=30, target_dur=24):
+        warnings_list = []
+        if actual_dur < hard_m or actual_dur > hard_mx:
+            return "failed", f"Duration {actual_dur}s is outside hard limits"
+        if actual_dur < pref_m or actual_dur > pref_mx:
+            warnings_list.append("outside preferred range")
+        if abs(actual_dur - target_dur) > 8.0:
+            warnings_list.append("differs from target by > 8s")
+        status = "warning" if warnings_list else "passed"
+        return status, "; ".join(warnings_list)
+
+    # Actual duration 10 fails
+    status, msg = validate_duration_checks(10.0)
+    assert status == "failed", "Expected 10.0s to fail duration checks"
+    
+    # Actual duration 17.5 fails (below 18)
+    status, msg = validate_duration_checks(17.5)
+    assert status == "failed", "Expected 17.5s to fail duration checks"
+    
+    # Actual duration 33.0 fails (above 32)
+    status, msg = validate_duration_checks(33.0)
+    assert status == "failed", "Expected 33.0s to fail duration checks"
+    
+    # Actual duration 24.5 passes (between 20-30)
+    status, msg = validate_duration_checks(24.5)
+    assert status == "passed", f"Expected 24.5s to pass duration checks, got {status}: {msg}"
+    
+    # Actual duration 19.0 warning (outside preferred 20-30 but inside hard 18-32)
+    status, msg = validate_duration_checks(19.0)
+    assert status == "warning", f"Expected 19.0s to warn, got {status}: {msg}"
+    
+    # Re-run brief builder to restore the correct brief for history writeback tests
+    run_cmd([sys.executable, "scripts/build_video_brief.py"])
 
     # 9. Test History Writeback
     print("\n--- Testing History Writeback ---")

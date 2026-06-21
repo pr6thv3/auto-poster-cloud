@@ -130,6 +130,59 @@ def main():
             except Exception as e:
                 print(f"Warning: Failed to load {quality_path} for summary: {e}")
 
+    # Read viral audit details
+    format_id = "N/A"
+    target_duration_seconds = "N/A"
+    actual_duration_seconds = "N/A"
+    duration_status = "N/A"
+    duration_warning = None
+    scene_count = "N/A"
+    hook_status = "passed"
+    text_overlay_status = "passed"
+    sound_design_status = "passed"
+    viral_format_status = "passed"
+
+    if os.path.exists("video-info.json"):
+        try:
+            with open("video-info.json", "r", encoding="utf-8") as f:
+                v_info = json.load(f)
+                actual_duration_seconds = v_info.get("actual_duration_seconds", "N/A")
+                target_duration_seconds = v_info.get("target_duration_seconds", "N/A")
+                duration_status = v_info.get("duration_status", "N/A")
+                duration_warning = v_info.get("duration_warning", None)
+        except Exception as e:
+            print(f"Warning: Failed to read video-info.json: {e}")
+
+    if os.path.exists("docs/video-brief.json"):
+        try:
+            with open("docs/video-brief.json", "r", encoding="utf-8") as f:
+                v_brief = json.load(f)
+                format_id = v_brief.get("format_id", "N/A")
+                scene_count = len(v_brief.get("scene_plan", []))
+        except Exception as e:
+            print(f"Warning: Failed to read docs/video-brief.json: {e}")
+
+    if os.path.exists("docs/quality-report.json"):
+        try:
+            with open("docs/quality-report.json", "r", encoding="utf-8") as f:
+                q_rep = json.load(f)
+                q_reasons = q_rep.get("reasons", [])
+                q_warnings = q_rep.get("warnings", [])
+                
+                if any("hook" in str(r).lower() or "hook" in str(w).lower() for r in q_reasons for w in q_warnings):
+                    hook_status = "failed" if any("hook" in str(r).lower() for r in q_reasons) else "warning"
+                if any("caption" in str(r).lower() or "overlay" in str(r).lower() or "caption" in str(w).lower() or "overlay" in str(w).lower() for r in q_reasons for w in q_warnings):
+                    text_overlay_status = "failed" if any("caption" in str(r).lower() or "overlay" in str(r).lower() for r in q_reasons) else "warning"
+                if any("sound" in str(r).lower() or "music" in str(r).lower() or "sound" in str(w).lower() or "music" in str(w).lower() for r in q_reasons for w in q_warnings):
+                    sound_design_status = "failed" if any("sound" in str(r).lower() or "music" in str(r).lower() for r in q_reasons) else "warning"
+
+                if q_rep.get("status") == "failed":
+                    viral_format_status = "failed"
+                elif q_rep.get("status") == "warning":
+                    viral_format_status = "warning"
+        except Exception as e:
+            print(f"Warning: Failed to read docs/quality-report.json: {e}")
+
     content_engine_md = ""
     if use_video_brief:
         content_engine_md = f"""
@@ -139,6 +192,23 @@ def main():
 * **Selected Idea**: `{selected_idea}`
 * **Freshness Score**: `{freshness_score}`
 * **Quality Gate Status**: `{quality_status.upper()}`
+
+---
+"""
+
+    viral_format_audit_md = ""
+    if format_id == "viral_curiosity_24s":
+        viral_format_audit_md = f"""
+### 🎬 Viral Format Audit
+* **Format Preset**: `{format_id}`
+* **Target Duration**: `{target_duration_seconds}s`
+* **Actual Duration**: `{actual_duration_seconds}s`
+* **Duration Status**: `{duration_status.upper()}`
+{f"* **Duration Warning**: `{duration_warning}`" if duration_warning else ""}
+* **Scene Count**: `{scene_count}`
+* **Hook Status**: `{hook_status}`
+* **Text Overlay Status**: `{text_overlay_status}`
+* **Sound Design Status**: `{sound_design_status}`
 
 ---
 """
@@ -155,6 +225,7 @@ def main():
 
 ---
 {content_engine_md}
+{viral_format_audit_md}
 ### 🔍 LLM Provider Audit
 
 #### 🎥 Video Generation (MoneyPrinterTurbo)
@@ -233,6 +304,11 @@ def main():
         "selected_idea": selected_idea,
         "freshness_score": freshness_score,
         "quality_status": quality_status,
+        "format_id": format_id,
+        "target_duration_seconds": target_duration_seconds,
+        "actual_duration_seconds": actual_duration_seconds,
+        "duration_status": duration_status,
+        "viral_format_status": viral_format_status,
         "results": platform_results
     }
     try:

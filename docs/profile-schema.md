@@ -68,3 +68,24 @@ This document defines the schema structure used by the Content Engine v1 profile
 - **Type**: List of Strings
 - **Description**: Specific terms, phrases, or clickbait trigger words that are strictly prohibited in the script, title, or tags.
 - **Example**: `["scam", "cheat", "hack", "illegal"]`
+
+### `format_preset`
+- **Type**: String (Path to format YAML file)
+- **Description**: Points to a reusable format configuration preset defining aspect ratios, duration targets, structural beats, overlay, editing rhythm, narration flow, and safety parameters.
+- **Example**: `formats/viral_curiosity_24s.yml`
+
+### `preferred_duration_seconds`
+- **Type**: Integer
+- **Description**: Target duration of the generated video output in seconds.
+- **Example**: `24`
+
+### `hard_min_duration_seconds`
+- **Type**: Integer
+- **Description**: The absolute lower limit for video duration. Values below this trigger a pipeline failure.
+- **Example**: `18`
+
+### `hard_max_duration_seconds`
+- **Type**: Integer
+- **Description**: The absolute upper limit for video duration. Values above this trigger a pipeline failure.
+- **Example**: `32`
+

@@ -25,6 +25,17 @@ def get_outline_duration(outline):
                 pass
     return max_seconds
 
+def get_scene_duration(time_range):
+    parts = time_range.split("-")
+    if len(parts) == 2:
+        try:
+            t1 = parse_time_to_seconds(parts[0].strip())
+            t2 = parse_time_to_seconds(parts[1].strip())
+            return t2 - t1
+        except Exception:
+            pass
+    return 0
+
 def main():
     brief_path = os.path.join("docs", "video-brief.json")
     
@@ -170,7 +181,7 @@ def main():
         hard_max = brief.get("hard_max_duration_seconds", 58)
         
         # Check target length limits
-        if target_length > 58:
+        if target_length > 58 and brief.get("format_id") != "viral_curiosity_24s":
             reasons.append(f"Target length ({target_length}s) is above the maximum allowed duration of 58 seconds.")
             
         outline_duration = get_outline_duration(script_outline)
@@ -192,6 +203,96 @@ def main():
         safe_voice_phrases = ["your own voice", "consent", "permission", "personal voiceover"]
         if not any(phrase in combined_text_lower for phrase in safe_voice_phrases):
             reasons.append("Voice cloning topic/script lacks safety consent/self-use framing. Must include phrases like: 'your own voice', 'consent', 'permission', or 'personal voiceover'.")
+
+    # 8. Viral curiosity format specific validations
+    format_id = brief.get("format_id", "")
+    if format_id == "viral_curiosity_24s":
+        target_len = brief.get("target_length_seconds", 0)
+        hard_max = brief.get("hard_max_duration_seconds", 0)
+        hard_min = brief.get("hard_min_duration_seconds", 0)
+        
+        # Check target length is in preferred 20-30s range
+        if target_len < 20 or target_len > 30:
+            reasons.append(f"Target length ({target_len}s) must be between 20 and 30 seconds for viral format.")
+        
+        # Check hard limits
+        if hard_max > 32:
+            reasons.append(f"Hard max duration ({hard_max}s) cannot exceed 32 seconds for viral format.")
+        if hard_min < 18:
+            reasons.append(f"Hard min duration ({hard_min}s) cannot be below 18 seconds for viral format.")
+            
+        # Hook greetings check
+        greetings = ["hey", "hello", "welcome", "hi", "what's up", "yo "]
+        if any(hook.lower().startswith(g) for g in greetings):
+            reasons.append(f"Hook starts with a greeting: '{hook}'")
+            
+        # Scene plan checks
+        scene_plan = brief.get("scene_plan", [])
+        if len(scene_plan) < 10:
+            reasons.append(f"Scene plan has only {len(scene_plan)} scenes (minimum required for viral format is 10).")
+            
+        has_long_scene = False
+        has_movement_missing = False
+        for s in scene_plan:
+            tr = s.get("time_range", "")
+            dur = get_scene_duration(tr)
+            if dur > 2:
+                has_long_scene = True
+            if not s.get("movement", "").strip():
+                has_movement_missing = True
+                
+        if has_long_scene:
+            reasons.append("One or more scenes have a duration longer than 2 seconds.")
+        if has_movement_missing:
+            reasons.append("One or more scenes are missing movement instructions.")
+            
+        # Text overlay plan checks
+        overlay_plan = brief.get("text_overlay_plan", [])
+        if not overlay_plan:
+            reasons.append("Text overlay plan is missing or empty.")
+        else:
+            long_captions = []
+            for item in overlay_plan:
+                words = item.get("text", "").split()
+                if len(words) > 4:
+                    long_captions.append(item.get("text"))
+            if long_captions:
+                warnings.append(f"Captions too long (some contain more than 4 words: {long_captions[:3]}).")
+                
+        # Narration greetings/filler check
+        fillers = [" um ", " ah ", " basically ", " literally ", " actually ", " like "]
+        combined_audio = " ".join([s.get("audio", "") for s in scene_plan]).lower()
+        if any(f in f" {combined_audio} " for f in fillers):
+            warnings.append("Narration contains filler words (um, ah, basically, literally, etc.).")
+            
+        # Safety rules check
+        safety_rules = brief.get("safety_rules", [])
+        if not safety_rules:
+            reasons.append("Safety rules are missing or empty.")
+            
+        # Copyright check
+        copyright_keywords = ["simpsons", "disney", "fox", "mickey", "marvel", "star wars", "pixar"]
+        found_copyright = []
+        combined_text_to_check = (brief.get("topic", "") + " " + hook + " " + " ".join([s.get("visual", "") for s in scene_plan])).lower()
+        for keyword in copyright_keywords:
+            if keyword in combined_text_to_check:
+                found_copyright.append(keyword)
+        if found_copyright:
+            reasons.append(f"Copyrighted character or clip dependency detected: {found_copyright}")
+            
+        # Warnings for curiosity gap, sound cues, payoff
+        curiosity_gap = brief.get("narration_beats", [""])[1] if len(brief.get("narration_beats", [])) > 1 else ""
+        if not curiosity_gap or len(str(curiosity_gap).strip()) < 5:
+            warnings.append("Weak curiosity gap: No clear curiosity gap defined.")
+            
+        sound_design = brief.get("sound_design", {})
+        transitions = sound_design.get("transitions", [])
+        if not sound_design or len(transitions) < 2:
+            warnings.append("Too few sound cues / transitions defined in sound design.")
+            
+        payoff = brief.get("narration_beats", [""])[3] if len(brief.get("narration_beats", [])) > 3 else ""
+        if not payoff or len(str(payoff).strip()) < 5:
+            warnings.append("Payoff is unclear or missing.")
             
     # Compile Report
     if reasons:
@@ -228,3 +329,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

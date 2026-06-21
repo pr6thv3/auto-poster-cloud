@@ -1,0 +1,62 @@
+format_id: viral_curiosity_24s
+aspect_ratio: "9:16"
+resolution: "1080x1920"
+
+duration:
+  preferred_seconds: 24
+  min_seconds: 20
+  max_seconds: 30
+  hard_min_seconds: 18
+  hard_max_seconds: 32
+
+structure:
+  hook:
+    start: 0
+    end: 3
+    requirement: "instant curiosity, no intro, no greeting"
+  build:
+    start: 3
+    end: 16
+    requirement: "evidence, fast reveals, suspense escalation"
+  payoff:
+    start: 16
+    end: 24
+    requirement: "prediction, reveal, conclusion, or twist"
+
+editing:
+  scene_duration_seconds: "1-2"
+  cut_frequency_seconds: "0.5-1.5"
+  require_constant_motion: true
+  forbid_static_images_longer_than_seconds: 2
+
+text_overlay:
+  style: "large bold center"
+  words_per_overlay: "1-4"
+  update_frequency_seconds: "0.5-1"
+  colors: "white text, black shadow"
+  require_high_contrast: true
+
+narration:
+  style: "short suspense sentences"
+  sentence_length: "3-9 words"
+  no_filler: true
+  no_greetings: true
+  pattern:
+    - claim
+    - evidence
+    - suspense
+    - reveal
+    - question_or_conclusion
+
+sound_design:
+  background: "suspense music"
+  transitions:
+    - whoosh
+    - impact
+    - riser
+  require_audio_feedback_per_scene: true
+
+safety:
+  forbid_copyrighted_clips: true
+  forbid_character_imitation: true
+  forbid_unverified_factual_claims: true

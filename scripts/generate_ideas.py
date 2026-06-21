@@ -10,84 +10,124 @@ IDEAS_CATALOG = {
         {
             "topic": "3 AI tools to start a side hustle",
             "angle": "side hustle automation",
-            "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+            "hook": "These 3 AI tools will build a side hustle for you in minutes.",
+            "curiosity_gap": "But most people are using them completely wrong.",
+            "visual_promise": "We show the exact screen, the generated output, and the earnings dashboard.",
+            "payoff": "Use them today before they become saturated.",
             "keywords": ["side hustle", "ai tools", "make money online"],
-            "format": "list_top_3",
-            "freshness_window_days": 14
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
         },
         {
             "topic": "This AI website writes all your emails",
             "angle": "email productivity",
-            "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds.",
+            "hook": "Stop wasting hours writing emails.",
+            "curiosity_gap": "This free AI website writes them exactly in your voice.",
+            "visual_promise": "Showing a blank email draft auto-filling in one click.",
+            "payoff": "It saves hours and sounds completely human.",
             "keywords": ["write emails", "ai website", "productivity hacks"],
-            "format": "one_tool_highlight",
-            "freshness_window_days": 7
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 7,
+            "risk_flags": []
         },
         {
             "topic": "How to create an AI voiceover using your own voice",
             "angle": "voice cloning tutorial",
-            "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how.",
+            "hook": "Create an AI voiceover using your own voice with consent in seconds.",
+            "curiosity_gap": "But you need to verify your permission first to prevent scams.",
+            "visual_promise": "Record a 10 second audio clip and see it clone instantly.",
+            "payoff": "Safe, consent-based voiceovers are now instant.",
             "keywords": ["personal voiceover", "ai voice", "voice cloning"],
-            "format": "tutorial",
-            "freshness_window_days": 30
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": ["voice_cloning"]
         },
         {
             "topic": "3 AI extensions for Google Chrome you need today",
             "angle": "browser extension recommendations",
-            "hook": "Stop using Chrome normally. These 3 AI Chrome extensions make it smarter.",
+            "hook": "Stop using Google Chrome normally.",
+            "curiosity_gap": "These 3 AI Chrome extensions make it twenty times smarter.",
+            "visual_promise": "Quick cuts showing each extension sidebar activating in Chrome.",
+            "payoff": "They are free to install and change how you browse.",
             "keywords": ["chrome extensions", "google chrome", "ai plugins"],
-            "format": "list_top_3",
-            "freshness_window_days": 14
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
         },
         {
             "topic": "This AI tool generates fully animated videos from text",
             "angle": "text to video animation",
-            "hook": "You can generate fully animated videos just by typing text. Here is how.",
+            "hook": "This AI tool turns text into a full video.",
+            "curiosity_gap": "But the result looks almost unreal.",
+            "visual_promise": "You type one sentence. It builds scenes, captions, and motion.",
+            "payoff": "This could change how creators make Shorts.",
             "keywords": ["text to video", "animated videos", "ai video generator"],
-            "format": "one_tool_highlight",
-            "freshness_window_days": 10
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 10,
+            "risk_flags": []
         }
     ],
     "fifa": [
         {
             "topic": "The 3 most overpowered cheap beasts in FIFA",
             "angle": "cheap squad builders",
-            "hook": "Stop spending millions! These 3 cheap players are absolute cheats in game.",
+            "hook": "Stop spending millions on meta FIFA players.",
+            "curiosity_gap": "These 3 cheap players outperform cards worth millions.",
+            "visual_promise": "Compare card stats and show in-game clip of a crazy goal.",
+            "payoff": "Buy them now before their price skyrockets.",
             "keywords": ["cheap beasts", "fifa squad", "overpowered players"],
-            "format": "list_top_3",
-            "freshness_window_days": 7
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 7,
+            "risk_flags": []
         },
         {
             "topic": "How to score every time using this skill move",
             "angle": "skill move tutorial",
-            "hook": "This simple skill move is completely broken. Here is how to perform it.",
+            "hook": "This simple skill move is completely broken.",
+            "curiosity_gap": "Almost nobody knows the correct trigger timing.",
+            "visual_promise": "Slow motion controller overlay pointing at the analog stick.",
+            "payoff": "Learn this sequence to win every FUT game.",
             "keywords": ["fifa tutorial", "skill move", "score goals"],
-            "format": "skill_tutorials",
-            "freshness_window_days": 14
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
         },
         {
             "topic": "Rate this 500k meta starter squad",
             "angle": "meta squad review",
-            "hook": "This is the best 500k starter squad you can build right now. Let's rate it.",
+            "hook": "This is the best 500k starter squad you can build right now.",
+            "curiosity_gap": "But it has one secret flaw in the midfield.",
+            "visual_promise": "Hovering over squad lineup and highlighting player link lines.",
+            "payoff": "Fix this link, and you have a champion team.",
             "keywords": ["starter squad", "meta players", "squad builder"],
-            "format": "squad_builders",
-            "freshness_window_days": 7
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 7,
+            "risk_flags": []
         },
         {
             "topic": "Is this new player item worth doing?",
             "angle": "sbc player review",
-            "hook": "EA just dropped a new player SBC. Is it actually worth your fodder?",
+            "hook": "EA just dropped a new player SBC.",
+            "curiosity_gap": "Is it actually worth your fodder, or is it a scam?",
+            "visual_promise": "Review player stats and gameplay traits.",
+            "payoff": "Avoid this unless you need the specific team links.",
             "keywords": ["sbc review", "player rating", "meta review"],
-            "format": "player_reviews",
-            "freshness_window_days": 5
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 5,
+            "risk_flags": []
         },
         {
             "topic": "Unbelievable pack luck in the weekend league rewards",
             "angle": "rewards pack opening",
-            "hook": "We just opened the weekend league rewards and you won't believe who we packed.",
+            "hook": "We just opened the weekend league rewards.",
+            "curiosity_gap": "You won't believe who we packed on the very last card.",
+            "visual_promise": "Opening pack animation, board reveal, and walkout.",
+            "payoff": "A million coins player from a free pack.",
             "keywords": ["pack opening", "rewards luck", "meta packing"],
-            "format": "pack_openings",
-            "freshness_window_days": 3
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 3,
+            "risk_flags": []
         }
     ],
     "cricket": [
@@ -178,42 +218,62 @@ IDEAS_CATALOG = {
         {
             "topic": "Apple announces the brand new iPhone 18",
             "angle": "product launch coverage",
-            "hook": "Apple just announced the new iPhone 18, and it features a major design change.",
+            "hook": "Apple just announced the new iPhone 18.",
+            "curiosity_gap": "And it features a major design change that shocks fans.",
+            "visual_promise": "Show mockups of the new screen layout and cameras.",
+            "payoff": "This could redefine standard phone design.",
             "keywords": ["iphone 18", "apple launch", "new iphone"],
-            "format": "product_launches",
-            "freshness_window_days": 7
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 7,
+            "risk_flags": []
         },
         {
             "topic": "Google drops its new open source AI model",
             "angle": "tech breakthroughs",
-            "hook": "Google just released a brand new AI model that runs locally on your phone.",
+            "hook": "Google just released a brand new AI model.",
+            "curiosity_gap": "It runs completely locally on your phone without internet.",
+            "visual_promise": "Demo showing instant text responses offline.",
+            "payoff": "A massive win for secure personal assistants.",
             "keywords": ["google ai", "local model", "tech breakthrough"],
-            "format": "tech_breakthroughs",
-            "freshness_window_days": 10
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 10,
+            "risk_flags": []
         },
         {
             "topic": "Change these 3 settings to protect your data now",
             "angle": "user privacy alerts",
-            "hook": "Your phone is spying on you. Change these 3 privacy settings immediately.",
+            "hook": "Your phone is spying on you.",
+            "curiosity_gap": "Change these 3 privacy settings immediately.",
+            "visual_promise": "Scrolling through iOS or Android privacy menus.",
+            "payoff": "Keep your private data secure from third-party trackers.",
             "keywords": ["data privacy", "phone settings", "security alerts"],
-            "format": "privacy_alerts",
-            "freshness_window_days": 30
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": []
         },
         {
             "topic": "The AI startup CEO drama explained",
             "angle": "industry news and drama",
-            "hook": "There is a massive boardroom fight happening at a top AI company. Here is what happened.",
+            "hook": "There is a massive boardroom fight happening at a top AI company.",
+            "curiosity_gap": "Here is what happened behind closed doors.",
+            "visual_promise": "Timeline showing fired executives and employee letters.",
+            "payoff": "The future of the company remains highly unstable.",
             "keywords": ["tech drama", "ceo fired", "industry news"],
-            "format": "industry_news",
-            "freshness_window_days": 7
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 7,
+            "risk_flags": []
         },
         {
             "topic": "How quantum computing will change encryption",
             "angle": "tech breakthroughs",
-            "hook": "Quantum computers are coming. Will they break all of our passwords?",
+            "hook": "Quantum computers are coming.",
+            "curiosity_gap": "Will they break all of our passwords in seconds?",
+            "visual_promise": "Animations explaining qubits and encryption keys.",
+            "payoff": "We need post-quantum security protocols ready today.",
             "keywords": ["quantum computing", "encryption", "future tech"],
-            "format": "tech_breakthroughs",
-            "freshness_window_days": 60
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 60,
+            "risk_flags": []
         }
     ]
 }
@@ -257,7 +317,11 @@ def main():
             "hook": catalog_idea["hook"],
             "keywords": catalog_idea["keywords"],
             "format": catalog_idea["format"],
-            "freshness_window_days": catalog_idea["freshness_window_days"]
+            "freshness_window_days": catalog_idea["freshness_window_days"],
+            "curiosity_gap": catalog_idea.get("curiosity_gap", ""),
+            "visual_promise": catalog_idea.get("visual_promise", ""),
+            "payoff": catalog_idea.get("payoff", ""),
+            "risk_flags": catalog_idea.get("risk_flags", [])
         }
         generated_ideas.append(idea)
         

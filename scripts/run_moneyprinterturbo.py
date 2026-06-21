@@ -54,6 +54,21 @@ def main():
         topic_brief += f"- Style Rules: {', '.join(brief['voice_style'].get('style_rules', []))}\n"
         topic_brief += f"Target Length: {brief['target_length_seconds']} seconds\n"
         
+        if brief.get("format_id") == "viral_curiosity_24s":
+            topic_brief += "\n=== STRICT VIRAL SHORTS REQUIREMENTS ===\n"
+            topic_brief += "Create a 20–30 second vertical Shorts video.\n"
+            topic_brief += "Use this exact structure:\n"
+            topic_brief += "0–3s: instant hook (no intro, no greetings)\n"
+            topic_brief += "3–16s: suspense/evidence buildup (fast reveal, escalation)\n"
+            topic_brief += "16–24s: reveal/payoff (twist/conclusion/prediction)\n"
+            topic_brief += "Use 12–18 fast scenes. Each scene should last 1–2 seconds.\n"
+            topic_brief += "Use constant movement and avoid static images.\n"
+            topic_brief += "Use large center-screen text overlays with 1-4 words per overlay.\n"
+            topic_brief += "Use short narration sentences (3-9 words each).\n"
+            topic_brief += "Do not include intros, logos, greetings, or filler words.\n"
+            topic_brief += "Avoid copyrighted characters or logos.\n"
+            topic_brief += "CRITICAL: Do not make the final video shorter than 20 seconds. Do not make the final video longer than 30 seconds.\n"
+            
         topic = topic_brief
 
 
@@ -135,15 +150,25 @@ subtitle_provider = "edge"
             sys.executable, "-m", "pip", "install", "-r", os.path.join(repo_dir, "requirements.txt")
         ], check=True)
         
+        # Determine paragraph count dynamically
+        paragraph_number = "1"
+        if use_video_brief:
+            target_len = brief.get("target_length_seconds", 48)
+            format_id = brief.get("format_id", "")
+            if format_id == "viral_curiosity_24s" or target_len < 30:
+                paragraph_number = "3"
+            elif target_len >= 45:
+                paragraph_number = "4"
+                
         # 4. Run CLI script
-        print("[REAL] Executing MoneyPrinterTurbo CLI...")
+        print(f"[REAL] Executing MoneyPrinterTurbo CLI with paragraph_number={paragraph_number}...")
         cmd = [
             sys.executable,
             "cli.py",
             "--video-subject", topic,
             "--video-language", "en-US",
             "--voice-name", "en-US-AndrewNeural",
-            "--paragraph-number", "1"
+            "--paragraph-number", paragraph_number
         ]
         subprocess.run(cmd, cwd=repo_dir, check=True)
         
