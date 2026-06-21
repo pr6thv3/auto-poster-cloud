@@ -6,5 +6,10 @@ compatibility_date = "2024-05-02"
 [triggers]
 crons = [ "30 3 * * *", "30 8 * * *", "30 13 * * *" ]
 
-# Note: All configuration variables (GITHUB_OWNER, GITHUB_REPO, GITHUB_WORKFLOW_FILE, 
-# GITHUB_DISPATCH_TOKEN, WORKER_TRIGGER_SECRET) must be set as Cloudflare Worker Secrets.
+[vars]
+GITHUB_OWNER = "pr6thv3"
+GITHUB_REPO = "auto-poster-cloud"
+GITHUB_WORKFLOW_FILE = "generate-youtube-short.yml"
+ENABLE_CRON = "false"
+ALLOW_LIVE_CRON = "false"
+ALLOW_PUBLIC_CRON = "false"
