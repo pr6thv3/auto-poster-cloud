@@ -130,6 +130,10 @@ export default {
     return new Response('Method Not Allowed', { status: 405 });
   },
   async scheduled(event, env, ctx) {
+    if (env.ENABLE_CRON !== 'true') {
+      console.log('Cron is disabled (ENABLE_CRON is not true). Returning early.');
+      return;
+    }
     ctx.waitUntil(handleScheduled(env));
   }
 };
