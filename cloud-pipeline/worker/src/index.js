@@ -450,17 +450,24 @@ function serveHTML(token) {
       resultCard.style.display = 'none';
 
       const formData = new FormData(form);
+      const tokenVal = formData.get('token');
 
       try {
-        const response = await fetch('/run', {
+        const response = await fetch('/run?token=' + encodeURIComponent(tokenVal), {
           method: 'POST',
           headers: {
-            'Authorization': 'Bearer ' + formData.get('token')
+            'Authorization': 'Bearer ' + tokenVal
           },
           body: formData
         });
 
-        const result = await response.json();
+        let result = {};
+        const contentType = response.headers.get('Content-Type') || '';
+        if (contentType.includes('application/json')) {
+          result = await response.json();
+        } else {
+          result = { status: 'error', message: await response.text() };
+        }
         
         if (response.ok && result.status === 'success') {
           resultCard.className = 'result-card success';
@@ -471,7 +478,12 @@ function serveHTML(token) {
           \`;
         } else {
           resultCard.className = 'result-card error';
-          resultCard.innerHTML = \`<strong>Error:</strong> \${result.message || 'Trigger failed'}\`;
+          resultCard.innerHTML = \`
+            <strong>Error (Status \${response.status}):</strong> \${result.message || 'Trigger failed'}<br>
+            <small style="color: var(--text-muted); display: block; margin-top: 8px; font-size: 11px;">
+              Repo: pr6thv3/auto-poster-cloud | Branch: main | Workflow: generate-youtube-short.yml
+            </small>
+          \`;
         }
       } catch (err) {
         resultCard.className = 'result-card error';
