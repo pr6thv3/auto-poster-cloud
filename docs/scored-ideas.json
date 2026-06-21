@@ -1,0 +1,89 @@
+[
+  {
+    "idea_id": "idea_ai_tools_1",
+    "profile_id": "ai_tools",
+    "topic": "3 AI tools to start a side hustle",
+    "angle": "side hustle automation",
+    "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+    "keywords": [
+      "side hustle",
+      "ai tools",
+      "make money online"
+    ],
+    "format": "list_top_3",
+    "freshness_window_days": 14,
+    "freshness_score": 100,
+    "penalties": [],
+    "selected": true
+  },
+  {
+    "idea_id": "idea_ai_tools_2",
+    "profile_id": "ai_tools",
+    "topic": "This AI website writes all your emails",
+    "angle": "email productivity",
+    "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds.",
+    "keywords": [
+      "write emails",
+      "ai website",
+      "productivity hacks"
+    ],
+    "format": "one_tool_highlight",
+    "freshness_window_days": 7,
+    "freshness_score": 100,
+    "penalties": [],
+    "selected": false
+  },
+  {
+    "idea_id": "idea_ai_tools_3",
+    "profile_id": "ai_tools",
+    "topic": "How to clone your voice with AI for free",
+    "angle": "voice cloning tutorial",
+    "hook": "You can clone your own voice with AI in under 60 seconds. Here is how.",
+    "keywords": [
+      "voice cloning",
+      "ai voice",
+      "free tutorial"
+    ],
+    "format": "tutorial",
+    "freshness_window_days": 30,
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches 2nd most recent video format 'tutorial' (-15)"
+    ],
+    "selected": false
+  },
+  {
+    "idea_id": "idea_ai_tools_4",
+    "profile_id": "ai_tools",
+    "topic": "3 AI extensions for Google Chrome you need today",
+    "angle": "browser extension recommendations",
+    "hook": "If you aren't using these 3 Google Chrome extensions, you're working too hard.",
+    "keywords": [
+      "chrome extensions",
+      "google chrome",
+      "ai plugins"
+    ],
+    "format": "list_top_3",
+    "freshness_window_days": 14,
+    "freshness_score": 100,
+    "penalties": [],
+    "selected": false
+  },
+  {
+    "idea_id": "idea_ai_tools_5",
+    "profile_id": "ai_tools",
+    "topic": "This AI tool generates fully animated videos from text",
+    "angle": "text to video animation",
+    "hook": "You can generate fully animated videos just by typing text. Here is how.",
+    "keywords": [
+      "text to video",
+      "animated videos",
+      "ai video generator"
+    ],
+    "format": "one_tool_highlight",
+    "freshness_window_days": 10,
+    "freshness_score": 100,
+    "penalties": [],
+    "selected": false
+  }
+]

@@ -1,0 +1,45 @@
+profile_id: ai_tools
+display_name: "AI Tools & Productivity Hacks"
+niche: ai
+tone:
+  - energetic
+  - educational
+  - fast-paced
+audience:
+  - content creators
+  - tech-savvy professionals
+  - developers
+  - general tech enthusiasts
+content_types:
+  - list_top_3
+  - one_tool_highlight
+  - tutorial
+avoid:
+  - outdated tool versions
+  - overly technical jargon
+  - promo code scams
+  - generic hype with no actual utility
+style:
+  visuals:
+    - high hook focus (first 3 seconds)
+    - caption animations
+    - screen recordings of the tools in action
+  audio:
+    - voiceover first
+    - upbeat, electronic background music
+sources:
+  - ProductHunt
+  - HackerNews
+  - Reddit r/ArtificialInteligence
+  - tech news sites
+safety_rules:
+  - no financial advice or investment claims
+  - verify tool legality (e.g. no scrape/bypass tools that violate terms of service)
+  - disclose sponsored tools if applicable
+  - keep video length under 60 seconds
+banned_words:
+  - scam
+  - cheat
+  - hack
+  - illegal
+  - loophole

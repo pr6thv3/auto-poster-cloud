@@ -1,0 +1,43 @@
+profile_id: fifa
+display_name: "FIFA Meta & Squad Builders"
+niche: fifa
+tone:
+  - hyped
+  - competitive
+  - engaging
+audience:
+  - FIFA gamers
+  - football fans
+  - Gen Z gaming enthusiasts
+content_types:
+  - squad_builders
+  - pack_openings
+  - skill_tutorials
+  - player_reviews
+avoid:
+  - boring commentary
+  - toxic gaming behavior
+  - fake leaks or rumors
+  - unsupported speculation about game mechanics
+style:
+  visuals:
+    - pack opening glow effects
+    - zoom-ins on player stats
+    - controller overlays for tutorials
+  audio:
+    - high energy commentary
+    - upbeat gaming beats
+sources:
+  - Futbin
+  - FIFA subreddits
+  - EA Sports official announcements
+safety_rules:
+  - do not promote coin selling sites
+  - respect fair play guidelines
+  - avoid copyrighted music
+  - keep video length under 60 seconds
+banned_words:
+  - coin seller
+  - glitch
+  - exploit
+  - hack

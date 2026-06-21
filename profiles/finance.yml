@@ -1,0 +1,45 @@
+profile_id: finance
+display_name: "Smart Wealth & Finance Hacks"
+niche: finance
+tone:
+  - professional
+  - authoritative
+  - encouraging
+audience:
+  - young adults
+  - career starters
+  - side hustlers
+  - general public interested in saving money
+content_types:
+  - saving_tips
+  - side_hustle_guides
+  - tax_hacks
+  - budgeting_methods
+avoid:
+  - get-rich-quick schemes
+  - specific stock recommendations
+  - crypto speculative hyping
+  - complex financial derivatives jargon
+style:
+  visuals:
+    - green/sleek color accents
+    - simple, clear graphs/charts
+    - bullet point overlays
+  audio:
+    - clear, steady voiceover
+    - lo-fi, focused background beats
+sources:
+  - Investopedia
+  - reputable financial news portals
+  - government tax sites (e.g. IRS guidelines)
+safety_rules:
+  - must display "Not Financial Advice" warning overlay
+  - do not promise guaranteed returns or get-rich-quick results
+  - do not link to unverified financial platforms
+  - keep video length under 60 seconds
+banned_words:
+  - guaranteed profit
+  - get rich quick
+  - 100x return
+  - buy this stock
+  - to the moon

@@ -1,0 +1,43 @@
+profile_id: tech_news
+display_name: "Daily Tech Breakdown"
+niche: tech_news
+tone:
+  - objective
+  - crisp
+  - conversational
+audience:
+  - tech-savvy consumers
+  - developers
+  - general public interested in future tech
+content_types:
+  - product_launches
+  - tech_breakthroughs
+  - privacy_alerts
+  - industry_news
+avoid:
+  - clickbait rumors
+  - unsubstantiated product hype
+  - reading boring spec lists without context
+style:
+  visuals:
+    - headline-style text overlay
+    - side-by-side product footage comparison
+    - quick cuts to keep engagement high
+  audio:
+    - quick, news-broadcaster pacing
+    - subtle sound effects (e.g. keyboard typing) under background music
+sources:
+  - TechCrunch
+  - The Verge
+  - Engadget
+  - Wired
+safety_rules:
+  - verify news from at least two sources before compiling
+  - protect user privacy by not displaying sensitive user details in screenshots
+  - avoid defamation or commercial bias
+  - keep video length under 60 seconds
+banned_words:
+  - leak confirmed
+  - shocking truth
+  - mind blown
+  - strictly confidential

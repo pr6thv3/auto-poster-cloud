@@ -1,0 +1,42 @@
+profile_id: cricket
+display_name: "Cricket Stats & Legends"
+niche: cricket
+tone:
+  - analytical
+  - passionate
+  - informative
+audience:
+  - cricket fans globally
+  - fantasy sports players
+  - sports history enthusiasts
+content_types:
+  - stats_comparison
+  - match_predictions
+  - legend_tributes
+  - trivia
+avoid:
+  - biased/one-sided team opinions
+  - clickbait stats
+  - toxic fan wars
+style:
+  visuals:
+    - player comparison tables
+    - stats highlight circles
+    - clean, readable subtitle text
+  audio:
+    - professional broadcasting tone
+    - subtle crowd cheer effects under music
+sources:
+  - ESPNcricinfo
+  - Cricbuzz
+  - ICC official records
+safety_rules:
+  - do not promote illegal betting or gambling platforms
+  - respect player privacy
+  - verify stats before posting
+  - keep video length under 60 seconds
+banned_words:
+  - betting
+  - gamble
+  - fixed
+  - rigged
