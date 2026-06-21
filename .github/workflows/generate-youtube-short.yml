@@ -66,6 +66,12 @@ on:
         required: false
         default: "false"
         type: string
+      allow_mock_history:
+        description: "Allow writing history on mock upload (true, false)"
+        required: false
+        default: "false"
+        type: string
+
 
 
 permissions:
@@ -216,6 +222,26 @@ jobs:
           git config --global user.email "actions@github.com"
           git add docs/content-queue.json
           git commit -m "Update queue item ${{ github.event.inputs.queue_item_id }} [skip ci]" || echo "No changes to commit"
+          if [ -n "${{ secrets.GITHUB_DISPATCH_TOKEN }}" ]; then
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_DISPATCH_TOKEN }}@github.com/${{ github.repository }}.git
+          else
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          fi
+          git push origin main || echo "Failed to push updates"
+
+      - name: Update Content History in Repository
+        if: always() && github.event.inputs.use_video_brief == 'true' && steps.post-youtube.outputs.youtube_status == 'success'
+        env:
+          USE_VIDEO_BRIEF: ${{ github.event.inputs.use_video_brief }}
+          POSTING_MODE: ${{ github.event.inputs.posting_mode }}
+          GENERATION_MODE: ${{ github.event.inputs.generation_mode }}
+          ALLOW_MOCK_HISTORY: ${{ github.event.inputs.allow_mock_history || 'false' }}
+        run: |
+          python scripts/update_content_history.py
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add docs/content-history.json
+          git commit -m "Update content history [skip ci]" || echo "No changes to commit"
           if [ -n "${{ secrets.GITHUB_DISPATCH_TOKEN }}" ]; then
             git remote set-url origin https://x-access-token:${{ secrets.GITHUB_DISPATCH_TOKEN }}@github.com/${{ github.repository }}.git
           else

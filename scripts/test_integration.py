@@ -120,6 +120,59 @@ def main():
 
     print("Verification: step-summary-mock.md contains the correct Content Engine Audit markdown section!")
 
+    # 9. Test History Writeback
+    print("\n--- Testing History Writeback ---")
+    
+    # Save original content history
+    history_file = "docs/content-history.json"
+    original_history = []
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            original_history = json.load(f)
+            
+    # Create a mock youtube-result.json
+    yt_mock_res = {
+        "youtube_video_id": "mock_test_video_999",
+        "youtube_status": "success",
+        "youtube_error": ""
+    }
+    with open("youtube-result.json", "w", encoding="utf-8") as f:
+        json.dump(yt_mock_res, f)
+        
+    # (a) Run with ALLOW_MOCK_HISTORY=false (should skip writeback)
+    env_no_history = env.copy()
+    env_no_history["ALLOW_MOCK_HISTORY"] = "false"
+    run_cmd([sys.executable, "scripts/update_content_history.py"], env_override=env_no_history)
+    
+    # Verify no change occurred
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            current_history = json.load(f)
+        assert len(current_history) == len(original_history), "History was modified when ALLOW_MOCK_HISTORY=false!"
+    print("Verification: History writeback skipped mock upload successfully by default.")
+
+    # (b) Run with ALLOW_MOCK_HISTORY=true (should write back)
+    env_with_history = env.copy()
+    env_with_history["ALLOW_MOCK_HISTORY"] = "true"
+    run_cmd([sys.executable, "scripts/update_content_history.py"], env_override=env_with_history)
+    
+    # Verify change occurred and mock video ID is recorded
+    with open(history_file, "r", encoding="utf-8") as f:
+        current_history = json.load(f)
+    assert len(current_history) == len(original_history) + 1, "History was not updated when ALLOW_MOCK_HISTORY=true!"
+    assert current_history[-1]["youtube_video_id"] == "mock_test_video_999", "Incorrect video ID in written history!"
+    assert current_history[-1]["idea_id"] == brief["idea_id"], "Incorrect idea ID in written history!"
+    print("Verification: History writeback wrote mock upload successfully when ALLOW_MOCK_HISTORY=true.")
+
+    # Restore original content history
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(original_history, f, indent=2)
+    print("Restored original docs/content-history.json.")
+
+    # Clean up mock youtube result
+    if os.path.exists("youtube-result.json"):
+        os.remove("youtube-result.json")
+
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 
 if __name__ == '__main__':
