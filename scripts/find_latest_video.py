@@ -73,13 +73,38 @@ def main():
     generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
     use_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
     
+    storyboard_path = os.path.join("docs", "retention-storyboard.json")
+    is_retention_format = False
+    if os.path.exists(storyboard_path):
+        try:
+            with open(storyboard_path, "r", encoding="utf-8") as f:
+                sb = json.load(f)
+            if sb.get("format_id") == "viral_retention_engine_24s":
+                is_retention_format = True
+        except Exception:
+            pass
+
     # Scan for MP4 files recursively
-    search_pattern = os.path.join("storage", "tasks", "**", "*.mp4")
+    if is_retention_format:
+        search_pattern = os.path.join("storage", "tasks", "**", "*final-retention.mp4")
+    else:
+        search_pattern = os.path.join("storage", "tasks", "**", "*.mp4")
     files = glob.glob(search_pattern, recursive=True)
     
     if not files:
-        print("Error: No video files found in storage/tasks/")
-        sys.exit(1)
+        if is_retention_format and generation_mode == "real":
+            print("Error: final-retention.mp4 not found for retention format run in real mode.")
+            sys.exit(1)
+        elif is_retention_format:
+            print("Warning: final-retention.mp4 not found. Falling back to general .mp4 search in mock mode.")
+            fallback_pattern = os.path.join("storage", "tasks", "**", "*.mp4")
+            files = [f for f in glob.glob(fallback_pattern, recursive=True) if not f.endswith("final-retention.mp4")]
+            if not files:
+                print("Error: No video files found in storage/tasks/")
+                sys.exit(1)
+        else:
+            print("Error: No video files found in storage/tasks/")
+            sys.exit(1)
         
     # Sort files by modification time, newest first
     files.sort(key=os.path.getmtime, reverse=True)

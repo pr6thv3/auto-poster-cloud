@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import datetime
+import glob
 
 def main():
     print("--- Running GitHub Actions Job Summary ---")
@@ -192,6 +193,14 @@ def main():
     retention_copyright_status = "passed"
     retention_format_status = "skipped"
 
+    retention_postprocess_status = "skipped"
+    final_video_source = "raw_mpt"
+    subtitle_mode_disabled = False
+    avg_overlay_duration = "N/A"
+    contact_sheet_path = "N/A"
+    format_fidelity_status = "skipped"
+    manual_review_required = True
+
     if retention_storyboard_exists:
         retention_format_status = "passed"
         try:
@@ -201,6 +210,46 @@ def main():
                 retention_overlay_count = len(sb_data.get("text_overlays", []))
         except Exception as e:
             print(f"Warning: Failed to load docs/retention-storyboard.json: {e}")
+
+        # Determine average overlay duration
+        if retention_overlay_count != "N/A" and int(retention_overlay_count) > 0:
+            avg_overlay_duration = f"{24.0 / int(retention_overlay_count):.2f}s"
+        else:
+            avg_overlay_duration = "N/A"
+
+        # Determine if subtitle mode is disabled in logs
+        log_path = "moneyprinter-log.txt"
+        if os.path.exists(log_path):
+            try:
+                with open(log_path, "r", encoding="utf-8") as f:
+                    log_content = f.read()
+                if "--no-subtitle-enabled" in log_content:
+                    subtitle_mode_disabled = True
+            except Exception:
+                pass
+
+        # Determine final video source
+        if "final-retention.mp4" in video_path:
+            final_video_source = "final_retention"
+
+        # Determine postprocess status
+        if os.path.exists(video_path) and video_path.endswith("final-retention.mp4"):
+            retention_postprocess_status = "success"
+
+        # Contact sheet path
+        if os.path.exists("docs/retention-contact-sheet.jpg"):
+            contact_sheet_path = "docs/retention-contact-sheet.jpg"
+
+        # Format fidelity status
+        if retention_postprocess_status == "success":
+            task_dir = os.path.dirname(video_path)
+            srt_files = glob.glob(os.path.join(task_dir, "*.srt")) if task_dir else []
+            if not srt_files:
+                format_fidelity_status = "passed"
+            else:
+                format_fidelity_status = "failed"
+        else:
+            format_fidelity_status = "failed"
 
         if os.path.exists("docs/quality-report.json"):
             try:
@@ -263,18 +312,19 @@ def main():
 ---
 """
 
-    retention_format_audit_md = ""
+    retention_fidelity_audit_md = ""
     if retention_storyboard_exists:
-        retention_format_audit_md = f"""
-### ⚡ Retention Format Audit
-* **Storyboard Detected**: `true`
-* **Format ID**: `viral_retention_engine_24s`
-* **Storyboard Scenes**: `{retention_scene_count}`
-* **Text Overlays**: `{retention_overlay_count}`
-* **Motion Guard**: `{retention_motion_status.upper()}`
-* **Sound Cue Guard**: `{retention_sound_status.upper()}`
-* **Copyright Guard**: `{retention_copyright_status.upper()}`
-* **Retention Format Status**: `{retention_format_status.upper()}`
+        retention_fidelity_audit_md = f"""
+### ⚡ Retention Fidelity Audit
+* **Retention Post-process Status**: `{retention_postprocess_status.upper()}`
+* **Final Video Source**: `{final_video_source}`
+* **Subtitle Mode Disabled**: `{str(subtitle_mode_disabled).lower()}`
+* **Overlay Count**: `{retention_overlay_count}`
+* **Scene Count**: `{retention_scene_count}`
+* **Average Overlay Duration**: `{avg_overlay_duration}`
+* **Contact Sheet Path**: `{contact_sheet_path}`
+* **Format Fidelity Status**: `{format_fidelity_status.upper()}`
+* **Manual Review Required**: `true`
 
 ---
 """
@@ -292,7 +342,7 @@ def main():
 ---
 {content_engine_md}
 {viral_format_audit_md}
-{retention_format_audit_md}
+{retention_fidelity_audit_md}
 ### 🔍 LLM Provider Audit
 
 #### 🎥 Video Generation (MoneyPrinterTurbo)
@@ -382,6 +432,13 @@ def main():
         "retention_motion_status": retention_motion_status,
         "retention_sound_status": retention_sound_status,
         "retention_copyright_status": retention_copyright_status,
+        "retention_postprocess_status": retention_postprocess_status,
+        "final_video_source": final_video_source,
+        "subtitle_mode_disabled": subtitle_mode_disabled,
+        "avg_overlay_duration": float(avg_overlay_duration.replace("s", "")) if avg_overlay_duration != "N/A" else 0.5,
+        "contact_sheet_path": contact_sheet_path,
+        "format_fidelity_status": format_fidelity_status,
+        "manual_review_required": True,
         "results": platform_results
     }
     try:

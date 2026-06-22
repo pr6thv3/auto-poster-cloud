@@ -203,6 +203,12 @@ jobs:
         run: |
           python scripts/find_latest_video.py
 
+      - name: Validate Retention Format
+        env:
+          GENERATION_MODE: ${{ github.event.inputs.generation_mode }}
+        run: |
+          python scripts/validate_retention_format.py
+
       - name: Upload to Cloudflare R2 (Optional)
         id: upload-r2
         continue-on-error: true
@@ -308,6 +314,8 @@ jobs:
             docs/scored-ideas.json
             docs/video-brief.json
             docs/quality-report.json
+            docs/retention-storyboard.json
+            docs/retention-contact-sheet.jpg
 
       - name: Run R2 Cleanup (Mock)
         if: always()

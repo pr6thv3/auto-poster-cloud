@@ -46,6 +46,7 @@ def main():
         "docs/scored-ideas.json",
         "docs/video-brief.json",
         "docs/quality-report.json",
+        "docs/retention-storyboard.json",
         "youtube-metadata.json",
         "run-log.json",
         "platform-results.json",
@@ -70,6 +71,7 @@ def main():
         run_cmd([sys.executable, "scripts/generate_ideas.py", "--profile", "profiles/ai_tools.yml"])
         run_cmd([sys.executable, "scripts/score_idea_freshness.py"])
         run_cmd([sys.executable, "scripts/build_video_brief.py"])
+        run_cmd([sys.executable, "scripts/build_retention_storyboard.py"])
         run_cmd([sys.executable, "scripts/quality_gate.py"])
     finally:
         if main_history_backup is not None:
@@ -811,7 +813,7 @@ def main():
         # 3. Test Copyright failure on storyboard
         bad_sb = sb_backup.copy()
         bad_scenes = [s.copy() for s in sb_backup["scenes"]]
-        bad_scenes[0]["visual"] = "Visual showing mickey mouse on screen"
+        bad_scenes[0]["visual_prompt"] = "Visual showing mickey mouse on screen"
         bad_sb["scenes"] = bad_scenes
         res_code, report_data = check_storyboard(bad_sb)
         assert res_code == 1, "Expected storyboard quality gate to fail for copyrighted character"
@@ -826,14 +828,15 @@ def main():
 
         # 5. Test Overlay word count failure on storyboard
         bad_sb = sb_backup.copy()
-        bad_sb["text_overlays"] = [{"time_range": "0:00 - 0:01", "text": "ONE TWO THREE FOUR FIVE"}]
+        bad_sb["text_overlays"] = [{"start_time": 0.0, "end_time": 1.0, "text": "ONE TWO THREE FOUR FIVE"}]
         res_code, report_data = check_storyboard(bad_sb)
         assert res_code == 1, "Expected storyboard quality gate to fail for text overlay words > 4"
         assert any("overlay has more than 4 words" in r for r in report_data["reasons"]), "Expected overlay length failure reason"
 
         # 6. Test Scene count failure on storyboard
         bad_sb = sb_backup.copy()
-        bad_sb["scenes"] = sb_backup["scenes"][:10]
+        bad_scenes = [s.copy() for s in sb_backup["scenes"]]
+        bad_sb["scenes"] = bad_scenes[:10]
         res_code, report_data = check_storyboard(bad_sb)
         assert res_code == 1, "Expected storyboard quality gate to fail for scene count < 14"
         assert any("scene count" in r.lower() and "below" in r.lower() for r in report_data["reasons"]), "Expected scene count failure reason"
@@ -841,7 +844,7 @@ def main():
         # 7. Test Static scene failure on storyboard
         bad_sb = sb_backup.copy()
         bad_scenes = [s.copy() for s in sb_backup["scenes"]]
-        bad_scenes[0]["movement"] = ""
+        bad_scenes[0]["motion_instruction"] = ""
         bad_sb["scenes"] = bad_scenes
         res_code, report_data = check_storyboard(bad_sb)
         assert res_code == 1, "Expected storyboard quality gate to fail for missing camera motion"
@@ -862,7 +865,7 @@ def main():
         
     run_cmd([sys.executable, "scripts/apply_retention_postprocess.py"])
     
-    expected_retention_mp4 = "storage/tasks/mock-task/test-dummy-retention.mp4"
+    expected_retention_mp4 = "storage/tasks/mock-task/final-retention.mp4"
     assert os.path.exists(expected_retention_mp4), "Mock post-processed output was not created!"
     
     if os.path.exists(test_mock_mp4):
@@ -871,6 +874,83 @@ def main():
         os.remove(expected_retention_mp4)
         
     print("Verification: Post-processing script handled mock input and fallbacks gracefully.")
+
+    # === TEST CONTENT ENGINE V1.8 SPECIFIC CHECKS ===
+    print("\n--- Testing Content Engine v1.8 Formats and Validator ---")
+    
+    # 9. Blacklist check in storyboard query builder
+    from build_retention_storyboard import sanitize_text
+    assert "follow" in sanitize_text("please subscribe to my channel").lower()
+    assert "modern desk workspace" in sanitize_text("working in a random office").lower()
+    print("Verification: Blacklist sanitization functions correctly.")
+
+    # 10. Test format validation success/failure cases
+    # Setup a valid video-info.json for validation testing
+    test_video_info = {
+        "video_path": "storage/tasks/mock-task/final-retention.mp4",
+        "duration": 24.0,
+        "width": 1080,
+        "height": 1920
+    }
+    with open("video-info.json", "w", encoding="utf-8") as f:
+        json.dump(test_video_info, f, indent=2)
+
+    # Re-create mock files
+    os.makedirs("storage/tasks/mock-task", exist_ok=True)
+    with open("storage/tasks/mock-task/final-retention.mp4", "wb") as f:
+        f.write(b"0" * 150000)
+
+    # Create logs with disable subtitle mode flag
+    with open("moneyprinter-log.txt", "w", encoding="utf-8") as f:
+        f.write("Executing MoneyPrinterTurbo cli.py with --no-subtitle-enabled flag")
+
+    # Run validation (should pass)
+    res_val = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"})
+    assert res_val.returncode == 0, f"Expected validator to pass on valid storyboard and logs, got code {res_val.returncode}"
+    assert os.path.exists("docs/retention-contact-sheet.jpg"), "Contact sheet was not generated!"
+
+    # Test Duplicate subtitle mode failure (if .srt exists in task directory)
+    with open("storage/tasks/mock-task/subtitles.srt", "w", encoding="utf-8") as f:
+        f.write("1\n00:00:01,000 --> 00:00:03,000\nHello World")
+
+    res_val_srt = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], capture_output=True, text=True)
+    assert res_val_srt.returncode == 1, "Expected validator to fail when .srt exists in task directory"
+    assert "Bottom subtitles are not allowed" in res_val_srt.stdout or "Bottom subtitles are not allowed" in res_val_srt.stderr
+
+    # Clean up .srt file
+    os.remove("storage/tasks/mock-task/subtitles.srt")
+
+    # Test Subscribe overlay failure
+    bad_sb = sb_backup.copy()
+    bad_sb["text_overlays"] = [o.copy() for o in sb_backup["text_overlays"]]
+    bad_sb["text_overlays"][0]["text"] = "SUBSCRIBE NOW"
+    with open(storyboard_path, "w", encoding="utf-8") as f:
+        json.dump(bad_sb, f, indent=2)
+    res_val_sub = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], capture_output=True, text=True)
+    assert res_val_sub.returncode == 1, "Expected validator to fail for forbidden word 'subscribe' in overlay"
+    assert "contains forbidden word" in res_val_sub.stdout or "contains forbidden word" in res_val_sub.stderr
+
+    # Test Overlay word count failure
+    bad_sb = sb_backup.copy()
+    bad_sb["text_overlays"] = [o.copy() for o in sb_backup["text_overlays"]]
+    bad_sb["text_overlays"][0]["text"] = "ONE TWO THREE FOUR FIVE"
+    with open(storyboard_path, "w", encoding="utf-8") as f:
+        json.dump(bad_sb, f, indent=2)
+    res_val_word = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], capture_output=True, text=True)
+    assert res_val_word.returncode == 1, "Expected validator to fail for text overlay words > 4"
+    assert "more than 4 words" in res_val_word.stdout or "more than 4 words" in res_val_word.stderr
+
+    # Restore storyboard
+    with open(storyboard_path, "w", encoding="utf-8") as f:
+        json.dump(sb_backup, f, indent=2)
+
+    # Clean up test task directory files and temporary test logs
+    if os.path.exists("storage/tasks/mock-task/final-retention.mp4"):
+        os.remove("storage/tasks/mock-task/final-retention.mp4")
+    if os.path.exists("docs/retention-contact-sheet.jpg"):
+        os.remove("docs/retention-contact-sheet.jpg")
+    if os.path.exists("moneyprinter-log.txt"):
+        os.remove("moneyprinter-log.txt")
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 

@@ -377,11 +377,11 @@ def main():
                     dur = get_scene_duration(tr)
                     if dur > 1.5:
                         has_long_scene = True
-                    if not s.get("movement", "").strip():
+                    if not s.get("motion_instruction", "").strip():
                         has_missing_motion = True
-                    if not s.get("sfx", "").strip():
+                    if not s.get("sound_cue", "").strip():
                         has_missing_sound = True
-                    if not s.get("role", "").strip():
+                    if not s.get("reaction_or_reveal_type", "").strip():
                         has_missing_role = True
                         
                 if has_long_scene:
@@ -429,7 +429,7 @@ def main():
                 # Copyright checks
                 copyright_keywords = ["simpsons", "disney", "fox", "mickey", "marvel", "star wars", "pixar"]
                 found_copyright = []
-                combined_sb_text = (combined_sb_audio + " " + sb_hook + " " + " ".join([s.get("visual", "") for s in sb_scenes])).lower()
+                combined_sb_text = (combined_sb_audio + " " + sb_hook + " " + " ".join([s.get("visual_prompt", "") for s in sb_scenes])).lower()
                 for keyword in copyright_keywords:
                     if keyword in combined_sb_text:
                         found_copyright.append(keyword)

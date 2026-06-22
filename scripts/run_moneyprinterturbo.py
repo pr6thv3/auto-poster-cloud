@@ -9,6 +9,7 @@ def main():
     title = os.environ.get('TITLE', 'Default Title')
     mock_mode = os.environ.get('MOCK_MODE', 'true').lower() == 'true'
     use_video_brief = os.environ.get('USE_VIDEO_BRIEF', 'false').lower() == 'true'
+    format_id = ""
 
     print(f"--- Running MoneyPrinterTurbo Integration ---")
     print(f"Topic: {topic}")
@@ -24,6 +25,7 @@ def main():
         try:
             with open(brief_path, "r", encoding="utf-8") as f:
                 brief = json.load(f)
+                format_id = brief.get("format_id", "")
         except Exception as e:
             print(f"Error: video-brief.json is invalid: {e} (USE_VIDEO_BRIEF=true)")
             sys.exit(1)
@@ -216,7 +218,7 @@ subtitle_provider = "edge"
         if use_video_brief:
             target_len = brief.get("target_length_seconds", 48)
             format_id = brief.get("format_id", "")
-            if format_id == "viral_curiosity_24s" or target_len < 30:
+            if format_id in ["viral_curiosity_24s", "viral_retention_engine_24s"] or target_len < 30:
                 paragraph_number = "3"
             elif target_len >= 45:
                 paragraph_number = "4"
@@ -231,6 +233,8 @@ subtitle_provider = "edge"
             "--voice-name", "en-US-AndrewNeural",
             "--paragraph-number", paragraph_number
         ]
+        if format_id == "viral_retention_engine_24s":
+            cmd.append("--no-subtitle-enabled")
         subprocess.run(cmd, cwd=repo_dir, check=True)
         
         # 5. Locate the generated output and copy it to our storage directory
