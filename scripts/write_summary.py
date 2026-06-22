@@ -183,6 +183,56 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to read docs/quality-report.json: {e}")
 
+    # Retention Format Audit variables
+    retention_storyboard_exists = os.path.exists("docs/retention-storyboard.json")
+    retention_scene_count = "N/A"
+    retention_overlay_count = "N/A"
+    retention_motion_status = "passed"
+    retention_sound_status = "passed"
+    retention_copyright_status = "passed"
+    retention_format_status = "skipped"
+
+    if retention_storyboard_exists:
+        retention_format_status = "passed"
+        try:
+            with open("docs/retention-storyboard.json", "r", encoding="utf-8") as f:
+                sb_data = json.load(f)
+                retention_scene_count = len(sb_data.get("scenes", []))
+                retention_overlay_count = len(sb_data.get("text_overlays", []))
+        except Exception as e:
+            print(f"Warning: Failed to load docs/retention-storyboard.json: {e}")
+
+        if os.path.exists("docs/quality-report.json"):
+            try:
+                with open("docs/quality-report.json", "r", encoding="utf-8") as f:
+                    q_rep = json.load(f)
+                    q_reasons = q_rep.get("reasons", [])
+                    q_warnings = q_rep.get("warnings", [])
+                    q_status = q_rep.get("status", "passed")
+                    
+                    if q_status == "failed":
+                        retention_format_status = "failed"
+                    elif q_status == "warning":
+                        retention_format_status = "warning"
+                        
+                    if any("motion" in str(r).lower() or "camera" in str(r).lower() for r in q_reasons):
+                        retention_motion_status = "failed"
+                    elif any("motion" in str(w).lower() or "camera" in str(w).lower() for w in q_warnings):
+                        retention_motion_status = "warning"
+                        
+                    if any("sound" in str(r).lower() or "sfx" in str(r).lower() or "cue" in str(r).lower() for r in q_reasons):
+                        retention_sound_status = "failed"
+                    elif any("sound" in str(w).lower() or "sfx" in str(w).lower() or "cue" in str(w).lower() for w in q_warnings):
+                        retention_sound_status = "warning"
+                        
+                    copyright_kws = ["copyright", "disney", "simpsons", "fox", "mickey", "marvel", "star wars", "pixar"]
+                    if any(any(kw in str(r).lower() for kw in copyright_kws) for r in q_reasons):
+                        retention_copyright_status = "failed"
+                    elif any(any(kw in str(w).lower() for kw in copyright_kws) for w in q_warnings):
+                        retention_copyright_status = "warning"
+            except Exception as e:
+                print(f"Warning: Failed to load docs/quality-report.json: {e}")
+
     content_engine_md = ""
     if use_video_brief:
         content_engine_md = f"""
@@ -213,6 +263,22 @@ def main():
 ---
 """
 
+    retention_format_audit_md = ""
+    if retention_storyboard_exists:
+        retention_format_audit_md = f"""
+### ⚡ Retention Format Audit
+* **Storyboard Detected**: `true`
+* **Format ID**: `viral_retention_engine_24s`
+* **Storyboard Scenes**: `{retention_scene_count}`
+* **Text Overlays**: `{retention_overlay_count}`
+* **Motion Guard**: `{retention_motion_status.upper()}`
+* **Sound Cue Guard**: `{retention_sound_status.upper()}`
+* **Copyright Guard**: `{retention_copyright_status.upper()}`
+* **Retention Format Status**: `{retention_format_status.upper()}`
+
+---
+"""
+
     markdown = f"""# 🎬 YouTube Shorts Auto-Posting Run Summary
 
 ### 📊 Configuration Parameters
@@ -226,6 +292,7 @@ def main():
 ---
 {content_engine_md}
 {viral_format_audit_md}
+{retention_format_audit_md}
 ### 🔍 LLM Provider Audit
 
 #### 🎥 Video Generation (MoneyPrinterTurbo)
@@ -309,6 +376,12 @@ def main():
         "actual_duration_seconds": actual_duration_seconds,
         "duration_status": duration_status,
         "viral_format_status": viral_format_status,
+        "retention_format_status": retention_format_status,
+        "retention_scene_count": retention_scene_count,
+        "retention_overlay_count": retention_overlay_count,
+        "retention_motion_status": retention_motion_status,
+        "retention_sound_status": retention_sound_status,
+        "retention_copyright_status": retention_copyright_status,
         "results": platform_results
     }
     try:

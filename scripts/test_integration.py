@@ -18,6 +18,25 @@ def run_cmd(args, env_override=None):
         print("stdout:", res.stdout)
     return res
 
+def parse_time_to_seconds(time_str):
+    parts = time_str.split(":")
+    if len(parts) == 2:
+        return int(parts[0]) * 60 + int(parts[1])
+    elif len(parts) == 3:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+    return 0
+
+def get_scene_duration(time_range):
+    parts = time_range.split("-")
+    if len(parts) == 2:
+        try:
+            t1 = parse_time_to_seconds(parts[0].strip())
+            t2 = parse_time_to_seconds(parts[1].strip())
+            return t2 - t1
+        except Exception:
+            pass
+    return 0
+
 def main():
     print("=== STARTING LOCAL INTEGRATION TESTS ===")
 
@@ -616,6 +635,8 @@ def main():
     
     # Re-run brief builder to restore the correct brief for history writeback tests
     run_cmd([sys.executable, "scripts/build_video_brief.py"])
+    with open(brief_file, "r", encoding="utf-8") as f:
+        brief = json.load(f)
 
     # 9. Test History Writeback
     print("\n--- Testing History Writeback ---")
@@ -737,6 +758,119 @@ def main():
     with open(history_file, "w", encoding="utf-8") as f:
         json.dump(original_history_for_analytics, f, indent=2)
     print("Verification: Analytics loop testing passed and content history restored.")
+
+    # === TEST RETENTION STORYBOARD AND POST-PROCESSING ===
+    print("\n--- Testing Retention Storyboard and Post-Processing ---")
+    
+    # 1. Test Storyboard Generation
+    run_cmd([sys.executable, "scripts/build_retention_storyboard.py"])
+    storyboard_path = "docs/retention-storyboard.json"
+    assert os.path.exists(storyboard_path), "Retention storyboard was not generated!"
+    
+    with open(storyboard_path, "r", encoding="utf-8") as f:
+        storyboard = json.load(f)
+        
+    assert storyboard.get("format_id") == "viral_retention_engine_24s", "Expected format_id to be viral_retention_engine_24s"
+    assert 14 <= len(storyboard["scenes"]) <= 24, f"Expected 14-24 scenes, got {len(storyboard['scenes'])}"
+    
+    for s in storyboard["scenes"]:
+        dur = get_scene_duration(s["time_range"])
+        assert dur <= 1.5, f"Scene duration {dur}s exceeds 1.5s max: {s['time_range']}"
+        
+    for o in storyboard["text_overlays"]:
+        words = o["text"].split()
+        assert 1 <= len(words) <= 4, f"Text overlay words count {len(words)} outside [1, 4]: '{o['text']}'"
+        
+    assert len(storyboard.get("hook_0_3s", "").strip()) > 0, "Hook missing or empty in storyboard"
+    assert len(storyboard.get("sound_cues", [])) > 0, "No sound cues found in storyboard"
+    for sc in storyboard["sound_cues"]:
+        assert sc.get("effect"), "Sound cue effect is empty"
+    assert len(storyboard.get("camera_motion", [])) > 0, "No camera motion cues found in storyboard"
+    
+    print("Verification: Retention storyboard generated successfully with valid format specs.")
+
+    # Backup the valid storyboard
+    sb_backup = storyboard.copy()
+
+    def check_storyboard(sb_data):
+        with open(storyboard_path, "w", encoding="utf-8") as f:
+            json.dump(sb_data, f, indent=2)
+        res = subprocess.run([sys.executable, "scripts/quality_gate.py"], capture_output=True, text=True)
+        with open("docs/quality-report.json", "r", encoding="utf-8") as f:
+            report_data = json.load(f)
+        return res.returncode, report_data
+
+    try:
+        # 2. Test Hook greeting failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_sb["hook_0_3s"] = "Hey this is my hook"
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for hook starting with greeting"
+        assert any("starts with a greeting" in r for r in report_data["reasons"]), "Expected greeting failure reason"
+
+        # 3. Test Copyright failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_scenes = [s.copy() for s in sb_backup["scenes"]]
+        bad_scenes[0]["visual"] = "Visual showing mickey mouse on screen"
+        bad_sb["scenes"] = bad_scenes
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for copyrighted character"
+        assert any("copyrighted character" in r.lower() or "disney" in r.lower() for r in report_data["reasons"]), "Expected copyright failure reason"
+
+        # 4. Test Filler words failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_sb["narration_script"] = ["Step 1.", "Basically this is a test.", "Step 2."]
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for filler words"
+        assert any("contains filler words" in r for r in report_data["reasons"]), "Expected filler words failure reason"
+
+        # 5. Test Overlay word count failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_sb["text_overlays"] = [{"time_range": "0:00 - 0:01", "text": "ONE TWO THREE FOUR FIVE"}]
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for text overlay words > 4"
+        assert any("overlay has more than 4 words" in r for r in report_data["reasons"]), "Expected overlay length failure reason"
+
+        # 6. Test Scene count failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_sb["scenes"] = sb_backup["scenes"][:10]
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for scene count < 14"
+        assert any("scene count" in r.lower() and "below" in r.lower() for r in report_data["reasons"]), "Expected scene count failure reason"
+
+        # 7. Test Static scene failure on storyboard
+        bad_sb = sb_backup.copy()
+        bad_scenes = [s.copy() for s in sb_backup["scenes"]]
+        bad_scenes[0]["movement"] = ""
+        bad_sb["scenes"] = bad_scenes
+        res_code, report_data = check_storyboard(bad_sb)
+        assert res_code == 1, "Expected storyboard quality gate to fail for missing camera motion"
+        assert any("missing camera motion" in r for r in report_data["reasons"]), "Expected static scene failure reason"
+
+    finally:
+        # Restore the valid storyboard
+        with open(storyboard_path, "w", encoding="utf-8") as f:
+            json.dump(sb_backup, f, indent=2)
+            
+    print("Verification: Storyboard quality gate validations failed and warned as expected.")
+
+    # 8. Test Post-processing script fallback and execution
+    os.makedirs("storage/tasks/mock-task", exist_ok=True)
+    test_mock_mp4 = "storage/tasks/mock-task/test-dummy.mp4"
+    with open(test_mock_mp4, "wb") as f:
+        f.write(b"0" * 500)
+        
+    run_cmd([sys.executable, "scripts/apply_retention_postprocess.py"])
+    
+    expected_retention_mp4 = "storage/tasks/mock-task/test-dummy-retention.mp4"
+    assert os.path.exists(expected_retention_mp4), "Mock post-processed output was not created!"
+    
+    if os.path.exists(test_mock_mp4):
+        os.remove(test_mock_mp4)
+    if os.path.exists(expected_retention_mp4):
+        os.remove(expected_retention_mp4)
+        
+    print("Verification: Post-processing script handled mock input and fallbacks gracefully.")
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 

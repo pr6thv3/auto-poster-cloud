@@ -1,0 +1,84 @@
+format_id: viral_retention_engine_24s
+
+video:
+  aspect_ratio: "9:16"
+  resolution: "1080x1920"
+  target_seconds: 24
+  preferred_min_seconds: 20
+  preferred_max_seconds: 30
+  hard_min_seconds: 18
+  hard_max_seconds: 32
+
+hook:
+  start: 0
+  end: 3
+  rules:
+    - no greeting
+    - no intro
+    - no logo
+    - start with shock, mystery, prediction, contradiction, or hidden truth
+    - first sentence must create curiosity
+
+story_structure:
+  beats:
+    - claim
+    - evidence
+    - suspense_build
+    - reveal_or_prediction
+    - final_question_or_twist
+
+visual_layer:
+  scene_count_min: 14
+  scene_count_max: 24
+  scene_duration_min_seconds: 0.7
+  scene_duration_max_seconds: 1.5
+  require_constant_motion: true
+  require_reaction_shots: true
+  require_zoom_or_camera_motion: true
+  forbid_static_images_longer_than_seconds: 1.5
+
+text_overlay:
+  required: true
+  placement: center
+  style: large_bold_white_black_shadow
+  max_words_per_overlay: 4
+  overlay_change_frequency_seconds: 0.5
+  require_word_by_word_punch: true
+  forbid_paragraph_captions: true
+
+narration:
+  sentence_min_words: 2
+  sentence_max_words: 9
+  no_filler: true
+  no_pauses: true
+  style:
+    - suspense
+    - direct
+    - fast
+    - curiosity_driven
+
+editing:
+  cut_frequency_seconds: "0.5-1.5"
+  require_pattern:
+    - visual
+    - text
+    - zoom
+    - reaction
+    - text
+    - reveal
+  require_audio_feedback_per_cut: true
+
+sound_design:
+  background_music: suspense_riser
+  effects:
+    - whoosh
+    - impact
+    - hit
+    - riser
+  require_scene_transition_sfx: true
+
+safety:
+  forbid_copyrighted_clips: true
+  forbid_named_character_imitation: true
+  forbid_logos: true
+  forbid_unverified_claims: true

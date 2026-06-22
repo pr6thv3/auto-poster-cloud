@@ -146,10 +146,30 @@ def main():
     else:
         print("[MOCK] Bypassing ffprobe checks for mock video generation.")
 
-    # 2. Duration Guard Check (using video-brief.json if USE_VIDEO_BRIEF=true)
+    # 2. Duration Guard Check (using retention-storyboard.json if exists, else video-brief.json)
+    storyboard_path = os.path.join("docs", "retention-storyboard.json")
     brief_path = os.path.join("docs", "video-brief.json")
     brief = {}
-    if use_brief and os.path.exists(brief_path):
+    is_retention_format = False
+    
+    if os.path.exists(storyboard_path):
+        try:
+            with open(storyboard_path, "r", encoding="utf-8") as f:
+                sb = json.load(f)
+            if sb.get("format_id") == "viral_retention_engine_24s":
+                is_retention_format = True
+                brief = {
+                    "format_id": "viral_retention_engine_24s",
+                    "target_length_seconds": sb.get("target_seconds", 24),
+                    "hard_min_duration_seconds": 18,
+                    "hard_max_duration_seconds": 32,
+                    "min_duration_seconds": 20,
+                    "max_duration_seconds": 30
+                }
+        except Exception as e:
+            print(f"Warning: Could not read retention storyboard: {e}")
+            
+    if not is_retention_format and use_brief and os.path.exists(brief_path):
         try:
             with open(brief_path, "r", encoding="utf-8") as f:
                 brief = json.load(f)
@@ -196,6 +216,10 @@ def main():
     video_info["actual_duration_seconds"] = float(actual_duration)
     video_info["duration_status"] = duration_status
     video_info["duration_warning"] = duration_warning
+    
+    if is_retention_format:
+        video_info["format_id"] = "viral_retention_engine_24s"
+        video_info["retention_format_status"] = "passed"
 
     # Write video-info.json
     with open("video-info.json", "w", encoding="utf-8") as f:

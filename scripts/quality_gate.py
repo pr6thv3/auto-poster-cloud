@@ -341,6 +341,126 @@ def main():
             if not has_override:
                 reasons.append(f"Unsafe cloning/copying phrasing detected in {field_name}: '{val}' without safe override terms.")
 
+
+    # 10. Retention Storyboard validations (Phase 3)
+    storyboard_path = os.path.join("docs", "retention-storyboard.json")
+    if os.path.exists(storyboard_path):
+        try:
+            with open(storyboard_path, "r", encoding="utf-8") as f:
+                sb = json.load(f)
+                
+            sb_format = sb.get("format_id", "")
+            if sb_format == "viral_retention_engine_24s":
+                sb_scenes = sb.get("scenes", [])
+                sb_overlays = sb.get("text_overlays", [])
+                sb_camera = sb.get("camera_motion", [])
+                sb_sound = sb.get("sound_cues", [])
+                sb_edit = sb.get("edit_cues", [])
+                sb_narration = sb.get("narration_script", [])
+                sb_safety = sb.get("safety_notes", [])
+                sb_hook = sb.get("hook_0_3s", "").strip()
+                
+                # Check scene count limits
+                scene_count = len(sb_scenes)
+                if scene_count < 14:
+                    reasons.append(f"Storyboard scene count ({scene_count}) is below the required 14 scenes.")
+                if scene_count < 18:
+                    warnings.append(f"Storyboard scene count ({scene_count}) is below the preferred 18 scenes.")
+                    
+                # Check scene duration limits
+                has_long_scene = False
+                has_missing_motion = False
+                has_missing_sound = False
+                has_missing_role = False
+                for s in sb_scenes:
+                    tr = s.get("time_range", "")
+                    dur = get_scene_duration(tr)
+                    if dur > 1.5:
+                        has_long_scene = True
+                    if not s.get("movement", "").strip():
+                        has_missing_motion = True
+                    if not s.get("sfx", "").strip():
+                        has_missing_sound = True
+                    if not s.get("role", "").strip():
+                        has_missing_role = True
+                        
+                if has_long_scene:
+                    reasons.append("Storyboard has one or more scenes with a duration exceeding 1.5 seconds.")
+                if has_missing_motion or not sb_camera:
+                    reasons.append("Storyboard has one or more scenes missing camera motion instructions.")
+                if has_missing_sound or not sb_sound:
+                    reasons.append("Storyboard has one or more scenes missing sound cue effects.")
+                if has_missing_role:
+                    reasons.append("Storyboard has one or more scenes missing story beat role assignments.")
+                    
+                # Check text overlays limit
+                if not sb_overlays:
+                    reasons.append("Storyboard has an empty or missing text overlay plan.")
+                else:
+                    long_overlays = []
+                    for item in sb_overlays:
+                        w_count = len(item.get("text", "").split())
+                        if w_count > 4:
+                            long_overlays.append(item.get("text"))
+                    if long_overlays:
+                        reasons.append(f"Storyboard text overlay has more than 4 words: {long_overlays[:3]}")
+                        
+                # Hook timing check
+                if not sb_hook:
+                    reasons.append("Storyboard hook_0_3s field is missing or empty.")
+                else:
+                    greetings = ["hey", "hello", "welcome", "hi", "what's up", "yo "]
+                    if any(sb_hook.lower().startswith(g) for g in greetings):
+                        reasons.append(f"Storyboard hook starts with a greeting: '{sb_hook}'")
+                        
+                # Exact word matching for greetings/fillers in narration script
+                combined_sb_audio = " ".join(sb_narration).lower()
+                words_list = combined_sb_audio.split()
+                greetings_words = {"hey", "hello", "welcome", "hi", "yo"}
+                found_greetings = [w for w in words_list if w.strip(",.!?") in greetings_words]
+                if found_greetings:
+                    reasons.append(f"Storyboard narration contains greeting words: {found_greetings}")
+                    
+                fillers_words = {"um", "ah", "basically", "literally", "actually", "like"}
+                found_fillers = [w for w in words_list if w.strip(",.!?") in fillers_words]
+                if found_fillers:
+                    reasons.append(f"Storyboard narration contains filler words: {found_fillers}")
+                    
+                # Copyright checks
+                copyright_keywords = ["simpsons", "disney", "fox", "mickey", "marvel", "star wars", "pixar"]
+                found_copyright = []
+                combined_sb_text = (combined_sb_audio + " " + sb_hook + " " + " ".join([s.get("visual", "") for s in sb_scenes])).lower()
+                for keyword in copyright_keywords:
+                    if keyword in combined_sb_text:
+                        found_copyright.append(keyword)
+                if found_copyright:
+                    reasons.append(f"Storyboard copyrighted character, clip, or logo dependency detected: {found_copyright}")
+                    
+                # Check sound cue density
+                if len(sb_sound) < (scene_count / 2):
+                    warnings.append(f"Sound cues ({len(sb_sound)}) are fewer than half of scene count ({scene_count // 2}).")
+                    
+                # Check overlay repetition
+                repeat_count = 0
+                for idx in range(len(sb_overlays) - 1):
+                    t1 = sb_overlays[idx].get("text", "")
+                    t2 = sb_overlays[idx+1].get("text", "")
+                    if t1 == t2 and t1 != "":
+                        repeat_count += 1
+                if repeat_count > 5:
+                    warnings.append(f"Too many text overlays repeat consecutively (repeat count: {repeat_count}).")
+                    
+                # Warn if payoff/curiosity gap is weak in narration script
+                sb_payoff = brief.get("payoff", "")
+                sb_curiosity = brief.get("curiosity_gap", "")
+                if not sb_payoff or len(str(sb_payoff).strip()) < 5:
+                    warnings.append("Storyboard payoff is unclear or missing in brief.")
+                if not sb_curiosity or len(str(sb_curiosity).strip()) < 5:
+                    warnings.append("Storyboard curiosity gap is weak or missing in brief.")
+                    
+        except Exception as e:
+            reasons.append(f"Error validating retention storyboard: {e}")
+
     # Compile Report
     if reasons:
         status = "failed"

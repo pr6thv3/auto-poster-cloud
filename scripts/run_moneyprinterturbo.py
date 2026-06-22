@@ -37,45 +37,98 @@ def main():
             
         print(f"Loaded video brief successfully. Profile ID: {brief['profile_id']}")
         
-        # Override the topic parameter with a detailed prompt constructed from the brief
-        topic_brief = f"Topic: {brief['topic']}\n"
-        topic_brief += f"Hook: {brief['hook']}\n"
-        topic_brief += "Script Outline:\n"
-        for line in brief['script_outline']:
-            topic_brief += f"- {line}\n"
-        topic_brief += "Scene Plan:\n"
-        for scene in brief['scene_plan']:
-            time_range = scene.get('time_range', '')
-            visual = scene.get('visual', '')
-            audio = scene.get('audio', '')
-            topic_brief += f"- [{time_range}] Visual: {visual} | Audio: {audio}\n"
-        topic_brief += "Voice Style / Tone:\n"
-        topic_brief += f"- Tone: {', '.join(brief['voice_style'].get('tone', []))}\n"
-        topic_brief += f"- Style Rules: {', '.join(brief['voice_style'].get('style_rules', []))}\n"
-        topic_brief += f"Target Length: {brief['target_length_seconds']} seconds\n"
-        
-        if brief.get("format_id") == "viral_curiosity_24s":
-            topic_brief += "\n=== STRICT VIRAL SHORTS REQUIREMENTS ===\n"
-            topic_brief += "Create a 20–30 second vertical Shorts video.\n"
-            topic_brief += "Use this exact structure:\n"
-            topic_brief += "0–3s: instant hook (no intro, no greetings)\n"
-            topic_brief += "3–16s: suspense/evidence buildup (fast reveal, escalation)\n"
-            topic_brief += "16–24s: reveal/payoff (twist/conclusion/prediction)\n"
-            topic_brief += "Use 12–18 fast scenes. Each scene should last 1–2 seconds.\n"
-            topic_brief += "Use constant movement and avoid static images.\n"
-            topic_brief += "Use large center-screen text overlays with 1-4 words per overlay.\n"
-            topic_brief += "Use short narration sentences (3-9 words each).\n"
-            topic_brief += "Do not include intros, logos, greetings, or filler words.\n"
-            topic_brief += "Avoid copyrighted characters or logos.\n"
-            topic_brief += "CRITICAL: Do not make the final video shorter than 20 seconds. Do not make the final video longer than 30 seconds.\n"
+        # Check if retention storyboard exists and use it as primary prompt source
+        storyboard_path = os.path.join("docs", "retention-storyboard.json")
+        loaded_sb = False
+        if os.path.exists(storyboard_path):
+            try:
+                with open(storyboard_path, "r", encoding="utf-8") as f:
+                    sb = json.load(f)
+                
+                print("Loaded retention storyboard successfully for MoneyPrinterTurbo prompt.")
+                loaded_sb = True
+                
+                topic_brief = "Create a 24-second vertical viral short.\n\n"
+                topic_brief += "This must feel like a fast social media retention edit.\n\n"
+                topic_brief += "Hard requirements:\n"
+                topic_brief += "- 9:16 vertical\n"
+                topic_brief += "- 20–30 seconds\n"
+                topic_brief += "- 14–24 fast scenes\n"
+                topic_brief += "- cuts every 0.5–1.5 seconds\n"
+                topic_brief += "- constant motion\n"
+                topic_brief += "- dramatic zooms\n"
+                topic_brief += "- reaction shots\n"
+                topic_brief += "- large center text overlays\n"
+                topic_brief += "- 1–4 words per overlay\n"
+                topic_brief += "- suspense music\n"
+                topic_brief += "- whoosh/impact/riser transition sounds\n"
+                topic_brief += "- no intro\n"
+                topic_brief += "- no greeting\n"
+                topic_brief += "- no logo\n"
+                topic_brief += "- no static images\n"
+                topic_brief += "- no copyrighted characters or logos\n\n"
+                
+                topic_brief += "Exact Storyboard:\n"
+                for s in sb.get("scenes", []):
+                    topic_brief += f"Scene {s.get('scene_id')}:\n"
+                    topic_brief += f"- Time Range: {s.get('time_range')}\n"
+                    topic_brief += f"- Visual Description (No Copyrighted Material): {s.get('visual')}\n"
+                    topic_brief += f"- Narration: {s.get('audio')}\n"
+                    topic_brief += f"- Motion/Zoom Cue: {s.get('movement')}\n"
+                    topic_brief += f"- Sound Cue (SFX): {s.get('sfx')}\n"
+                    topic_brief += f"- Role: {s.get('role')}\n\n"
+                    
+                target_len = sb.get("target_seconds", 24)
+                min_words = int(target_len * 2.2)
+                max_words = int(target_len * 2.7)
+                topic_brief += f"=== SCRIPT LENGTH REQUIREMENT ===\n"
+                topic_brief += f"The generated script MUST contain between {min_words} and {max_words} words to align with the target video duration of {target_len} seconds.\n"
+                topic_brief += "Do not write a short script under 50 words! Expand the narration dynamically.\n"
+                
+            except Exception as e:
+                print(f"Warning: Could not read retention storyboard: {e}. Falling back to brief prompt.")
+                loaded_sb = False
 
-        # Dynamic word count guard to prevent short video generation
-        target_len = brief.get("target_length_seconds", 24)
-        min_words = int(target_len * 2.2)
-        max_words = int(target_len * 2.7)
-        topic_brief += f"\n=== SCRIPT LENGTH REQUIREMENT ===\n"
-        topic_brief += f"The generated script MUST contain between {min_words} and {max_words} words to align with the target video duration of {target_len} seconds.\n"
-        topic_brief += f"Do not write a short script. If your draft is too short, please expand the content by adding helpful details or context to reach the required word count.\n"
+        if not loaded_sb:
+            # Override the topic parameter with a detailed prompt constructed from the brief
+            topic_brief = f"Topic: {brief['topic']}\n"
+            topic_brief += f"Hook: {brief['hook']}\n"
+            topic_brief += "Script Outline:\n"
+            for line in brief['script_outline']:
+                topic_brief += f"- {line}\n"
+            topic_brief += "Scene Plan:\n"
+            for scene in brief['scene_plan']:
+                time_range = scene.get('time_range', '')
+                visual = scene.get('visual', '')
+                audio = scene.get('audio', '')
+                topic_brief += f"- [{time_range}] Visual: {visual} | Audio: {audio}\n"
+            topic_brief += "Voice Style / Tone:\n"
+            topic_brief += f"- Tone: {', '.join(brief['voice_style'].get('tone', []))}\n"
+            topic_brief += f"- Style Rules: {', '.join(brief['voice_style'].get('style_rules', []))}\n"
+            topic_brief += f"Target Length: {brief['target_length_seconds']} seconds\n"
+            
+            if brief.get("format_id") == "viral_curiosity_24s":
+                topic_brief += "\n=== STRICT VIRAL SHORTS REQUIREMENTS ===\n"
+                topic_brief += "Create a 20–30 second vertical Shorts video.\n"
+                topic_brief += "Use this exact structure:\n"
+                topic_brief += "0–3s: instant hook (no intro, no greetings)\n"
+                topic_brief += "3–16s: suspense/evidence buildup (fast reveal, escalation)\n"
+                topic_brief += "16–24s: reveal/payoff (twist/conclusion/prediction)\n"
+                topic_brief += "Use 12–18 fast scenes. Each scene should last 1–2 seconds.\n"
+                topic_brief += "Use constant movement and avoid static images.\n"
+                topic_brief += "Use large center-screen text overlays with 1-4 words per overlay.\n"
+                topic_brief += "Use short narration sentences (3-9 words each).\n"
+                topic_brief += "Do not include intros, logos, greetings, or filler words.\n"
+                topic_brief += "Avoid copyrighted characters or logos.\n"
+                topic_brief += "CRITICAL: Do not make the final video shorter than 20 seconds. Do not make the final video longer than 30 seconds.\n"
+
+            # Dynamic word count guard to prevent short video generation
+            target_len = brief.get("target_length_seconds", 24)
+            min_words = int(target_len * 2.2)
+            max_words = int(target_len * 2.7)
+            topic_brief += f"\n=== SCRIPT LENGTH REQUIREMENT ===\n"
+            topic_brief += f"The generated script MUST contain between {min_words} and {max_words} words to align with the target video duration of {target_len} seconds.\n"
+            topic_brief += f"Do not write a short script. If your draft is too short, please expand the content by adding helpful details or context to reach the required word count.\n"
             
         topic = topic_brief
 

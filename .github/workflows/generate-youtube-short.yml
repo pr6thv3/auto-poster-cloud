@@ -81,6 +81,11 @@ on:
         required: false
         default: "false"
         type: string
+      apply_retention_postprocess:
+        description: "Apply high-retention post-processing overlays (true, false)"
+        required: false
+        default: "false"
+        type: string
 
 
 
@@ -125,6 +130,7 @@ jobs:
           python scripts/generate_ideas.py --profile ${{ github.event.inputs.profile_path }}
           python scripts/score_idea_freshness.py
           python scripts/build_video_brief.py
+          python scripts/build_retention_storyboard.py
           python scripts/quality_gate.py
 
       - name: Generate YouTube Metadata
@@ -184,6 +190,11 @@ jobs:
               f.write(b'0' * 150000)
           print('Wrote dummy MP4 file.')
           " >> moneyprinter-log.txt
+
+      - name: Apply Retention Post-Processing
+        if: github.event.inputs.apply_retention_postprocess == 'true'
+        run: |
+          python scripts/apply_retention_postprocess.py
 
       - name: Find Output Video & Validate
         id: find-video
