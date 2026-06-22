@@ -251,5 +251,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "27918433917"
+  },
+  {
+    "idea_id": "idea_ai_tools_9",
+    "profile_id": "ai_tools",
+    "topic": "This free AI website removes background noise from any audio file",
+    "angle": "audio cleanup tool",
+    "hook": "Stop recording video with background fan noise or traffic sounds.",
+    "keywords": [
+      "audio cleanup",
+      "remove noise",
+      "free ai tool"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-22T01:22:22.258583Z",
+    "status": "success",
+    "youtube_video_id": "pS7ao1TNQ-U",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "27923765038"
   }
 ]
