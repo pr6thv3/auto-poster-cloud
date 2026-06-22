@@ -107,7 +107,7 @@ IDEAS_CATALOG = {
             "topic": "This free AI website removes background noise from any audio file",
             "angle": "audio cleanup tool",
             "hook": "Stop recording video with background fan noise or traffic sounds.",
-            "curiosity_gap": "This free AI audio cleanup site makes a cheap mic sound like a studio mic.",
+            "curiosity_gap": "This free AI audio cleanup site makes a cheap microphone sound as clear as a studio microphone.",
             "visual_promise": "Showing an audio waveform graph with noise disappearing in real time.",
             "payoff": "Upload your audio and get a studio quality podcast sound instantly.",
             "keywords": ["audio cleanup", "remove noise", "free ai tool"],
