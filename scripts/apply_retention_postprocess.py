@@ -100,7 +100,7 @@ def main():
             f"fontsize=72:fontcolor=white:"
             f"borderw=4:bordercolor=black:"
             f"shadowcolor=black:shadowx=4:shadowy=4:"
-            f"enable='between(t,{start:.2f},{end:.2f})'"
+            f"enable='between(t\\,{start:.2f}\\,{end:.2f})'"
         )
         filters.append(f_str)
         
