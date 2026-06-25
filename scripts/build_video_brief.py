@@ -3,7 +3,7 @@ import sys
 import json
 import yaml
 
-def get_script_and_scenes_for_format(format_type, topic, hook, curiosity_gap="", visual_promise="", payoff="", niche="tech"):
+def get_script_and_scenes_for_format(format_type, topic, hook, curiosity_gap="", visual_promise="", payoff="", final_question_or_twist="", niche="tech"):
     if format_type == "viral_curiosity_24s":
         # Build narration beats
         narration_beats = [
@@ -11,7 +11,7 @@ def get_script_and_scenes_for_format(format_type, topic, hook, curiosity_gap="",
             curiosity_gap if curiosity_gap else "But there is a catch.",
             visual_promise if visual_promise else "Watch how it works.",
             payoff if payoff else "This changes everything.",
-            "Follow for more daily tips!"
+            final_question_or_twist if final_question_or_twist else "Follow for more daily tips!"
         ]
         
         # Build 12 scenes (2 seconds each for a total of 24 seconds)
@@ -131,6 +131,7 @@ def main():
     curiosity_gap = selected_idea.get("curiosity_gap", "")
     visual_promise = selected_idea.get("visual_promise", "")
     payoff = selected_idea.get("payoff", "")
+    final_question_or_twist = selected_idea.get("final_question_or_twist", "")
     niche = profile.get("niche", "tech")
     
     # Load format preset if configured
@@ -144,7 +145,7 @@ def main():
             print(f"Warning: Could not read format preset {format_preset_path}: {e}")
             
     outline, scenes = get_script_and_scenes_for_format(
-        format_type, topic, hook, curiosity_gap, visual_promise, payoff, niche
+        format_type, topic, hook, curiosity_gap, visual_promise, payoff, final_question_or_twist, niche
     )
     
     # Enforce defaults from format preset if present
@@ -222,13 +223,16 @@ def main():
         "hard_min_duration_seconds": hard_min,
         "hard_max_duration_seconds": hard_max,
         "hook_0_3s": hook,
+        "curiosity_gap": curiosity_gap,
+        "visual_promise": visual_promise,
         "payoff": payoff,
+        "final_question_or_twist": final_question_or_twist,
         "narration_beats": [
             hook,
             curiosity_gap,
             visual_promise,
             payoff,
-            "Follow for more."
+            final_question_or_twist if final_question_or_twist else "Follow for more."
         ] if format_type == "viral_curiosity_24s" else [hook],
         "text_overlay_plan": text_overlay_plan,
         "editing_rhythm": format_preset.get("editing", {}),

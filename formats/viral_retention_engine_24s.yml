@@ -75,6 +75,15 @@ sound_design:
     - impact
     - hit
     - riser
+    - glitch
+    - bass drop
+  transitions:
+    - whoosh
+    - impact
+    - hit
+    - riser
+    - glitch
+    - bass drop
   require_scene_transition_sfx: true
 
 safety:

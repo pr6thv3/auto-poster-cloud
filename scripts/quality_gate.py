@@ -284,10 +284,44 @@ def main():
         if found_copyright:
             reasons.append(f"Copyrighted character or clip dependency detected: {found_copyright}")
             
-        # Warnings for curiosity gap, sound cues, payoff
-        curiosity_gap = brief.get("narration_beats", [""])[1] if len(brief.get("narration_beats", [])) > 1 else ""
-        if not curiosity_gap or len(str(curiosity_gap).strip()) < 5:
-            warnings.append("Weak curiosity gap: No clear curiosity gap defined.")
+        # Check that all 5 viral retention structure elements are present in the brief
+        claim = brief.get("hook", "") or brief.get("hook_0_3s", "")
+        mystery = brief.get("curiosity_gap", "")
+        evidence = brief.get("visual_promise", "")
+        payoff_val = brief.get("payoff", "")
+        twist = brief.get("final_question_or_twist", "")
+        
+        missing_elements = []
+        if not claim.strip(): missing_elements.append("claim")
+        if not mystery.strip(): missing_elements.append("mystery/conflict")
+        if not evidence.strip(): missing_elements.append("evidence")
+        if not payoff_val.strip(): missing_elements.append("reveal/payoff")
+        if not twist.strip(): missing_elements.append("final_question_or_twist")
+        
+        if missing_elements:
+            reasons.append(f"Missing required viral retention structure elements: {', '.join(missing_elements)}.")
+            
+        # Curiosity gap specificity checks
+        curiosity_gap = mystery.strip()
+        if not curiosity_gap:
+            curiosity_gap = brief.get("narration_beats", [""])[1] if len(brief.get("narration_beats", [])) > 1 else ""
+            
+        curiosity_gap_lower = str(curiosity_gap).lower()
+        generic_curiosity_phrases = [
+            "this is useful",
+            "saves time",
+            "save time",
+            "is amazing",
+            "will help you",
+            "helps you",
+            "useful tool",
+            "useful website"
+        ]
+        found_generic = [p for p in generic_curiosity_phrases if p in curiosity_gap_lower]
+        if found_generic:
+            reasons.append(f"Generic curiosity gap phrasing detected: {found_generic}. Curiosity gap must be specific and suspenseful.")
+        elif not curiosity_gap or len(curiosity_gap) < 15:
+            reasons.append("Weak curiosity gap: Must be at least 15 characters, specific, and suspenseful.")
             
         sound_design = brief.get("sound_design", {})
         transitions = sound_design.get("transitions", [])

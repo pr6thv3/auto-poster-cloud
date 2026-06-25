@@ -250,7 +250,7 @@ def main():
     brief_scenes = brief.get("scene_plan", [])
     
     movements_list = ["Rapid zoom-in", "Pan left", "Tilt up", "Icon shake", "Slow zoom-out", "Slide-right", "Camera shake", "Focus switch"]
-    sfx_list = ["whoosh", "impact", "hit", "riser"]
+    sfx_list = ["whoosh", "impact", "hit", "riser", "glitch", "bass drop"]
     
     # We will split the 12 brief scenes into 24 scenes (Sub-scene A and B of 1.0s each)
     for i in range(12):
@@ -310,7 +310,7 @@ def main():
             "motion_instruction": base_movement if base_movement else "Rapid zoom-in",
             "reaction_or_reveal_type": role,
             "overlay_text": overlay_text_a,
-            "narration_line": audio_a if audio_a else "Follow for more daily tips.",
+            "narration_line": audio_a if audio_a else "Watch closely.",
             "sound_cue": sfx_list[(2*i) % len(sfx_list)]
         })
         
@@ -324,7 +324,7 @@ def main():
             "motion_instruction": movements_list[(2*i+1) % len(movements_list)],
             "reaction_or_reveal_type": role,
             "overlay_text": overlay_text_b,
-            "narration_line": audio_b if audio_b else "Export complete instantly.",
+            "narration_line": audio_b if audio_b else "Process completed.",
             "sound_cue": sfx_list[(2*i+1) % len(sfx_list)]
         })
 

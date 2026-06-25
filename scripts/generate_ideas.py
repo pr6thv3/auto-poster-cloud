@@ -8,6 +8,45 @@ import yaml
 IDEAS_CATALOG = {
     "ai": [
         {
+            "topic": "One messy recording becomes studio clean",
+            "angle": "audio restoration technology",
+            "hook": "See how one messy recording becomes studio clean.",
+            "curiosity_gap": "A secret neural network isolates the speaker's voice by predicting and reconstructing missing vocal frequencies.",
+            "visual_promise": "Watch the background noise waveform instantly flatten to a straight line.",
+            "payoff": "The low-quality street audio transforms into crisp studio sound.",
+            "final_question_or_twist": "Could this technology make expensive microphones completely obsolete?",
+            "keywords": ["audio restoration", "voice cleaning", "neural network sound"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
+        },
+        {
+            "topic": "This boring file turns into something wild",
+            "angle": "interactive data visualization",
+            "hook": "Watch this boring file turn into something wild.",
+            "curiosity_gap": "A hidden python script parses a simple CSV list and generates a stunning interactive 3D solar system visualization.",
+            "visual_promise": "Witness rows of numbers instantly render into orbits, stars, and rotating planets.",
+            "payoff": "We built a complete, interactive galaxy map without writing a single line of WebGL.",
+            "final_question_or_twist": "Why aren't schools using this to teach astronomy?",
+            "keywords": ["data visualization", "python script", "interactive 3d"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
+        },
+        {
+            "topic": "Nobody expects this AI trick to work",
+            "angle": "document translation layout preserve",
+            "hook": "Nobody expects this AI trick to work.",
+            "curiosity_gap": "A new layout-preserving translator replaces text in complex diagrams without losing the original fonts or borders.",
+            "visual_promise": "A technical blueprint transitions seamlessly between languages while keeping every design element intact.",
+            "payoff": "It translates a full multi-layer PDF document in under three seconds.",
+            "final_question_or_twist": "Is this the end of traditional translation services?",
+            "keywords": ["document translation", "layout preservation", "pdf tools"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 14,
+            "risk_flags": []
+        },
+        {
             "topic": "Create beautiful presentation slides instantly using artificial intelligence",
             "angle": "presentation slide design automation",
             "hook": "Stop spending hours designing presentation slides today.",
@@ -369,6 +408,7 @@ def main():
             "curiosity_gap": catalog_idea.get("curiosity_gap", ""),
             "visual_promise": catalog_idea.get("visual_promise", ""),
             "payoff": catalog_idea.get("payoff", ""),
+            "final_question_or_twist": catalog_idea.get("final_question_or_twist", ""),
             "risk_flags": catalog_idea.get("risk_flags", [])
         }
         generated_ideas.append(idea)
