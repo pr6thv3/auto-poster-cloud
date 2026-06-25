@@ -289,5 +289,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28189684061"
+  },
+  {
+    "idea_id": "idea_ai_tools_2",
+    "profile_id": "ai_tools",
+    "topic": "This boring file turns into something wild",
+    "angle": "interactive data visualization",
+    "hook": "Watch this boring file turn into something wild.",
+    "keywords": [
+      "data visualization",
+      "python script",
+      "interactive 3d"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-25T18:38:51.427561Z",
+    "status": "success",
+    "youtube_video_id": "atKUvTtmDn0",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28192058487"
   }
 ]
