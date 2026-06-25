@@ -181,6 +181,7 @@ def main():
             "ffmpeg", "-y",
             "-i", video_path,
             "-vf", "fps=1,scale=180:-1,tile=5x5",
+            "-frames:v", "1",
             contact_sheet_path
         ]
         try:
