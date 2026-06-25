@@ -308,5 +308,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28192058487"
+  },
+  {
+    "idea_id": "idea_ai_tools_3",
+    "profile_id": "ai_tools",
+    "topic": "Nobody expects this AI trick to work",
+    "angle": "document translation layout preserve",
+    "hook": "Nobody expects this AI trick to work.",
+    "keywords": [
+      "document translation",
+      "layout preservation",
+      "pdf tools"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-25T21:20:23.041094Z",
+    "status": "success",
+    "youtube_video_id": "L9Z02wpfRgI",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28200994231"
   }
 ]
