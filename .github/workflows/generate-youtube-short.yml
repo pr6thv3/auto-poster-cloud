@@ -192,6 +192,8 @@ jobs:
           " >> moneyprinter-log.txt
 
       - name: Apply Retention Post-Processing
+        env:
+          GENERATION_MODE: ${{ github.event.inputs.generation_mode }}
         run: |
           python scripts/apply_retention_postprocess.py
 
