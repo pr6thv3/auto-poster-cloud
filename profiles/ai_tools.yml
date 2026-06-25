@@ -51,5 +51,5 @@ banned_words:
 preferred_duration_seconds: 24
 hard_min_duration_seconds: 18
 hard_max_duration_seconds: 32
-format_preset: formats/viral_curiosity_24s.yml
+format_preset: formats/viral_retention_engine_24s.yml
 

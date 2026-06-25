@@ -8,10 +8,27 @@ def main():
     print("--- Running Format Fidelity Validator ---")
     
     storyboard_path = os.path.join("docs", "retention-storyboard.json")
+    brief_path = os.path.join("docs", "video-brief.json")
+    
+    # Determine if this is a retention run from the video brief
+    is_retention_run = False
+    if os.path.exists(brief_path):
+        try:
+            with open(brief_path, "r", encoding="utf-8") as f:
+                brief = json.load(f)
+                if brief.get("format_id") == "viral_retention_engine_24s":
+                    is_retention_run = True
+        except Exception:
+            pass
+            
     if not os.path.exists(storyboard_path):
-        print("No retention storyboard found. Skipping validation.")
-        sys.exit(0)
-        
+        if is_retention_run:
+            print("Error: Retention storyboard is missing for viral_retention_engine_24s run!")
+            sys.exit(1)
+        else:
+            print("No retention storyboard found. Skipping validation.")
+            sys.exit(0)
+            
     try:
         with open(storyboard_path, "r", encoding="utf-8") as f:
             sb = json.load(f)
@@ -93,6 +110,19 @@ def main():
         if "subscribe" in txt.lower():
             print(f"Error: Overlay {idx} contains forbidden word 'subscribe': '{txt}'")
             sys.exit(1)
+            
+    # Check visual blacklist in scenes
+    blacklist = ["subscribe", "isolation", "protest", "unrelated crowd", "random office", "generic podcast"]
+    for idx, s in enumerate(scenes):
+        query = s.get("stock_search_query", "").lower()
+        prompt = s.get("visual_prompt", "").lower()
+        for term in blacklist:
+            if term in query:
+                print(f"Error: Scene {idx+1} search query contains blacklisted term '{term}': '{query}'")
+                sys.exit(1)
+            if term in prompt:
+                print(f"Error: Scene {idx+1} visual prompt contains blacklisted term '{term}': '{prompt}'")
+                sys.exit(1)
             
     print("Storyboard parameters validated successfully.")
     

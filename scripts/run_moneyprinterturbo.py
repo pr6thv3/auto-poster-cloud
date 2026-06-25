@@ -223,6 +223,17 @@ subtitle_provider = "edge"
             elif target_len >= 45:
                 paragraph_number = "4"
                 
+        # Also check format_id from retention-storyboard.json if it exists
+        storyboard_path = os.path.join("docs", "retention-storyboard.json")
+        if os.path.exists(storyboard_path):
+            try:
+                with open(storyboard_path, "r", encoding="utf-8") as f:
+                    sb = json.load(f)
+                    if sb.get("format_id") == "viral_retention_engine_24s":
+                        format_id = "viral_retention_engine_24s"
+            except Exception:
+                pass
+
         # 4. Run CLI script
         print(f"[REAL] Executing MoneyPrinterTurbo CLI with paragraph_number={paragraph_number}...")
         cmd = [
@@ -235,7 +246,25 @@ subtitle_provider = "edge"
         ]
         if format_id == "viral_retention_engine_24s":
             cmd.append("--no-subtitle-enabled")
-        subprocess.run(cmd, cwd=repo_dir, check=True)
+
+        # Write command to moneyprinter-log.txt at the root directory
+        log_cmd_str = f"Executing MoneyPrinterTurbo cli.py with command: {' '.join(cmd)}\n"
+        with open("moneyprinter-log.txt", "w", encoding="utf-8") as lf:
+            lf.write(log_cmd_str)
+
+        res = subprocess.run(cmd, cwd=repo_dir, capture_output=True, text=True)
+        print(res.stdout)
+        if res.stderr:
+            print(res.stderr, file=sys.stderr)
+        
+        with open("moneyprinter-log.txt", "a", encoding="utf-8") as lf:
+            lf.write(res.stdout)
+            if res.stderr:
+                lf.write("\nSTDERR:\n" + res.stderr)
+
+        if res.returncode != 0:
+            print(f"Error: MoneyPrinterTurbo execution failed with exit code {res.returncode}")
+            sys.exit(res.returncode)
         
         # 5. Locate the generated output and copy it to our storage directory
         src_storage = os.path.join(repo_dir, "storage")

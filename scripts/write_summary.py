@@ -22,7 +22,16 @@ def main():
     metadata_mode = os.environ.get('METADATA_MODE', 'mock')
     posting_mode = os.environ.get('POSTING_MODE', 'mock')
     
-    video_path = os.environ.get('VIDEO_PATH', 'Not Found')
+    video_path = os.environ.get('VIDEO_PATH', '')
+    if not video_path and os.path.exists("video-info.json"):
+        try:
+            with open("video-info.json", "r", encoding="utf-8") as f:
+                v_info = json.load(f)
+                video_path = v_info.get("video_path", "")
+        except Exception:
+            pass
+    if not video_path:
+        video_path = "Not Found"
     public_video_url = os.environ.get('PUBLIC_VIDEO_URL', 'Not Uploaded')
     
     # Try reading from youtube-result.json

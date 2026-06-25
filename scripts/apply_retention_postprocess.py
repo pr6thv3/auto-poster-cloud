@@ -60,9 +60,12 @@ def main():
     
     output_video = os.path.join(os.path.dirname(input_video), "final-retention.mp4")
     
-    # If the input file is too small (mock dummy file), bypass post-processing to avoid ffmpeg errors
-    if file_size_kb < 100:
-        print("[MOCK] Input is a mock dummy file. Bypassing ffmpeg post-processing.")
+    generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+    is_mock = generation_mode == "mock" or file_size_kb < 100
+    
+    # If in mock mode or input file is too small, bypass post-processing to avoid ffmpeg errors
+    if is_mock:
+        print("[MOCK] Mock mode or dummy file detected. Bypassing ffmpeg post-processing.")
         try:
             shutil.copy2(input_video, output_video)
             print(f"[MOCK] Copied mock video to {output_video}")

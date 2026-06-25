@@ -192,7 +192,6 @@ jobs:
           " >> moneyprinter-log.txt
 
       - name: Apply Retention Post-Processing
-        if: github.event.inputs.apply_retention_postprocess == 'true'
         run: |
           python scripts/apply_retention_postprocess.py
 

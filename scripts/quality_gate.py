@@ -181,7 +181,7 @@ def main():
         hard_max = brief.get("hard_max_duration_seconds", 58)
         
         # Check target length limits
-        if target_length > 58 and brief.get("format_id") != "viral_curiosity_24s":
+        if target_length > 58 and brief.get("format_id") not in ["viral_curiosity_24s", "viral_retention_engine_24s"]:
             reasons.append(f"Target length ({target_length}s) is above the maximum allowed duration of 58 seconds.")
             
         outline_duration = get_outline_duration(script_outline)
@@ -206,7 +206,7 @@ def main():
 
     # 8. Viral curiosity format specific validations
     format_id = brief.get("format_id", "")
-    if format_id == "viral_curiosity_24s":
+    if format_id in ["viral_curiosity_24s", "viral_retention_engine_24s"]:
         target_len = brief.get("target_length_seconds", 0)
         hard_max = brief.get("hard_max_duration_seconds", 0)
         hard_min = brief.get("hard_min_duration_seconds", 0)
@@ -372,6 +372,10 @@ def main():
                 has_missing_motion = False
                 has_missing_sound = False
                 has_missing_role = False
+                has_missing_visual = False
+                has_missing_query = False
+                has_missing_overlay = False
+                has_missing_narration = False
                 for s in sb_scenes:
                     tr = s.get("time_range", "")
                     dur = get_scene_duration(tr)
@@ -383,6 +387,14 @@ def main():
                         has_missing_sound = True
                     if not s.get("reaction_or_reveal_type", "").strip():
                         has_missing_role = True
+                    if not s.get("visual_prompt", "").strip():
+                        has_missing_visual = True
+                    if not s.get("stock_search_query", "").strip():
+                        has_missing_query = True
+                    if not s.get("overlay_text", "").strip():
+                        has_missing_overlay = True
+                    if not s.get("narration_line", "").strip():
+                        has_missing_narration = True
                         
                 if has_long_scene:
                     reasons.append("Storyboard has one or more scenes with a duration exceeding 1.5 seconds.")
@@ -392,6 +404,14 @@ def main():
                     reasons.append("Storyboard has one or more scenes missing sound cue effects.")
                 if has_missing_role:
                     reasons.append("Storyboard has one or more scenes missing story beat role assignments.")
+                if has_missing_visual:
+                    reasons.append("Storyboard has one or more scenes missing visual prompts.")
+                if has_missing_query:
+                    reasons.append("Storyboard has one or more scenes missing stock search queries.")
+                if has_missing_overlay:
+                    reasons.append("Storyboard has one or more scenes missing overlay text.")
+                if has_missing_narration:
+                    reasons.append("Storyboard has one or more scenes missing narration lines.")
                     
                 # Check text overlays limit
                 if not sb_overlays:

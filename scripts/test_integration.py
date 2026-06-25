@@ -557,7 +557,7 @@ def main():
     with open(brief_file, "r", encoding="utf-8") as f:
         viral_brief = json.load(f)
         
-    assert viral_brief.get("format_id") == "viral_curiosity_24s", "Expected format_id to be viral_curiosity_24s"
+    assert viral_brief.get("format_id") == "viral_retention_engine_24s", "Expected format_id to be viral_retention_engine_24s"
     assert viral_brief.get("target_length_seconds") == 24, "Expected target duration 24s"
     assert viral_brief.get("hard_max_duration_seconds") == 32, "Expected hard max duration 32s"
     assert len(viral_brief.get("scene_plan", [])) >= 10, "Expected at least 10 scenes"
@@ -943,6 +943,59 @@ def main():
     # Restore storyboard
     with open(storyboard_path, "w", encoding="utf-8") as f:
         json.dump(sb_backup, f, indent=2)
+
+    # 11. Test visual blacklist in scene search query failure
+    bad_sb = sb_backup.copy()
+    bad_sb["scenes"] = [s.copy() for s in sb_backup["scenes"]]
+    bad_sb["scenes"][0]["stock_search_query"] = "protest crowd"
+    with open(storyboard_path, "w", encoding="utf-8") as f:
+        json.dump(bad_sb, f, indent=2)
+    res_val_blacklist = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], capture_output=True, text=True)
+    assert res_val_blacklist.returncode == 1, "Expected validator to fail for blacklisted term in query"
+    assert "contains blacklisted term" in res_val_blacklist.stdout or "contains blacklisted term" in res_val_blacklist.stderr
+
+    # Restore storyboard
+    with open(storyboard_path, "w", encoding="utf-8") as f:
+        json.dump(sb_backup, f, indent=2)
+
+    # 12. Test missing storyboard fails when format is retention
+    if os.path.exists(storyboard_path):
+        os.rename(storyboard_path, storyboard_path + ".bak")
+    try:
+        res_val_missing_sb = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], capture_output=True, text=True)
+        assert res_val_missing_sb.returncode == 1, "Expected validator to fail when storyboard is missing during retention run"
+        assert "Retention storyboard is missing" in res_val_missing_sb.stdout or "Retention storyboard is missing" in res_val_missing_sb.stderr
+    finally:
+        if os.path.exists(storyboard_path + ".bak"):
+            os.rename(storyboard_path + ".bak", storyboard_path)
+
+    # 13. Test missing postprocessed video fails for retention runs in real mode
+    retention_mp4_path = "storage/tasks/mock-task/final-retention.mp4"
+    if os.path.exists(retention_mp4_path):
+        os.rename(retention_mp4_path, retention_mp4_path + ".bak")
+    try:
+        res_find_missing = subprocess.run([sys.executable, "scripts/find_latest_video.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_find_missing.returncode == 1, "Expected find_latest_video to fail when final-retention.mp4 is missing in real mode"
+    finally:
+        if os.path.exists(retention_mp4_path + ".bak"):
+            os.rename(retention_mp4_path + ".bak", retention_mp4_path)
+
+    # 14. Test final-retention.mp4 preference
+    res_find = subprocess.run([sys.executable, "scripts/find_latest_video.py"], env={"GENERATION_MODE": "real"})
+    assert res_find.returncode == 0
+    with open("video-info.json", "r", encoding="utf-8") as f:
+        v_info = json.load(f)
+    assert v_info.get("video_path").endswith("final-retention.mp4"), "Expected video_path to point to final-retention.mp4"
+
+    # 15. Test subtitle enabled in logs fails validation
+    with open("moneyprinter-log.txt", "w", encoding="utf-8") as f:
+        f.write("Executing MoneyPrinterTurbo cli.py with subtitles enabled")
+    res_val_log_fail = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+    assert res_val_log_fail.returncode == 1, "Expected validator to fail when --no-subtitle-enabled is missing in logs"
+    
+    # Restore valid logs
+    with open("moneyprinter-log.txt", "w", encoding="utf-8") as f:
+        f.write("Executing MoneyPrinterTurbo cli.py with --no-subtitle-enabled flag")
 
     # Clean up test task directory files and temporary test logs
     if os.path.exists("storage/tasks/mock-task/final-retention.mp4"):
