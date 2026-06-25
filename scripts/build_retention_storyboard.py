@@ -323,6 +323,9 @@ def main():
             # Fallback repeating CTA words (no "subscribe"!)
             fallback_words = ["BOOST", "PRODUCTIVITY", "DESIGN", "FAST", "REVEAL", "NOW", "CREATIVE", "SYSTEM"]
             chunk = [fallback_words[idx % len(fallback_words)]]
+            is_filler = True
+        else:
+            is_filler = False
             
         text_overlays.append({
             "start_time": float(sec_start),
@@ -330,7 +333,8 @@ def main():
             "text": " ".join(chunk),
             "position": "center",
             "style": "large_bold_white_black_shadow",
-            "max_words": 4
+            "max_words": 4,
+            "is_filler": is_filler
         })
 
     # Generate 24 scenes of 1.0s duration each

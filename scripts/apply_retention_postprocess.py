@@ -102,6 +102,8 @@ def compute_alignment_stats(synced_overlays):
     drifts = []
 
     for ov in synced_overlays:
+        if ov.get("is_filler", False):
+            continue
         total_overlay_words += ov.get("total_words", 0)
         total_matched += ov.get("matched_words", 0)
 
@@ -231,6 +233,23 @@ def main():
     if tts_words:
         print("[REAL] Matching overlay words to TTS timestamps for audio sync...")
         synced_overlays = match_overlays_to_tts(overlays, tts_words)
+        
+        # Shift and filter filler overlays to prevent visual overlap/double exposure
+        last_word_end = max([w["end"] for w in tts_words]) if tts_words else 0.0
+        print(f"[REAL] Narration ends at {last_word_end:.3f}s. Adjusting filler overlays...")
+        
+        adjusted_overlays = []
+        filler_count = 0
+        for ov in synced_overlays:
+            if ov.get("is_filler", False):
+                new_start = last_word_end + (filler_count * 0.5)
+                new_end = new_start + 0.5
+                ov["start_time"] = round(new_start, 3)
+                ov["end_time"] = round(new_end, 3)
+                filler_count += 1
+            adjusted_overlays.append(ov)
+        synced_overlays = adjusted_overlays
+        
         stats = compute_alignment_stats(synced_overlays)
         print(f"[REAL] Alignment coverage: {stats['alignment_coverage_pct']}% "
               f"({stats['total_matched_words']}/{stats['total_overlay_words']} words matched)")
