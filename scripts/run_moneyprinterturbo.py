@@ -74,11 +74,11 @@ def main():
                 for s in sb.get("scenes", []):
                     topic_brief += f"Scene {s.get('scene_id')}:\n"
                     topic_brief += f"- Time Range: {s.get('time_range')}\n"
-                    topic_brief += f"- Visual Description (No Copyrighted Material): {s.get('visual')}\n"
-                    topic_brief += f"- Narration: {s.get('audio')}\n"
-                    topic_brief += f"- Motion/Zoom Cue: {s.get('movement')}\n"
-                    topic_brief += f"- Sound Cue (SFX): {s.get('sfx')}\n"
-                    topic_brief += f"- Role: {s.get('role')}\n\n"
+                    topic_brief += f"- Visual Description (No Copyrighted Material): {s.get('visual_prompt')}\n"
+                    topic_brief += f"- Narration: {s.get('narration_line')}\n"
+                    topic_brief += f"- Motion/Zoom Cue: {s.get('motion_instruction')}\n"
+                    topic_brief += f"- Sound Cue (SFX): {s.get('sound_cue')}\n"
+                    topic_brief += f"- Role: {s.get('reaction_or_reveal_type')}\n\n"
                     
                 target_len = sb.get("target_seconds", 24)
                 min_words = int(target_len * 2.2)
