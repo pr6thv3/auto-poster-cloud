@@ -47,6 +47,8 @@ def main():
         "docs/video-brief.json",
         "docs/quality-report.json",
         "docs/retention-storyboard.json",
+        "docs/retention-storyboard-synced.json",
+        "docs/tts-timestamps.json",
         "youtube-metadata.json",
         "run-log.json",
         "platform-results.json",
@@ -104,6 +106,8 @@ def main():
 
     run_cmd([sys.executable, "scripts/generate_youtube_metadata.py"], env_override=env)
     run_cmd([sys.executable, "scripts/run_moneyprinterturbo.py"], env_override=env)
+    run_cmd([sys.executable, "scripts/extract_tts_timestamps.py"], env_override=env)
+    run_cmd([sys.executable, "scripts/mix_retention_audio.py"], env_override=env)
     run_cmd([sys.executable, "scripts/write_summary.py"], env_override=env)
 
     # 5. Assert output file generation and verification
@@ -869,11 +873,22 @@ def main():
     
     expected_retention_mp4 = "storage/tasks/mock-task/final-retention.mp4"
     assert os.path.exists(expected_retention_mp4), "Mock post-processed output was not created!"
+
+    # 8b. Test mock synced storyboard was written
+    synced_storyboard_path = "docs/retention-storyboard-synced.json"
+    assert os.path.exists(synced_storyboard_path), "Mock synced storyboard was not created!"
+    with open(synced_storyboard_path, "r", encoding="utf-8") as f:
+        synced_sb = json.load(f)
+    assert "alignment_stats" in synced_sb, "Synced storyboard missing alignment_stats"
+    assert synced_sb["alignment_stats"].get("mode") == "mock", "Expected mock mode in alignment stats"
+    print("Verification: Synced storyboard written correctly in mock mode.")
     
     if os.path.exists(test_mock_mp4):
         os.remove(test_mock_mp4)
     if os.path.exists(expected_retention_mp4):
         os.remove(expected_retention_mp4)
+    if os.path.exists(synced_storyboard_path):
+        os.remove(synced_storyboard_path)
         
     print("Verification: Post-processing script handled mock input and fallbacks gracefully.")
 
@@ -1006,6 +1021,76 @@ def main():
         os.remove("docs/retention-contact-sheet.jpg")
     if os.path.exists("moneyprinter-log.txt"):
         os.remove("moneyprinter-log.txt")
+
+    # === TEST CONTENT ENGINE v2.0 — AUDIO-SYNCED RETENTION COMPOSITOR ===
+    print("\n--- Testing v2.0 TTS Timestamp Extraction (Mock) ---")
+
+    # 16. Test TTS timestamp extraction in mock mode
+    os.makedirs("storage/tasks/mock-task", exist_ok=True)
+    with open("storage/tasks/mock-task/test-tts.mp4", "wb") as f:
+        f.write(b"0" * 500)
+
+    run_cmd([sys.executable, "scripts/extract_tts_timestamps.py"], env_override={"GENERATION_MODE": "mock"})
+
+    tts_path = "docs/tts-timestamps.json"
+    assert os.path.exists(tts_path), "TTS timestamps file was not created in mock mode!"
+    with open(tts_path, "r", encoding="utf-8") as f:
+        tts_data = json.load(f)
+    assert tts_data.get("mode") == "mock", "Expected mock mode in TTS timestamps"
+    assert "words" in tts_data, "TTS timestamps missing 'words' field"
+    assert len(tts_data["words"]) > 0, "TTS timestamps has no words"
+    assert "total_duration" in tts_data, "TTS timestamps missing 'total_duration'"
+    print(f"TTS mock extraction: {tts_data['word_count']} words, {tts_data['total_duration']}s duration")
+    print("Verification: TTS timestamp extraction works correctly in mock mode.")
+
+    # 17. Test background music mixer bypass in mock mode
+    print("\n--- Testing v2.0 Background Music Mixer (Mock) ---")
+    run_cmd([sys.executable, "scripts/mix_retention_audio.py"], env_override={"GENERATION_MODE": "mock"})
+
+    pre_overlay_path = "storage/tasks/mock-task/pre-overlay.mp4"
+    assert os.path.exists(pre_overlay_path), "pre-overlay.mp4 was not created in mock mode!"
+    print("Verification: Background music mixer bypasses correctly in mock mode.")
+
+    # 18. Test audio-synced overlay compositor in mock mode
+    print("\n--- Testing v2.0 Audio-Synced Overlay Compositor (Mock) ---")
+    run_cmd([sys.executable, "scripts/apply_retention_postprocess.py"], env_override={"GENERATION_MODE": "mock"})
+
+    final_ret_path = "storage/tasks/mock-task/final-retention.mp4"
+    assert os.path.exists(final_ret_path), "final-retention.mp4 was not created in mock compositor!"
+
+    synced_sb_path = "docs/retention-storyboard-synced.json"
+    assert os.path.exists(synced_sb_path), "Synced storyboard was not created in mock compositor!"
+    with open(synced_sb_path, "r", encoding="utf-8") as f:
+        synced_sb = json.load(f)
+    assert "alignment_stats" in synced_sb, "Synced storyboard missing alignment_stats"
+    assert "text_overlays_synced" in synced_sb, "Synced storyboard missing text_overlays_synced"
+    print("Verification: Audio-synced overlay compositor works correctly in mock mode.")
+
+    # 19. Test narration-derived B-roll query extraction
+    print("\n--- Testing v2.0 Narration-Derived B-Roll Queries ---")
+    if os.path.exists(storyboard_path):
+        with open(storyboard_path, "r", encoding="utf-8") as f:
+            sb_check = json.load(f)
+        scenes = sb_check.get("scenes", [])
+        narr_derived_count = 0
+        for s in scenes:
+            if s.get("narration_derived_query"):
+                narr_derived_count += 1
+            assert "narration_derived_query" in s, f"Scene {s.get('scene_id')} missing narration_derived_query"
+            assert "preset_fallback_query" in s, f"Scene {s.get('scene_id')} missing preset_fallback_query"
+        print(f"Narration-derived queries present in {narr_derived_count}/{len(scenes)} scenes")
+        print("Verification: Narration-derived B-roll query fields are present in storyboard.")
+
+    # Clean up v2.0 test artifacts
+    for cleanup_path in [
+        "storage/tasks/mock-task/test-tts.mp4",
+        "storage/tasks/mock-task/pre-overlay.mp4",
+        "storage/tasks/mock-task/final-retention.mp4",
+        "docs/tts-timestamps.json",
+        "docs/retention-storyboard-synced.json"
+    ]:
+        if os.path.exists(cleanup_path):
+            os.remove(cleanup_path)
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 

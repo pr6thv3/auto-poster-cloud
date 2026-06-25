@@ -126,7 +126,52 @@ def main():
             
     print("Storyboard parameters validated successfully.")
     
-    # 6. Video duration is between 18s and 32s
+    # 6. TTS Alignment validation (real mode only)
+    tts_path = os.path.join("docs", "tts-timestamps.json")
+    synced_path = os.path.join("docs", "retention-storyboard-synced.json")
+    
+    if generation_mode == "real":
+        if not os.path.exists(tts_path):
+            print("Error: docs/tts-timestamps.json is missing for real retention run.")
+            sys.exit(1)
+        print(f"Verified TTS timestamps file exists: {tts_path}")
+        
+        # Check alignment coverage from synced storyboard
+        if os.path.exists(synced_path):
+            try:
+                with open(synced_path, "r", encoding="utf-8") as f:
+                    synced_sb = json.load(f)
+                stats = synced_sb.get("alignment_stats", {})
+                coverage = stats.get("alignment_coverage_pct", 0.0)
+                matched = stats.get("total_matched_words", 0)
+                total = stats.get("total_overlay_words", 0)
+                
+                print(f"TTS alignment coverage: {coverage}% ({matched}/{total} words)")
+                
+                if coverage < 80.0:
+                    print(f"Warning: TTS alignment coverage {coverage}% is below 80% threshold.")
+                    # This is a warning, not a hard failure, to allow graceful degradation
+                else:
+                    print(f"TTS alignment coverage {coverage}% meets >= 80% threshold.")
+                    
+                # Validate that synced overlay timestamps are reasonable
+                synced_overlays = synced_sb.get("text_overlays_synced", [])
+                for idx, ov in enumerate(synced_overlays):
+                    start = float(ov.get("start_time", 0.0))
+                    end = float(ov.get("end_time", 0.0))
+                    if end <= start:
+                        print(f"Warning: Synced overlay {idx} has invalid timing: start={start}, end={end}")
+                    if end - start > 3.0:
+                        print(f"Warning: Synced overlay {idx} duration {end - start:.2f}s exceeds 3.0s")
+                        
+            except Exception as e:
+                print(f"Warning: Could not read synced storyboard for alignment check: {e}")
+        else:
+            print("Warning: docs/retention-storyboard-synced.json not found. Alignment check skipped.")
+    else:
+        print("[MOCK] Skipping TTS alignment validation in mock mode.")
+    
+    # 7. Video duration is between 18s and 32s
     if duration < 18.0 or duration > 32.0:
         print(f"Error: Video duration {duration:.1f}s is outside the hard limits [18s, 32s].")
         sys.exit(1)

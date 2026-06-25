@@ -4,6 +4,94 @@ import json
 import yaml
 import re
 
+# Common stop words to filter out when extracting search keywords from narration
+STOP_WORDS = {
+    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "do", "does", "did", "will", "would", "shall",
+    "should", "may", "might", "must", "can", "could", "to", "of", "in",
+    "for", "on", "with", "at", "by", "from", "as", "into", "through",
+    "during", "before", "after", "above", "below", "between", "out",
+    "off", "over", "under", "again", "further", "then", "once", "here",
+    "there", "when", "where", "why", "how", "all", "both", "each",
+    "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "so", "than", "too", "very", "just", "but",
+    "and", "or", "if", "it", "its", "this", "that", "these", "those",
+    "i", "me", "my", "we", "our", "you", "your", "he", "him", "his",
+    "she", "her", "they", "them", "their", "what", "which", "who",
+    "whom", "up", "down", "about", "because", "while", "until",
+    "watch", "closely", "now", "look", "see", "get", "got", "goes",
+    "process", "completed", "becomes", "become", "one", "two", "three"
+}
+
+# Ambiguous terms that produce off-topic stock footage without domain context.
+# Example: narration says "isolating background noise" → bare keyword "isolation"
+# returns social-isolation or quarantine footage. These words are stripped entirely;
+# the domain-context prefix + remaining concrete keywords keep the query on-topic.
+AMBIGUOUS_TERMS = {
+    "isolation", "isolate", "isolating", "isolated",
+    "clean", "cleaning", "cleaned",
+    "remove", "removed", "removing",
+    "cut", "cutting", "split", "splitting",
+    "background", "noise", "static",
+    "change", "changed", "changing",
+    "make", "making", "made",
+    "turn", "turning", "turned",
+    "take", "taking", "taken",
+    "work", "working", "works",
+    "thing", "things", "stuff",
+    "way", "something", "anything",
+    "good", "bad", "best", "worst",
+    "new", "old", "big", "small"
+}
+
+# Domain-context prefixes per content category.
+# Prepended to narration-derived queries so stock searches stay on-topic.
+CATEGORY_SEARCH_CONTEXT = {
+    "audio_cleanup": "audio sound",
+    "slides": "presentation design",
+    "3d": "3d modeling",
+    "fallback": "technology software"
+}
+
+
+def extract_narration_keywords(narration_line, category="fallback", max_keywords=3):
+    """Extract meaningful keywords from a narration line for stock search queries.
+    
+    Strips stop words and ambiguous terms that are polysemous without domain context.
+    Prepends a domain-context prefix from the content category to keep queries on-topic.
+    Falls back to empty string if no concrete keywords survive filtering, which signals
+    the caller to use the static category preset instead.
+    """
+    if not narration_line:
+        return ""
+    words = re.findall(r'[a-zA-Z]+', narration_line.lower())
+    keywords = [
+        w for w in words
+        if w not in STOP_WORDS
+        and w not in AMBIGUOUS_TERMS
+        and len(w) > 2
+    ]
+    # Take the first max_keywords unique words
+    seen = []
+    for k in keywords:
+        if k not in seen:
+            seen.append(k)
+        if len(seen) >= max_keywords:
+            break
+    
+    # If filtering left us with ≤1 keyword, the query is too generic to be useful.
+    # Return empty to signal fallback to the curated category preset.
+    if len(seen) <= 1:
+        return ""
+    
+    # Prepend domain-context prefix so the stock search stays on-topic
+    prefix = CATEGORY_SEARCH_CONTEXT.get(category, "")
+    raw_query = " ".join(seen)
+    if prefix:
+        return f"{prefix} {raw_query}"
+    return raw_query
+
+
 def sanitize_text(text):
     blacklist = ["subscribe", "isolation", "protest", "unrelated crowd", "random office", "generic podcast"]
     replacements = {
@@ -300,13 +388,22 @@ def main():
         # Overlay text for Scene B
         overlay_text_b = text_overlays[2*i+1]["text"]
         
+        # Derive stock search queries from narration content, fallback to preset.
+        # Domain-context prefix prevents ambiguous terms from producing off-topic footage.
+        narr_query_a = extract_narration_keywords(audio_a, category=category)
+        narr_query_b = extract_narration_keywords(audio_b, category=category)
+        final_query_a = narr_query_a if narr_query_a else query_a
+        final_query_b = narr_query_b if narr_query_b else query_b
+
         # Scene A (e.g. 0.0s - 1.0s)
         time_a = f"0:{2*i:02d} - 0:{2*i+1:02d}" # Represents 1s interval structurally
         scenes.append({
             "scene_id": 2 * i + 1,
             "time_range": time_a,
             "visual_prompt": visual_a,
-            "stock_search_query": query_a,
+            "stock_search_query": sanitize_text(final_query_a),
+            "narration_derived_query": narr_query_a,
+            "preset_fallback_query": query_a,
             "motion_instruction": base_movement if base_movement else "Rapid zoom-in",
             "reaction_or_reveal_type": role,
             "overlay_text": overlay_text_a,
@@ -320,7 +417,9 @@ def main():
             "scene_id": 2 * i + 2,
             "time_range": time_b,
             "visual_prompt": visual_b,
-            "stock_search_query": query_b,
+            "stock_search_query": sanitize_text(final_query_b),
+            "narration_derived_query": narr_query_b,
+            "preset_fallback_query": query_b,
             "motion_instruction": movements_list[(2*i+1) % len(movements_list)],
             "reaction_or_reveal_type": role,
             "overlay_text": overlay_text_b,
