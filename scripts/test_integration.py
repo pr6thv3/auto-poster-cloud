@@ -275,7 +275,9 @@ def main():
     def check_brief(test_brief):
         with open(brief_file, "w", encoding="utf-8") as f:
             json.dump(test_brief, f, indent=2)
-        res = subprocess.run([sys.executable, "scripts/quality_gate.py"], capture_output=True, text=True)
+        env = os.environ.copy()
+        env["GENERATION_MODE"] = "real"
+        res = subprocess.run([sys.executable, "scripts/quality_gate.py"], env=env, capture_output=True, text=True)
         with open(report_file, "r", encoding="utf-8") as f:
             report_data = json.load(f)
         return res.returncode, report_data

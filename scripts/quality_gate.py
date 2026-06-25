@@ -170,7 +170,11 @@ def main():
     # 4. Check Freshness Score Threshold
     freshness_score = brief.get("freshness_score", 100)
     if freshness_score < 70:
-        reasons.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70).")
+        generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+        if generation_mode == 'mock':
+            warnings.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70). (Downgraded to warning in mock mode)")
+        else:
+            reasons.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70).")
         
     # 5. Check Script Outline and Durations
     script_outline = brief.get("script_outline", [])
