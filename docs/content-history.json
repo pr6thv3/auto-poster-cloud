@@ -327,5 +327,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28200994231"
+  },
+  {
+    "idea_id": "idea_ai_tools_1",
+    "profile_id": "ai_tools",
+    "topic": "This hidden AI tool restores old blurry photos in seconds",
+    "angle": "photo restoration technology",
+    "hook": "This hidden AI tool restores old blurry photos.",
+    "keywords": [
+      "photo restoration",
+      "face enhancement",
+      "old photos"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-25T21:44:31.384170Z",
+    "status": "success",
+    "youtube_video_id": "lAVi7CjWfg4",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28202233918"
   }
 ]
