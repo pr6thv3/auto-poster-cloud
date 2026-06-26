@@ -907,10 +907,28 @@ def main():
         "video_path": "storage/tasks/mock-task/final-retention.mp4",
         "duration": 24.0,
         "width": 1080,
-        "height": 1920
+        "height": 1920,
+        "validation": "mocked"
     }
     with open("video-info.json", "w", encoding="utf-8") as f:
         json.dump(test_video_info, f, indent=2)
+
+    # Setup a dummy mix report to satisfy the validator
+    os.makedirs("docs", exist_ok=True)
+    dummy_mix_report = {
+        "bgm_status": "added",
+        "bgm_file": "assets/music/tech_pulse.mp3",
+        "bgm_mood": "tech_pulse",
+        "video_duration": 24.0,
+        "bgm_duration_after_loop": 24.0,
+        "voice_audio_present": True,
+        "final_audio_present": True,
+        "full_duration_audio_coverage": True,
+        "volume_settings": {"voice_volume": 1.0, "bgm_volume": 0.12}
+    }
+    with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+        json.dump(dummy_mix_report, f, indent=2)
+
 
     # Re-create mock files
     os.makedirs("storage/tasks/mock-task", exist_ok=True)
@@ -1081,6 +1099,173 @@ def main():
         print(f"Narration-derived queries present in {narr_derived_count}/{len(scenes)} scenes")
         print("Verification: Narration-derived B-roll query fields are present in storyboard.")
 
+    # === TEST CONTENT ENGINE V2.0B — BGM + NO DEAD AIR VALIDATION ===
+    print("\n--- Testing v2.0b BGM and Silence Validation ---")
+    import yaml
+    
+    # 20. Audio config loads
+    print("Testing audio configuration loading...")
+    with open("formats/viral_retention_engine_24s.yml", "r", encoding="utf-8") as f:
+        fmt_cfg = yaml.safe_load(f)
+    assert "audio" in fmt_cfg, "Audio section missing in formats/viral_retention_engine_24s.yml"
+    assert fmt_cfg["audio"]["require_bgm"] is True
+    assert fmt_cfg["audio"]["bgm_mood"] == "tech_pulse"
+    print("Verification: Audio configuration loaded successfully.")
+
+    # 21. mix_retention_audio.py handles mock mode and creates report
+    print("Testing BGM mixer in mock mode...")
+    mix_report_path = "docs/audio-mix-report.json"
+    if os.path.exists(mix_report_path):
+        os.remove(mix_report_path)
+        
+    os.makedirs("storage/tasks/mock-task", exist_ok=True)
+    dummy_input = "storage/tasks/mock-task/test-dummy.mp4"
+    with open(dummy_input, "wb") as f:
+        f.write(b"0" * 500) # under 100 KB -> mock
+        
+    run_cmd([sys.executable, "scripts/mix_retention_audio.py"], env_override={"GENERATION_MODE": "mock"})
+    assert os.path.exists(mix_report_path), "audio-mix-report.json was not created in mock mode!"
+    with open(mix_report_path, "r", encoding="utf-8") as f:
+        rep = json.load(f)
+    assert rep["bgm_status"] == "skipped", "Expected BGM status 'skipped' in mock mode"
+    print("Verification: BGM mixer bypassed successfully in mock mode and created report.")
+
+    # 22. missing BGM fails in real mode if require_bgm=true
+    print("Testing BGM mixer missing assets failure in real mode...")
+    music_dir = "assets/music"
+    music_backup = "assets/music_backup_temp"
+    if os.path.exists(music_dir):
+        os.rename(music_dir, music_backup)
+        
+    real_input = "storage/tasks/mock-task/test-real-input.mp4"
+    with open(real_input, "wb") as f:
+        f.write(b"0" * 150000) # over 100 KB -> real
+        
+    try:
+        res = subprocess.run([sys.executable, "scripts/mix_retention_audio.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "BGM mixer should have failed when assets are missing and require_bgm=true"
+        print("Verification: BGM mixer failed successfully when BGM files were missing.")
+    finally:
+        if os.path.exists(music_backup):
+            os.rename(music_backup, music_dir)
+
+    # 23. Silence validation catches long silent tail / silence gaps
+    print("Testing silence validation on a silent video...")
+    silent_video = "storage/tasks/mock-task/final-retention.mp4"
+    if os.path.exists(silent_video):
+        os.remove(silent_video)
+        
+    # Generate 24s silent video using ffmpeg
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "lavfi", "-i", "color=c=blue:s=1080x1920:d=24",
+        "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo:d=24",
+        "-c:v", "libx264", "-c:a", "aac", "-shortest",
+        silent_video
+    ]
+    res_gen = subprocess.run(cmd, capture_output=True)
+    if res_gen.returncode == 0:
+        print("Generated a silent video successfully for test.")
+        # Pad the video file to ensure its size exceeds the 100KB mock threshold
+        with open(silent_video, "ab") as f:
+            f.write(b"0" * 200000)
+            
+        test_video_info = {
+            "video_path": silent_video,
+            "duration": 24.0,
+            "width": 1080,
+            "height": 1920
+        }
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(test_video_info, f, indent=2)
+            
+        dummy_mix_report = {
+            "bgm_status": "added",
+            "bgm_file": "assets/music/tech_pulse.mp3",
+            "bgm_mood": "tech_pulse",
+            "video_duration": 24.0,
+            "bgm_duration_after_loop": 24.0,
+            "voice_audio_present": True,
+            "final_audio_present": True,
+            "full_duration_audio_coverage": True,
+            "volume_settings": {"voice_volume": 1.0, "bgm_volume": 0.12}
+        }
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump(dummy_mix_report, f, indent=2)
+
+            
+        env_val = os.environ.copy()
+        env_val["GENERATION_MODE"] = "real"
+        res_val = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env=env_val, capture_output=True, text=True)
+        if res_val.returncode != 1:
+            print("res_val STDOUT:", res_val.stdout)
+            print("res_val STDERR:", res_val.stderr)
+        assert res_val.returncode == 1, "validate_retention_format should have failed for a silent video!"
+        assert "exceeds 1.0s threshold" in res_val.stdout or "exceeds 1.0s threshold" in res_val.stderr
+        print("Verification: Silence validation successfully caught silence and failed.")
+    else:
+        print("Warning: ffmpeg not functional or failed to generate silent video. Skipping ffmpeg silence test.")
+
+    # 24. Filler detector reports exact matched tokens
+    print("Testing filler word checks in quality gate...")
+    test_brief = {
+        "topic": "Clean topic about productivity website",
+        "hook": "Stop wasting hours. Basically this is amazing.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Um, step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 100,
+        "format_id": "viral_retention_engine_24s",
+        "target_length_seconds": 24,
+        "hard_min_duration_seconds": 18,
+        "hard_max_duration_seconds": 32,
+        "scene_plan": [
+            {"scene_id": 1, "time_range": "0:00 - 0:02", "visual": "visual", "audio": "Basically this is amazing.", "movement": "zoom"},
+            {"scene_id": 2, "time_range": "0:02 - 0:04", "visual": "visual", "audio": "Um, step 2", "movement": "zoom"}
+        ],
+        "text_overlay_plan": [{"time_range": "0:00 - 0:01", "text": "text"}],
+        "safety_rules": ["no copyright issues"]
+    }
+    
+    with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+        json.dump(test_brief, f, indent=2)
+        
+    res_gate = subprocess.run([sys.executable, "scripts/quality_gate.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+    with open("docs/quality-report.json", "r", encoding="utf-8") as f:
+        gate_rep = json.load(f)
+        
+    warnings_str = " ".join(gate_rep.get("warnings", []))
+    assert "basically" in warnings_str and "um" in warnings_str, f"Expected reported filler words in warning: {warnings_str}"
+    
+    # Test that "like" or "actually" are not flagged
+    test_brief_clean = test_brief.copy()
+    test_brief_clean["hook"] = "Stop wasting hours. I actually like this."
+    test_brief_clean["scene_plan"] = [
+        {"scene_id": 1, "time_range": "0:00 - 0:02", "visual": "visual", "audio": "I actually like this.", "movement": "zoom"}
+    ]
+    with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+        json.dump(test_brief_clean, f, indent=2)
+        
+    res_gate_clean = subprocess.run([sys.executable, "scripts/quality_gate.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+    with open("docs/quality-report.json", "r", encoding="utf-8") as f:
+        gate_rep_clean = json.load(f)
+        
+    warnings_clean_str = " ".join(gate_rep_clean.get("warnings", []))
+    assert "filler words" not in warnings_clean_str, f"Normal words 'like'/'actually' should not trigger filler warning: {warnings_clean_str}"
+    print("Verification: Filler word check successfully detected exact tokens and ignored normal words.")
+
+    # Clean up test files
+    for clean_path in [
+        "storage/tasks/mock-task/test-dummy.mp4",
+        "storage/tasks/mock-task/test-real-input.mp4",
+        "storage/tasks/mock-task/final-retention.mp4",
+        "docs/audio-mix-report.json",
+        "docs/video-brief.json",
+        "docs/quality-report.json"
+    ]:
+        if os.path.exists(clean_path):
+            os.remove(clean_path)
+
     # Clean up v2.0 test artifacts
     for cleanup_path in [
         "storage/tasks/mock-task/test-tts.mp4",
@@ -1096,3 +1281,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

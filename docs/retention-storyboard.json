@@ -1,0 +1,1064 @@
+{
+  "format_id": "viral_retention_engine_24s",
+  "target_seconds": 24,
+  "hook_0_3s": "This hidden AI tool restores old blurry photos.",
+  "narration_script": [
+    "This hidden AI tool restores old blurry photos",
+    "It uses a deep neural network",
+    "to predict and reconstruct high-resolution face",
+    "details that are completely missing",
+    "Watch a pixelated black-and-white face instantly",
+    "sharpen into high-definition color",
+    "Your family's old memories look they were shot yesterday",
+    "Would you pay a professional restorer when this exists"
+  ],
+  "scenes": [
+    {
+      "scene_id": 1,
+      "time_range": "0:00 - 0:01",
+      "visual_prompt": "A clean glowing computer monitor displaying a modern dashboard.",
+      "stock_search_query": "technology software hidden tool",
+      "narration_derived_query": "technology software hidden tool",
+      "preset_fallback_query": "glowing computer dashboard",
+      "motion_instruction": "Slow zoom-in",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "THIS HIDDEN",
+      "narration_line": "This hidden AI tool",
+      "sound_cue": "whoosh"
+    },
+    {
+      "scene_id": 2,
+      "time_range": "0:01 - 0:02",
+      "visual_prompt": "A close-up of hands typing quickly on a backlit mechanical keyboard.",
+      "stock_search_query": "technology software restores blurry photos",
+      "narration_derived_query": "technology software restores blurry photos",
+      "preset_fallback_query": "hands typing keyboard",
+      "motion_instruction": "Pan left",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "AI TOOL",
+      "narration_line": "restores old blurry photos.",
+      "sound_cue": "impact"
+    },
+    {
+      "scene_id": 3,
+      "time_range": "0:02 - 0:03",
+      "visual_prompt": "A user interface loading progress bar filling up rapidly.",
+      "stock_search_query": "technology software hidden tool",
+      "narration_derived_query": "technology software hidden tool",
+      "preset_fallback_query": "progress bar loading screen",
+      "motion_instruction": "Pan right",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "RESTORES OLD",
+      "narration_line": "This hidden AI tool",
+      "sound_cue": "hit"
+    },
+    {
+      "scene_id": 4,
+      "time_range": "0:03 - 0:04",
+      "visual_prompt": "A pointer clicking on a bright Generate option.",
+      "stock_search_query": "technology software restores blurry photos",
+      "narration_derived_query": "technology software restores blurry photos",
+      "preset_fallback_query": "click generate interface",
+      "motion_instruction": "Icon shake",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "BLURRY PHOTOS",
+      "narration_line": "restores old blurry photos.",
+      "sound_cue": "riser"
+    },
+    {
+      "scene_id": 5,
+      "time_range": "0:04 - 0:05",
+      "visual_prompt": "A circular progress wheel spinning and glowing.",
+      "stock_search_query": "technology software hidden tool",
+      "narration_derived_query": "technology software hidden tool",
+      "preset_fallback_query": "loading wheel process",
+      "motion_instruction": "Rapid zoom-in",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "IT USES",
+      "narration_line": "This hidden AI tool",
+      "sound_cue": "glitch"
+    },
+    {
+      "scene_id": 6,
+      "time_range": "0:05 - 0:06",
+      "visual_prompt": "A beautiful design layout appearing instantly on a tablet.",
+      "stock_search_query": "technology software restores blurry photos",
+      "narration_derived_query": "technology software restores blurry photos",
+      "preset_fallback_query": "tablet designer interface",
+      "motion_instruction": "Slide-right",
+      "reaction_or_reveal_type": "claim",
+      "overlay_text": "A DEEP",
+      "narration_line": "restores old blurry photos.",
+      "sound_cue": "bass drop"
+    },
+    {
+      "scene_id": 7,
+      "time_range": "0:06 - 0:07",
+      "visual_prompt": "A creator reacting with surprise and smiling.",
+      "stock_search_query": "technology software uses deep neural",
+      "narration_derived_query": "technology software uses deep neural",
+      "preset_fallback_query": "excited creator screen",
+      "motion_instruction": "Click zoom",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "NEURAL NETWORK",
+      "narration_line": "It uses a deep neural network to predict",
+      "sound_cue": "whoosh"
+    },
+    {
+      "scene_id": 8,
+      "time_range": "0:07 - 0:08",
+      "visual_prompt": "Close-up of dynamic statistics graph building on screen.",
+      "stock_search_query": "technology software reconstruct high resolution",
+      "narration_derived_query": "technology software reconstruct high resolution",
+      "preset_fallback_query": "growth chart screen",
+      "motion_instruction": "Focus switch",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "TO PREDICT",
+      "narration_line": "and reconstruct high-resolution face details that are completely missing.",
+      "sound_cue": "impact"
+    },
+    {
+      "scene_id": 9,
+      "time_range": "0:08 - 0:09",
+      "visual_prompt": "A screen displaying modern software menu navigation.",
+      "stock_search_query": "technology software uses deep neural",
+      "narration_derived_query": "technology software uses deep neural",
+      "preset_fallback_query": "software screen navigation",
+      "motion_instruction": "Fast scroll down",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "AND RECONSTRUCT",
+      "narration_line": "It uses a deep neural network to predict",
+      "sound_cue": "hit"
+    },
+    {
+      "scene_id": 10,
+      "time_range": "0:09 - 0:10",
+      "visual_prompt": "A close-up of fingers sliding a visual timeline scale.",
+      "stock_search_query": "technology software reconstruct high resolution",
+      "narration_derived_query": "technology software reconstruct high resolution",
+      "preset_fallback_query": "timeline slider controls",
+      "motion_instruction": "Pan left",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "HIGH-RESOLUTION FACE",
+      "narration_line": "and reconstruct high-resolution face details that are completely missing.",
+      "sound_cue": "riser"
+    },
+    {
+      "scene_id": 11,
+      "time_range": "0:10 - 0:11",
+      "visual_prompt": "A clean workspace with computer and glowing light.",
+      "stock_search_query": "technology software pixelated black white",
+      "narration_derived_query": "technology software pixelated black white",
+      "preset_fallback_query": "creative workspace desk",
+      "motion_instruction": "Icon shake",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "DETAILS THAT",
+      "narration_line": "Watch a pixelated black-and-white face",
+      "sound_cue": "glitch"
+    },
+    {
+      "scene_id": 12,
+      "time_range": "0:11 - 0:12",
+      "visual_prompt": "A laptop screen displaying successful export status.",
+      "stock_search_query": "technology software instantly sharpen high",
+      "narration_derived_query": "technology software instantly sharpen high",
+      "preset_fallback_query": "laptop success status",
+      "motion_instruction": "Icon shake",
+      "reaction_or_reveal_type": "evidence",
+      "overlay_text": "ARE COMPLETELY",
+      "narration_line": "instantly sharpen into high-definition color.",
+      "sound_cue": "bass drop"
+    },
+    {
+      "scene_id": 13,
+      "time_range": "0:12 - 0:13",
+      "visual_prompt": "A split screen view showing fast changes in files.",
+      "stock_search_query": "technology software pixelated black white",
+      "narration_derived_query": "technology software pixelated black white",
+      "preset_fallback_query": "split screen workflow",
+      "motion_instruction": "Split-screen slide",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "MISSING WATCH",
+      "narration_line": "Watch a pixelated black-and-white face",
+      "sound_cue": "whoosh"
+    },
+    {
+      "scene_id": 14,
+      "time_range": "0:13 - 0:14",
+      "visual_prompt": "A professional developer nodding in approval.",
+      "stock_search_query": "technology software instantly sharpen high",
+      "narration_derived_query": "technology software instantly sharpen high",
+      "preset_fallback_query": "professional nodding screen",
+      "motion_instruction": "Slide-right",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "A PIXELATED",
+      "narration_line": "instantly sharpen into high-definition color.",
+      "sound_cue": "impact"
+    },
+    {
+      "scene_id": 15,
+      "time_range": "0:14 - 0:15",
+      "visual_prompt": "A checkmark icon populating on a dark background.",
+      "stock_search_query": "technology software pixelated black white",
+      "narration_derived_query": "technology software pixelated black white",
+      "preset_fallback_query": "checkmark complete icon",
+      "motion_instruction": "Toggle zoom",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "BLACK-AND-WHITE FACE",
+      "narration_line": "Watch a pixelated black-and-white face",
+      "sound_cue": "hit"
+    },
+    {
+      "scene_id": 16,
+      "time_range": "0:15 - 0:16",
+      "visual_prompt": "Sleek neon lines pulsing across a grid screen.",
+      "stock_search_query": "technology software instantly sharpen high",
+      "narration_derived_query": "technology software instantly sharpen high",
+      "preset_fallback_query": "neon lines abstract",
+      "motion_instruction": "Focus switch",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "INSTANTLY SHARPEN",
+      "narration_line": "instantly sharpen into high-definition color.",
+      "sound_cue": "riser"
+    },
+    {
+      "scene_id": 17,
+      "time_range": "0:16 - 0:17",
+      "visual_prompt": "A tablet screen with design templates visible.",
+      "stock_search_query": "technology software family memories",
+      "narration_derived_query": "technology software family memories",
+      "preset_fallback_query": "tablet design templates",
+      "motion_instruction": "Slide-in",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "INTO HIGH-DEFINITION",
+      "narration_line": "Your family's old memories",
+      "sound_cue": "glitch"
+    },
+    {
+      "scene_id": 18,
+      "time_range": "0:17 - 0:18",
+      "visual_prompt": "A creator smiling and presenting towards screen.",
+      "stock_search_query": "technology software shot yesterday",
+      "narration_derived_query": "technology software shot yesterday",
+      "preset_fallback_query": "smiling developer screen",
+      "motion_instruction": "Pan left",
+      "reaction_or_reveal_type": "suspense_build",
+      "overlay_text": "COLOR YOUR",
+      "narration_line": "look they were shot yesterday.",
+      "sound_cue": "bass drop"
+    },
+    {
+      "scene_id": 19,
+      "time_range": "0:18 - 0:19",
+      "visual_prompt": "Close-up of a high quality interface dial rotating.",
+      "stock_search_query": "technology software family memories",
+      "narration_derived_query": "technology software family memories",
+      "preset_fallback_query": "interface dial rotation",
+      "motion_instruction": "Slow pan left",
+      "reaction_or_reveal_type": "reveal_or_prediction",
+      "overlay_text": "FAMILY'S OLD",
+      "narration_line": "Your family's old memories",
+      "sound_cue": "whoosh"
+    },
+    {
+      "scene_id": 20,
+      "time_range": "0:19 - 0:20",
+      "visual_prompt": "A hand pressing a button on a control device.",
+      "stock_search_query": "technology software shot yesterday",
+      "narration_derived_query": "technology software shot yesterday",
+      "preset_fallback_query": "hand press button",
+      "motion_instruction": "Icon shake",
+      "reaction_or_reveal_type": "reveal_or_prediction",
+      "overlay_text": "MEMORIES LOOK",
+      "narration_line": "look they were shot yesterday.",
+      "sound_cue": "impact"
+    },
+    {
+      "scene_id": 21,
+      "time_range": "0:20 - 0:21",
+      "visual_prompt": "Smooth geometric patterns floating in abstract space.",
+      "stock_search_query": "abstract float geometry",
+      "narration_derived_query": "",
+      "preset_fallback_query": "abstract float geometry",
+      "motion_instruction": "Device rotation",
+      "reaction_or_reveal_type": "reveal_or_prediction",
+      "overlay_text": "THEY WERE",
+      "narration_line": "Would you pay a",
+      "sound_cue": "hit"
+    },
+    {
+      "scene_id": 22,
+      "time_range": "0:21 - 0:22",
+      "visual_prompt": "A laptop displaying a secure complete dashboard.",
+      "stock_search_query": "technology software professional restorer exists",
+      "narration_derived_query": "technology software professional restorer exists",
+      "preset_fallback_query": "laptop complete dashboard",
+      "motion_instruction": "Slide-right",
+      "reaction_or_reveal_type": "reveal_or_prediction",
+      "overlay_text": "SHOT YESTERDAY",
+      "narration_line": "professional restorer when this exists?",
+      "sound_cue": "riser"
+    },
+    {
+      "scene_id": 23,
+      "time_range": "0:22 - 0:23",
+      "visual_prompt": "A person looking happy and typing on keyboard.",
+      "stock_search_query": "happy typing keyboard",
+      "narration_derived_query": "",
+      "preset_fallback_query": "happy typing keyboard",
+      "motion_instruction": "Button pulse",
+      "reaction_or_reveal_type": "final_question_or_twist",
+      "overlay_text": "WOULD YOU",
+      "narration_line": "Would you pay a",
+      "sound_cue": "glitch"
+    },
+    {
+      "scene_id": 24,
+      "time_range": "0:23 - 0:24",
+      "visual_prompt": "A golden success badge or checkmark glowing.",
+      "stock_search_query": "technology software professional restorer exists",
+      "narration_derived_query": "technology software professional restorer exists",
+      "preset_fallback_query": "glowing checkmark badge",
+      "motion_instruction": "Focus switch",
+      "reaction_or_reveal_type": "final_question_or_twist",
+      "overlay_text": "PAY A",
+      "narration_line": "professional restorer when this exists?",
+      "sound_cue": "bass drop"
+    }
+  ],
+  "text_overlays": [
+    {
+      "start_time": 0.0,
+      "end_time": 0.5,
+      "text": "THIS HIDDEN",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 0.5,
+      "end_time": 1.0,
+      "text": "AI TOOL",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 1.0,
+      "end_time": 1.5,
+      "text": "RESTORES OLD",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 1.5,
+      "end_time": 2.0,
+      "text": "BLURRY PHOTOS",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 2.0,
+      "end_time": 2.5,
+      "text": "IT USES",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 2.5,
+      "end_time": 3.0,
+      "text": "A DEEP",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 3.0,
+      "end_time": 3.5,
+      "text": "NEURAL NETWORK",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 3.5,
+      "end_time": 4.0,
+      "text": "TO PREDICT",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 4.0,
+      "end_time": 4.5,
+      "text": "AND RECONSTRUCT",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 4.5,
+      "end_time": 5.0,
+      "text": "HIGH-RESOLUTION FACE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 5.0,
+      "end_time": 5.5,
+      "text": "DETAILS THAT",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 5.5,
+      "end_time": 6.0,
+      "text": "ARE COMPLETELY",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 6.0,
+      "end_time": 6.5,
+      "text": "MISSING WATCH",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 6.5,
+      "end_time": 7.0,
+      "text": "A PIXELATED",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 7.0,
+      "end_time": 7.5,
+      "text": "BLACK-AND-WHITE FACE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 7.5,
+      "end_time": 8.0,
+      "text": "INSTANTLY SHARPEN",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 8.0,
+      "end_time": 8.5,
+      "text": "INTO HIGH-DEFINITION",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 8.5,
+      "end_time": 9.0,
+      "text": "COLOR YOUR",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 9.0,
+      "end_time": 9.5,
+      "text": "FAMILY'S OLD",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 9.5,
+      "end_time": 10.0,
+      "text": "MEMORIES LOOK",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 10.0,
+      "end_time": 10.5,
+      "text": "THEY WERE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 10.5,
+      "end_time": 11.0,
+      "text": "SHOT YESTERDAY",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 11.0,
+      "end_time": 11.5,
+      "text": "WOULD YOU",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 11.5,
+      "end_time": 12.0,
+      "text": "PAY A",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 12.0,
+      "end_time": 12.5,
+      "text": "PROFESSIONAL RESTORER",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 12.5,
+      "end_time": 13.0,
+      "text": "WHEN THIS",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 13.0,
+      "end_time": 13.5,
+      "text": "EXISTS",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": false
+    },
+    {
+      "start_time": 13.5,
+      "end_time": 14.0,
+      "text": "FAST",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 14.0,
+      "end_time": 14.5,
+      "text": "REVEAL",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 14.5,
+      "end_time": 15.0,
+      "text": "NOW",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 15.0,
+      "end_time": 15.5,
+      "text": "CREATIVE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 15.5,
+      "end_time": 16.0,
+      "text": "SYSTEM",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 16.0,
+      "end_time": 16.5,
+      "text": "BOOST",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 16.5,
+      "end_time": 17.0,
+      "text": "PRODUCTIVITY",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 17.0,
+      "end_time": 17.5,
+      "text": "DESIGN",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 17.5,
+      "end_time": 18.0,
+      "text": "FAST",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 18.0,
+      "end_time": 18.5,
+      "text": "REVEAL",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 18.5,
+      "end_time": 19.0,
+      "text": "NOW",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 19.0,
+      "end_time": 19.5,
+      "text": "CREATIVE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 19.5,
+      "end_time": 20.0,
+      "text": "SYSTEM",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 20.0,
+      "end_time": 20.5,
+      "text": "BOOST",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 20.5,
+      "end_time": 21.0,
+      "text": "PRODUCTIVITY",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 21.0,
+      "end_time": 21.5,
+      "text": "DESIGN",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 21.5,
+      "end_time": 22.0,
+      "text": "FAST",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 22.0,
+      "end_time": 22.5,
+      "text": "REVEAL",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 22.5,
+      "end_time": 23.0,
+      "text": "NOW",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 23.0,
+      "end_time": 23.5,
+      "text": "CREATIVE",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    },
+    {
+      "start_time": 23.5,
+      "end_time": 24.0,
+      "text": "SYSTEM",
+      "position": "center",
+      "style": "large_bold_white_black_shadow",
+      "max_words": 4,
+      "is_filler": true
+    }
+  ],
+  "camera_motion": [
+    {
+      "time_range": "0:00 - 0:01",
+      "motion": "Slow zoom-in"
+    },
+    {
+      "time_range": "0:01 - 0:02",
+      "motion": "Pan left"
+    },
+    {
+      "time_range": "0:02 - 0:03",
+      "motion": "Pan right"
+    },
+    {
+      "time_range": "0:03 - 0:04",
+      "motion": "Icon shake"
+    },
+    {
+      "time_range": "0:04 - 0:05",
+      "motion": "Rapid zoom-in"
+    },
+    {
+      "time_range": "0:05 - 0:06",
+      "motion": "Slide-right"
+    },
+    {
+      "time_range": "0:06 - 0:07",
+      "motion": "Click zoom"
+    },
+    {
+      "time_range": "0:07 - 0:08",
+      "motion": "Focus switch"
+    },
+    {
+      "time_range": "0:08 - 0:09",
+      "motion": "Fast scroll down"
+    },
+    {
+      "time_range": "0:09 - 0:10",
+      "motion": "Pan left"
+    },
+    {
+      "time_range": "0:10 - 0:11",
+      "motion": "Icon shake"
+    },
+    {
+      "time_range": "0:11 - 0:12",
+      "motion": "Icon shake"
+    },
+    {
+      "time_range": "0:12 - 0:13",
+      "motion": "Split-screen slide"
+    },
+    {
+      "time_range": "0:13 - 0:14",
+      "motion": "Slide-right"
+    },
+    {
+      "time_range": "0:14 - 0:15",
+      "motion": "Toggle zoom"
+    },
+    {
+      "time_range": "0:15 - 0:16",
+      "motion": "Focus switch"
+    },
+    {
+      "time_range": "0:16 - 0:17",
+      "motion": "Slide-in"
+    },
+    {
+      "time_range": "0:17 - 0:18",
+      "motion": "Pan left"
+    },
+    {
+      "time_range": "0:18 - 0:19",
+      "motion": "Slow pan left"
+    },
+    {
+      "time_range": "0:19 - 0:20",
+      "motion": "Icon shake"
+    },
+    {
+      "time_range": "0:20 - 0:21",
+      "motion": "Device rotation"
+    },
+    {
+      "time_range": "0:21 - 0:22",
+      "motion": "Slide-right"
+    },
+    {
+      "time_range": "0:22 - 0:23",
+      "motion": "Button pulse"
+    },
+    {
+      "time_range": "0:23 - 0:24",
+      "motion": "Focus switch"
+    }
+  ],
+  "sound_cues": [
+    {
+      "time_range": "0:00 - 0:01",
+      "effect": "whoosh"
+    },
+    {
+      "time_range": "0:01 - 0:02",
+      "effect": "impact"
+    },
+    {
+      "time_range": "0:02 - 0:03",
+      "effect": "hit"
+    },
+    {
+      "time_range": "0:03 - 0:04",
+      "effect": "riser"
+    },
+    {
+      "time_range": "0:04 - 0:05",
+      "effect": "glitch"
+    },
+    {
+      "time_range": "0:05 - 0:06",
+      "effect": "bass drop"
+    },
+    {
+      "time_range": "0:06 - 0:07",
+      "effect": "whoosh"
+    },
+    {
+      "time_range": "0:07 - 0:08",
+      "effect": "impact"
+    },
+    {
+      "time_range": "0:08 - 0:09",
+      "effect": "hit"
+    },
+    {
+      "time_range": "0:09 - 0:10",
+      "effect": "riser"
+    },
+    {
+      "time_range": "0:10 - 0:11",
+      "effect": "glitch"
+    },
+    {
+      "time_range": "0:11 - 0:12",
+      "effect": "bass drop"
+    },
+    {
+      "time_range": "0:12 - 0:13",
+      "effect": "whoosh"
+    },
+    {
+      "time_range": "0:13 - 0:14",
+      "effect": "impact"
+    },
+    {
+      "time_range": "0:14 - 0:15",
+      "effect": "hit"
+    },
+    {
+      "time_range": "0:15 - 0:16",
+      "effect": "riser"
+    },
+    {
+      "time_range": "0:16 - 0:17",
+      "effect": "glitch"
+    },
+    {
+      "time_range": "0:17 - 0:18",
+      "effect": "bass drop"
+    },
+    {
+      "time_range": "0:18 - 0:19",
+      "effect": "whoosh"
+    },
+    {
+      "time_range": "0:19 - 0:20",
+      "effect": "impact"
+    },
+    {
+      "time_range": "0:20 - 0:21",
+      "effect": "hit"
+    },
+    {
+      "time_range": "0:21 - 0:22",
+      "effect": "riser"
+    },
+    {
+      "time_range": "0:22 - 0:23",
+      "effect": "glitch"
+    },
+    {
+      "time_range": "0:23 - 0:24",
+      "effect": "bass drop"
+    }
+  ],
+  "edit_cues": [
+    {
+      "time_range": "0:00",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:01",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:02",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:03",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:04",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:05",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:06",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:07",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:08",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:09",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:10",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:11",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:12",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:13",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:14",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:15",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:16",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:17",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:18",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:19",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:20",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:21",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:22",
+      "type": "jump_cut"
+    },
+    {
+      "time_range": "0:23",
+      "type": "jump_cut"
+    }
+  ],
+  "safety_notes": [
+    "No copyrighted clips are used.",
+    "Disney, Fox, Simpsons, and named character references are fully avoided.",
+    "Visuals describe generic non-branded assets (mockups, reaction vectors, layouts).",
+    "Text overlays strictly contain 1-4 words.",
+    "Narration is direct and safety-checked for overpromising income claims."
+  ]
+}

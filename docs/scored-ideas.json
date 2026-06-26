@@ -2,6 +2,603 @@
   {
     "idea_id": "idea_ai_tools_1",
     "profile_id": "ai_tools",
+    "topic": "This hidden AI tool restores old blurry photos in seconds",
+    "angle": "photo restoration technology",
+    "hook": "This hidden AI tool restores old blurry photos.",
+    "keywords": [
+      "photo restoration",
+      "face enhancement",
+      "old photos"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "It uses a deep neural network to predict and reconstruct high-resolution face details that are completely missing.",
+    "visual_promise": "Watch a pixelated black-and-white face instantly sharpen into high-definition color.",
+    "payoff": "Your family's old memories look like they were shot yesterday.",
+    "final_question_or_twist": "Would you pay a professional restorer when this exists?",
+    "risk_flags": [],
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": true,
+    "selected_reason": "Selected as the highest scoring fresh idea (Score: 85)."
+  },
+  {
+    "idea_id": "idea_ai_tools_10",
+    "profile_id": "ai_tools",
+    "topic": "3 AI extensions for Google Chrome you need today",
+    "angle": "browser extension recommendations",
+    "hook": "Stop using Google Chrome normally.",
+    "keywords": [
+      "chrome extensions",
+      "google chrome",
+      "ai plugins"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "These 3 AI Chrome extensions make it twenty times smarter.",
+    "visual_promise": "Quick cuts showing each extension sidebar activating in Chrome.",
+    "payoff": "They are free to install and change how you browse.",
+    "final_question_or_twist": "Which Chrome extension is your favorite?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with '3 AI extensions for Google Chrome you need today' (-60)",
+      "Angle recency conflict: Angle 'browser extension recommendations' used recently (-25)",
+      "Reused 2+ keywords (chrome extensions, google chrome, ai plugins) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "3 AI extensions for Google Chrome you need today",
+        "video_id": "tR-hHVtTEyo",
+        "date": "2026-06-21T19:59:04.857750Z"
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "3 AI extensions for Google Chrome you need today",
+        "video_id": "tR-hHVtTEyo",
+        "date": "2026-06-21T19:59:04.857750Z",
+        "angle": "browser extension recommendations"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "3 AI extensions for Google Chrome you need today",
+        "video_id": "tR-hHVtTEyo",
+        "date": "2026-06-21T19:59:04.857750Z",
+        "keywords": [
+          "chrome extensions",
+          "google chrome",
+          "ai plugins"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_11",
+    "profile_id": "ai_tools",
+    "topic": "This AI tool generates fully animated videos from text",
+    "angle": "text to video animation",
+    "hook": "This AI tool turns text into a full video.",
+    "keywords": [
+      "text to video",
+      "animated videos",
+      "ai video generator"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 10,
+    "curiosity_gap": "But the result looks almost unreal.",
+    "visual_promise": "You type one sentence. It builds scenes, captions, and motion.",
+    "payoff": "This could change how creators make Shorts.",
+    "final_question_or_twist": "Will AI completely replace animators?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'This AI tool generates fully animated videos from text' (-60)",
+      "Angle recency conflict: Angle 'text to video animation' used recently (-25)",
+      "Reused 2+ keywords (text to video, animated videos, ai video generator) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This AI tool generates fully animated videos from text",
+        "video_id": "fl5QPqoB9gU",
+        "date": "2026-06-21T20:18:26.106965Z"
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This AI tool generates fully animated videos from text",
+        "video_id": "fl5QPqoB9gU",
+        "date": "2026-06-21T20:18:26.106965Z",
+        "angle": "text to video animation"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This AI tool generates fully animated videos from text",
+        "video_id": "fl5QPqoB9gU",
+        "date": "2026-06-21T20:18:26.106965Z",
+        "keywords": [
+          "text to video",
+          "animated videos",
+          "ai video generator"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_12",
+    "profile_id": "ai_tools",
+    "topic": "This AI tool generates 3D models from simple text prompts",
+    "angle": "text to 3D generation",
+    "hook": "You can generate fully textured 3D models in seconds just by typing.",
+    "keywords": [
+      "3d models",
+      "text to 3d",
+      "game assets"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "This new AI software builds 3D assets that are ready to import into games.",
+    "visual_promise": "Watch a 3D character render on screen from a single word prompt.",
+    "payoff": "Download the file and use it in your game engine immediately.",
+    "final_question_or_twist": "Is this the future of game design?",
+    "risk_flags": [],
+    "freshness_score": 45,
+    "penalties": [
+      "Similar topic overlap (60%) with 'This AI tool generates fully animated videos from text' (-40)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "similar_topic_overlap",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "similar_topic",
+        "history_topic": "This AI tool generates fully animated videos from text",
+        "video_id": "fl5QPqoB9gU",
+        "date": "2026-06-21T20:18:26.106965Z",
+        "overlap": 0.6
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_13",
+    "profile_id": "ai_tools",
+    "topic": "This free AI website removes background noise from any audio file",
+    "angle": "audio cleanup tool",
+    "hook": "Stop recording video with background fan noise or traffic sounds.",
+    "keywords": [
+      "audio cleanup",
+      "remove noise",
+      "free ai tool"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "This free AI audio cleanup site makes a cheap microphone sound as clear as a studio microphone.",
+    "visual_promise": "Showing an audio waveform graph with noise disappearing in real time.",
+    "payoff": "Upload your audio and get a studio quality podcast sound instantly.",
+    "final_question_or_twist": "Will you use this to clean up your audio?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'This free AI website removes background noise from any audio file' (-60)",
+      "Hook pattern start 'stop recording video' matches recent video (-25)",
+      "Angle recency conflict: Angle 'audio cleanup tool' used recently (-25)",
+      "Reused 2+ keywords (audio cleanup, remove noise, free ai tool) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This free AI website removes background noise from any audio file",
+        "video_id": "pS7ao1TNQ-U",
+        "date": "2026-06-22T01:22:22.258583Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This free AI website removes background noise from any audio file",
+        "video_id": "pS7ao1TNQ-U",
+        "date": "2026-06-22T01:22:22.258583Z",
+        "hook": "Stop recording video with background fan noise or traffic sounds."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This free AI website removes background noise from any audio file",
+        "video_id": "pS7ao1TNQ-U",
+        "date": "2026-06-22T01:22:22.258583Z",
+        "angle": "audio cleanup tool"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This free AI website removes background noise from any audio file",
+        "video_id": "pS7ao1TNQ-U",
+        "date": "2026-06-22T01:22:22.258583Z",
+        "keywords": [
+          "audio cleanup",
+          "remove noise",
+          "free ai tool"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_2",
+    "profile_id": "ai_tools",
+    "topic": "One messy recording becomes studio clean",
+    "angle": "audio restoration technology",
+    "hook": "See how one messy recording becomes studio clean.",
+    "keywords": [
+      "audio restoration",
+      "voice cleaning",
+      "neural network sound"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "A secret neural network isolates the speaker's voice by predicting and reconstructing missing vocal frequencies.",
+    "visual_promise": "Watch the background noise waveform instantly flatten to a straight line.",
+    "payoff": "The low-quality street audio transforms into crisp studio sound.",
+    "final_question_or_twist": "Could this technology make expensive microphones completely obsolete?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'One messy recording becomes studio clean' (-60)",
+      "Hook pattern start 'see how one' matches recent video (-25)",
+      "Angle recency conflict: Angle 'audio restoration technology' used recently (-25)",
+      "Reused 2+ keywords (audio restoration, voice cleaning, neural network sound) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "One messy recording becomes studio clean",
+        "video_id": "SAtjoXraUZU",
+        "date": "2026-06-25T17:57:13.189212Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "One messy recording becomes studio clean",
+        "video_id": "SAtjoXraUZU",
+        "date": "2026-06-25T17:57:13.189212Z",
+        "hook": "See how one messy recording becomes studio clean."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "One messy recording becomes studio clean",
+        "video_id": "SAtjoXraUZU",
+        "date": "2026-06-25T17:57:13.189212Z",
+        "angle": "audio restoration technology"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "One messy recording becomes studio clean",
+        "video_id": "SAtjoXraUZU",
+        "date": "2026-06-25T17:57:13.189212Z",
+        "keywords": [
+          "audio restoration",
+          "voice cleaning",
+          "neural network sound"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_3",
+    "profile_id": "ai_tools",
+    "topic": "This boring file turns into something wild",
+    "angle": "interactive data visualization",
+    "hook": "Watch this boring file turn into something wild.",
+    "keywords": [
+      "data visualization",
+      "python script",
+      "interactive 3d"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "A hidden python script parses a simple CSV list and generates a stunning interactive 3D solar system visualization.",
+    "visual_promise": "Witness rows of numbers instantly render into orbits, stars, and rotating planets.",
+    "payoff": "We built a complete, interactive galaxy map without writing a single line of WebGL.",
+    "final_question_or_twist": "Why aren't schools using this to teach astronomy?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'This boring file turns into something wild' (-60)",
+      "Hook pattern start 'watch this boring' matches recent video (-25)",
+      "Angle recency conflict: Angle 'interactive data visualization' used recently (-25)",
+      "Reused 2+ keywords (data visualization, python script, interactive 3d) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This boring file turns into something wild",
+        "video_id": "atKUvTtmDn0",
+        "date": "2026-06-25T18:38:51.427561Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This boring file turns into something wild",
+        "video_id": "atKUvTtmDn0",
+        "date": "2026-06-25T18:38:51.427561Z",
+        "hook": "Watch this boring file turn into something wild."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This boring file turns into something wild",
+        "video_id": "atKUvTtmDn0",
+        "date": "2026-06-25T18:38:51.427561Z",
+        "angle": "interactive data visualization"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This boring file turns into something wild",
+        "video_id": "atKUvTtmDn0",
+        "date": "2026-06-25T18:38:51.427561Z",
+        "keywords": [
+          "data visualization",
+          "python script",
+          "interactive 3d"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_4",
+    "profile_id": "ai_tools",
+    "topic": "Nobody expects this AI trick to work",
+    "angle": "document translation layout preserve",
+    "hook": "Nobody expects this AI trick to work.",
+    "keywords": [
+      "document translation",
+      "layout preservation",
+      "pdf tools"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "A new layout-preserving translator replaces text in complex diagrams without losing the original fonts or borders.",
+    "visual_promise": "A technical blueprint transitions seamlessly between languages while keeping every design element intact.",
+    "payoff": "It translates a full multi-layer PDF document in under three seconds.",
+    "final_question_or_twist": "Is this the end of traditional translation services?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'Nobody expects this AI trick to work' (-60)",
+      "Hook pattern start 'nobody expects this' matches recent video (-25)",
+      "Angle recency conflict: Angle 'document translation layout preserve' used recently (-25)",
+      "Reused 2+ keywords (document translation, layout preservation, pdf tools) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "hook": "Nobody expects this AI trick to work."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "angle": "document translation layout preserve"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "keywords": [
+          "document translation",
+          "layout preservation",
+          "pdf tools"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_5",
+    "profile_id": "ai_tools",
+    "topic": "Create beautiful presentation slides instantly using artificial intelligence",
+    "angle": "presentation slide design automation",
+    "hook": "Stop spending hours designing presentation slides today.",
+    "keywords": [
+      "presentation slide",
+      "ai presentation",
+      "design deck"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 14,
+    "curiosity_gap": "This new AI website builds entire slide decks from a single prompt.",
+    "visual_promise": "Type in your topic and watch the presentation populate.",
+    "payoff": "Export clean PowerPoint slides in seconds.",
+    "final_question_or_twist": "Is PowerPoint finally dead?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'Create beautiful presentation slides instantly using artificial intelligence' (-60)",
+      "Hook pattern start 'stop spending hours' matches recent video (-25)",
+      "Angle recency conflict: Angle 'presentation slide design automation' used recently (-25)",
+      "Reused 2+ keywords (presentation slide, ai presentation, design deck) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
+        "video_id": "pzr7wcQJbSc",
+        "date": "2026-06-21T21:49:15.769475Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
+        "video_id": "pzr7wcQJbSc",
+        "date": "2026-06-21T21:49:15.769475Z",
+        "hook": "Stop spending hours designing presentation slides today."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
+        "video_id": "pzr7wcQJbSc",
+        "date": "2026-06-21T21:49:15.769475Z",
+        "angle": "presentation slide design automation"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
+        "video_id": "pzr7wcQJbSc",
+        "date": "2026-06-21T21:49:15.769475Z",
+        "keywords": [
+          "presentation slide",
+          "ai presentation",
+          "design deck"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_6",
+    "profile_id": "ai_tools",
     "topic": "This AI tool turns a website idea into a landing page",
     "angle": "landing page layout recreation",
     "hook": "Stop coding landing page mockups from scratch today.",
@@ -15,6 +612,7 @@
     "curiosity_gap": "This AI website builder generates a website draft from a prompt.",
     "visual_promise": "Watch it recreate a landing page layout instantly.",
     "payoff": "Create a landing page mockup and export clean HTML.",
+    "final_question_or_twist": "Will this make web developers obsolete?",
     "risk_flags": [],
     "freshness_score": 65,
     "penalties": [
@@ -47,17 +645,17 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
         "format": "viral_curiosity_24s"
       }
     ],
-    "selected": true,
-    "selected_reason": "Selected as the highest scoring fresh idea (Score: 65)."
+    "selected": false,
+    "selected_reason": null
   },
   {
-    "idea_id": "idea_ai_tools_2",
+    "idea_id": "idea_ai_tools_7",
     "profile_id": "ai_tools",
     "topic": "3 AI tools to start a side hustle",
     "angle": "side hustle automation",
@@ -72,6 +670,7 @@
     "curiosity_gap": "But most people are using them completely wrong.",
     "visual_promise": "We show the exact screen, the generated output, and the earnings dashboard.",
     "payoff": "Use them today before they become saturated.",
+    "final_question_or_twist": "Which of these side hustles will you try first?",
     "risk_flags": [],
     "freshness_score": 0,
     "penalties": [
@@ -115,9 +714,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
         "format": "viral_curiosity_24s"
       },
       {
@@ -131,7 +730,7 @@
     "selected_reason": null
   },
   {
-    "idea_id": "idea_ai_tools_3",
+    "idea_id": "idea_ai_tools_8",
     "profile_id": "ai_tools",
     "topic": "This AI website writes all your emails",
     "angle": "email productivity",
@@ -146,18 +745,17 @@
     "curiosity_gap": "This free AI website writes them exactly in your voice.",
     "visual_promise": "Showing a blank email draft auto-filling in one click.",
     "payoff": "It saves hours and sounds completely human.",
+    "final_question_or_twist": "Would you trust an AI to email your boss?",
     "risk_flags": [],
     "freshness_score": 0,
     "penalties": [
       "Exact topic overlap with 'This AI website writes all your emails' (-60)",
-      "Hook pattern start 'stop wasting hours' matches recent video (-25)",
       "Angle recency conflict: Angle 'email productivity' used recently (-25)",
       "Reused 2+ keywords (write emails, ai website, productivity hacks) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
       "exact_topic_overlap",
-      "hook_pattern_overlap",
       "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
@@ -168,13 +766,6 @@
         "history_topic": "This AI website writes all your emails",
         "video_id": "7Lu-CSmLSVs",
         "date": "2026-06-21T18:41:51.513475Z"
-      },
-      {
-        "type": "hook_pattern",
-        "history_topic": "This AI website writes all your emails",
-        "video_id": "7Lu-CSmLSVs",
-        "date": "2026-06-21T18:41:51.513475Z",
-        "hook": "Stop wasting hours writing emails. Let this free AI website do it in seconds."
       },
       {
         "type": "angle_recency",
@@ -196,9 +787,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -206,7 +797,7 @@
     "selected_reason": null
   },
   {
-    "idea_id": "idea_ai_tools_4",
+    "idea_id": "idea_ai_tools_9",
     "profile_id": "ai_tools",
     "topic": "How to create an AI voiceover using your own voice",
     "angle": "voice cloning tutorial",
@@ -221,20 +812,19 @@
     "curiosity_gap": "But you need to verify your permission first to prevent scams.",
     "visual_promise": "Record a 10 second audio clip and see it clone instantly.",
     "payoff": "Safe, consent-based voiceovers are now instant.",
+    "final_question_or_twist": "Would you clone your own voice for content?",
     "risk_flags": [
       "voice_cloning"
     ],
     "freshness_score": 0,
     "penalties": [
       "Exact topic overlap with 'How to create an AI voiceover using your own voice' (-60)",
-      "Hook pattern start 'create an ai' matches recent video (-25)",
       "Angle recency conflict: Angle 'voice cloning tutorial' used recently (-25)",
       "Reused 2+ keywords (personal voiceover, ai voice, voice cloning) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
       "exact_topic_overlap",
-      "hook_pattern_overlap",
       "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
@@ -245,13 +835,6 @@
         "history_topic": "How to create an AI voiceover using your own voice",
         "video_id": "4wiuATE0Gos",
         "date": "2026-06-21T19:20:01.974544Z"
-      },
-      {
-        "type": "hook_pattern",
-        "history_topic": "How to create an AI voiceover using your own voice",
-        "video_id": "4wiuATE0Gos",
-        "date": "2026-06-21T19:20:01.974544Z",
-        "hook": "Create an AI voiceover using your own voice with consent in seconds. Here is how."
       },
       {
         "type": "angle_recency",
@@ -273,141 +856,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
-        "format": "viral_curiosity_24s"
-      }
-    ],
-    "selected": false,
-    "selected_reason": null
-  },
-  {
-    "idea_id": "idea_ai_tools_5",
-    "profile_id": "ai_tools",
-    "topic": "3 AI extensions for Google Chrome you need today",
-    "angle": "browser extension recommendations",
-    "hook": "Stop using Google Chrome normally.",
-    "keywords": [
-      "chrome extensions",
-      "google chrome",
-      "ai plugins"
-    ],
-    "format": "viral_curiosity_24s",
-    "freshness_window_days": 14,
-    "curiosity_gap": "These 3 AI Chrome extensions make it twenty times smarter.",
-    "visual_promise": "Quick cuts showing each extension sidebar activating in Chrome.",
-    "payoff": "They are free to install and change how you browse.",
-    "risk_flags": [],
-    "freshness_score": 0,
-    "penalties": [
-      "Exact topic overlap with '3 AI extensions for Google Chrome you need today' (-60)",
-      "Angle recency conflict: Angle 'browser extension recommendations' used recently (-25)",
-      "Reused 2+ keywords (chrome extensions, google chrome, ai plugins) from last 30 days (-20)",
-      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
-    ],
-    "penalty_reasons": [
-      "exact_topic_overlap",
-      "angle_recency_conflict",
-      "keyword_fatigue",
-      "format_fatigue"
-    ],
-    "recent_history_matches": [
-      {
-        "type": "exact_topic",
-        "history_topic": "3 AI extensions for Google Chrome you need today",
-        "video_id": "tR-hHVtTEyo",
-        "date": "2026-06-21T19:59:04.857750Z"
-      },
-      {
-        "type": "angle_recency",
-        "history_topic": "3 AI extensions for Google Chrome you need today",
-        "video_id": "tR-hHVtTEyo",
-        "date": "2026-06-21T19:59:04.857750Z",
-        "angle": "browser extension recommendations"
-      },
-      {
-        "type": "keyword_overlap",
-        "history_topic": "3 AI extensions for Google Chrome you need today",
-        "video_id": "tR-hHVtTEyo",
-        "date": "2026-06-21T19:59:04.857750Z",
-        "keywords": [
-          "chrome extensions",
-          "google chrome",
-          "ai plugins"
-        ]
-      },
-      {
-        "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
-        "format": "viral_curiosity_24s"
-      }
-    ],
-    "selected": false,
-    "selected_reason": null
-  },
-  {
-    "idea_id": "idea_ai_tools_6",
-    "profile_id": "ai_tools",
-    "topic": "This AI tool generates fully animated videos from text",
-    "angle": "text to video animation",
-    "hook": "This AI tool turns text into a full video.",
-    "keywords": [
-      "text to video",
-      "animated videos",
-      "ai video generator"
-    ],
-    "format": "viral_curiosity_24s",
-    "freshness_window_days": 10,
-    "curiosity_gap": "But the result looks almost unreal.",
-    "visual_promise": "You type one sentence. It builds scenes, captions, and motion.",
-    "payoff": "This could change how creators make Shorts.",
-    "risk_flags": [],
-    "freshness_score": 0,
-    "penalties": [
-      "Exact topic overlap with 'This AI tool generates fully animated videos from text' (-60)",
-      "Angle recency conflict: Angle 'text to video animation' used recently (-25)",
-      "Reused 2+ keywords (text to video, animated videos, ai video generator) from last 30 days (-20)",
-      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
-    ],
-    "penalty_reasons": [
-      "exact_topic_overlap",
-      "angle_recency_conflict",
-      "keyword_fatigue",
-      "format_fatigue"
-    ],
-    "recent_history_matches": [
-      {
-        "type": "exact_topic",
-        "history_topic": "This AI tool generates fully animated videos from text",
-        "video_id": "fl5QPqoB9gU",
-        "date": "2026-06-21T20:18:26.106965Z"
-      },
-      {
-        "type": "angle_recency",
-        "history_topic": "This AI tool generates fully animated videos from text",
-        "video_id": "fl5QPqoB9gU",
-        "date": "2026-06-21T20:18:26.106965Z",
-        "angle": "text to video animation"
-      },
-      {
-        "type": "keyword_overlap",
-        "history_topic": "This AI tool generates fully animated videos from text",
-        "video_id": "fl5QPqoB9gU",
-        "date": "2026-06-21T20:18:26.106965Z",
-        "keywords": [
-          "text to video",
-          "animated videos",
-          "ai video generator"
-        ]
-      },
-      {
-        "type": "format_fatigue",
-        "history_topic": "This AI tool clones any website in one click",
-        "video_id": "9dHkHFWRjII",
-        "date": "2026-06-21T21:12:05.407864Z",
+        "history_topic": "Nobody expects this AI trick to work",
+        "video_id": "L9Z02wpfRgI",
+        "date": "2026-06-25T21:20:23.041094Z",
         "format": "viral_curiosity_24s"
       }
     ],

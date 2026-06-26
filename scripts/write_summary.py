@@ -291,6 +291,45 @@ def main():
             except Exception as e:
                 print(f"Warning: Failed to load docs/quality-report.json: {e}")
 
+    # Read audio mix report fields
+    bgm_status_val = "N/A"
+    bgm_file_val = "N/A"
+    bgm_mood_val = "N/A"
+    coverage_val = "N/A"
+    silence_gap_val = "N/A"
+    tail_silence_val = "N/A"
+    val_status_val = "N/A"
+    
+    mix_report_path = "docs/audio-mix-report.json"
+    if os.path.exists(mix_report_path):
+        try:
+            with open(mix_report_path, "r", encoding="utf-8") as f:
+                amr = json.load(f)
+            bgm_status_val = amr.get("bgm_status", "N/A")
+            bgm_file_val = amr.get("bgm_file", "N/A")
+            bgm_mood_val = amr.get("bgm_mood", "N/A")
+            coverage_val = str(amr.get("full_duration_audio_coverage", "N/A")).lower()
+            silence_gap_val = amr.get("max_silence_gap_seconds", "N/A")
+            tail_silence_val = amr.get("final_tail_silence_status", "N/A")
+            val_status_val = amr.get("audio_validation_status", "N/A")
+        except Exception as e:
+            print(f"Warning: Failed to load docs/audio-mix-report.json for summary: {e}")
+            
+    silence_str = f"{silence_gap_val:.2f}s" if isinstance(silence_gap_val, (int, float)) else f"{silence_gap_val}"
+    
+    audio_mix_audit_md = f"""
+### 🎵 Audio Mix Audit
+* **BGM Status**: `{bgm_status_val}`
+* **BGM File**: `{bgm_file_val}`
+* **BGM Mood**: `{bgm_mood_val}`
+* **Full Duration Audio Coverage**: `{coverage_val}`
+* **Max Silence Gap**: `{silence_str}`
+* **Final Tail Silence Status**: `{tail_silence_val}`
+* **Audio Validation Status**: `{val_status_val}`
+
+---
+"""
+
     content_engine_md = ""
     if use_video_brief:
         content_engine_md = f"""
@@ -352,6 +391,7 @@ def main():
 {content_engine_md}
 {viral_format_audit_md}
 {retention_fidelity_audit_md}
+{audio_mix_audit_md}
 ### 🔍 LLM Provider Audit
 
 #### 🎥 Video Generation (MoneyPrinterTurbo)
@@ -448,6 +488,13 @@ def main():
         "contact_sheet_path": contact_sheet_path,
         "format_fidelity_status": format_fidelity_status,
         "manual_review_required": True,
+        "audio_bgm_status": bgm_status_val,
+        "audio_bgm_file": bgm_file_val,
+        "audio_bgm_mood": bgm_mood_val,
+        "audio_full_duration_coverage": coverage_val == "true" if coverage_val != "N/A" else "N/A",
+        "audio_max_silence_gap_seconds": silence_gap_val,
+        "audio_final_tail_silence_status": tail_silence_val,
+        "audio_validation_status": val_status_val,
         "results": platform_results
     }
     try:

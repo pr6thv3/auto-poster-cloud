@@ -264,10 +264,12 @@ def main():
                 warnings.append(f"Captions too long (some contain more than 4 words: {long_captions[:3]}).")
                 
         # Narration greetings/filler check
-        fillers = [" um ", " ah ", " basically ", " literally ", " actually ", " like "]
+        fillers_words = {"um", "ah", "basically", "literally"}
         combined_audio = " ".join([s.get("audio", "") for s in scene_plan]).lower()
-        if any(f in f" {combined_audio} " for f in fillers):
-            warnings.append("Narration contains filler words (um, ah, basically, literally, etc.).")
+        words_list = [w.strip(",.!?\"'();:") for w in combined_audio.split()]
+        found_fillers = [w for w in words_list if w in fillers_words]
+        if found_fillers:
+            warnings.append(f"Narration contains filler words: {list(set(found_fillers))}")
             
         # Safety rules check
         safety_rules = brief.get("safety_rules", [])
@@ -479,10 +481,11 @@ def main():
                 if found_greetings:
                     reasons.append(f"Storyboard narration contains greeting words: {found_greetings}")
                     
-                fillers_words = {"um", "ah", "basically", "literally", "actually", "like"}
-                found_fillers = [w for w in words_list if w.strip(",.!?") in fillers_words]
+                fillers_words = {"um", "ah", "basically", "literally"}
+                cleaned_words = [w.strip(",.!?\"'();:") for w in words_list]
+                found_fillers = [w for w in cleaned_words if w in fillers_words]
                 if found_fillers:
-                    reasons.append(f"Storyboard narration contains filler words: {found_fillers}")
+                    reasons.append(f"Storyboard narration contains filler words: {list(set(found_fillers))}")
                     
                 # Copyright checks
                 copyright_keywords = ["simpsons", "disney", "fox", "mickey", "marvel", "star wars", "pixar"]

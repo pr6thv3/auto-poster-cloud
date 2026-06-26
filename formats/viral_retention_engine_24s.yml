@@ -91,3 +91,11 @@ safety:
   forbid_named_character_imitation: true
   forbid_logos: true
   forbid_unverified_claims: true
+
+audio:
+  require_bgm: true
+  bgm_mood: tech_pulse
+  bgm_volume: 0.12
+  max_full_silence_gap_seconds: 1.0
+  require_audio_full_duration: true
+
