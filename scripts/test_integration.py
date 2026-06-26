@@ -1643,7 +1643,7 @@ def main():
             scenes.append({
                 "scene_id": idx,
                 "reaction_or_reveal_type": role,
-                "stock_search_query": "honey jar recipe" if idx == 1 else "generic placeholder query",
+                "stock_search_query": "honey jar recipe" if idx == 13 else "generic placeholder query",
                 "visual_prompt": "some visual description",
                 "narration_derived_query": "" if is_fallback else "specific animation query",
                 "preset_fallback_query": "generic stock fallback query"
@@ -1785,6 +1785,8 @@ def main():
         "assets/proof_capture/proof_assets.json",
         "docs/proof-asset-selection-report.json",
         "docs/proof-validation-report.json",
+        "docs/proof-diversity-report.json",
+        "docs/manual-review-rubric.json",
         "docs/video-brief.json",
         "docs/retention-storyboard.json",
         "docs/visual-fallback-report.json",
@@ -1904,7 +1906,14 @@ def main():
             "source_type": "synthetic_mock_asset",
             "approved_for_private_validation": True,
             "approved_for_public_use": False,
-            "contains_private_data": False
+            "contains_private_data": False,
+            "asset_variant": "final_result_visual",
+            "visual_strength_score": 5,
+            "best_for_scene_position": ["final_payoff", "last_3_seconds"],
+            "allowed_reuse_count": 2,
+            "allow_single_asset_private_validation": True,
+            "payoff_strength": "strong",
+            "visual_notes": "Completed weekly calendar."
         }
         with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
             json.dump({"assets": [mock_asset]}, f)
@@ -1955,6 +1964,16 @@ def main():
         # Write clean storyboard and run selector
         with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
             json.dump(make_base_storyboard(), f)
+            
+        # Re-register 4 mock assets to satisfy repetition limits (12 required scenes, max 3 reuses each)
+        mock_assets_sub8 = []
+        for i in range(1, 5):
+            asset_copy = mock_asset.copy()
+            asset_copy["asset_id"] = f"mock_calendar_00{i}"
+            mock_assets_sub8.append(asset_copy)
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": mock_assets_sub8}, f)
+            
         res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
         assert res_sel.returncode == 0, f"Expected selection to pass with registered asset. Output: {res_sel.stdout}\n{res_sel.stderr}"
         
@@ -2008,6 +2027,210 @@ def main():
         assert "Proof Asset Audit" in summary_content
         assert "proof_assets_matched" in summary_content
         assert "proof_assets_missing" in summary_content
+
+        # 10. Test one asset reused too many times fails real mode
+        print("Subtest 10: one asset reused too many times fails real mode...")
+        # We need to make a storyboard with more than 4 proof/payoff scenes
+        # and assign a single asset
+        # Register only ONE asset
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [mock_asset]}, f)
+            
+        sb_reused = make_base_storyboard()
+        for i in range(12, 18):
+            sb_reused["scenes"][i]["reaction_or_reveal_type"] = "proof"
+            sb_reused["scenes"][i]["proof_asset_required"] = True
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_reused, f)
+            
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real", "PRIVACY": "private"}, capture_output=True, text=True)
+        assert res_sel.returncode != 0, "Expected select_proof_asset to fail in real mode when single asset is reused > 4 times."
+        
+        # 11. Test one asset reused too many times warns in mock mode
+        print("Subtest 11: one asset reused too many times warns in mock mode...")
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock", "PRIVACY": "private"}, capture_output=True, text=True)
+        assert res_sel.returncode == 0, f"Expected select_proof_asset to pass in mock mode with > 4 reuses. Got: {res_sel.stderr}"
+        
+        # 12. Test private validation can allow single asset only if metadata explicitly allows it
+        print("Subtest 12: private validation can allow single asset only if metadata explicitly allows it...")
+        # Create a storyboard with 2 proof/payoff scenes (which fits the limit <= 4) but only 1 asset in registry
+        sb_two_scenes = make_base_storyboard()
+        for idx in range(len(sb_two_scenes["scenes"])):
+            role = "hook" if idx < 22 else "payoff" # only 2 payoff scenes at the end!
+            sb_two_scenes["scenes"][idx]["reaction_or_reveal_type"] = role
+            sb_two_scenes["scenes"][idx]["proof_asset_required"] = (role == "payoff")
+            
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_two_scenes, f)
+            
+        # Test 12a: allow_single_asset_private_validation = True -> should pass in private real mode
+        mock_asset_allow = mock_asset.copy()
+        mock_asset_allow["allow_single_asset_private_validation"] = True
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [mock_asset_allow]}, f)
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real", "POSTING_MODE": "real", "PRIVACY": "private"}, capture_output=True, text=True)
+        assert res_sel.returncode == 0, f"Expected private validation single asset fallback to pass when allowed. Output: {res_sel.stdout}\n{res_sel.stderr}"
+        
+        # Test 12b: allow_single_asset_private_validation = False -> should fail in private real mode
+        mock_asset_deny = mock_asset.copy()
+        mock_asset_deny["allow_single_asset_private_validation"] = False
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [mock_asset_deny]}, f)
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real", "POSTING_MODE": "real", "PRIVACY": "private"}, capture_output=True, text=True)
+        assert res_sel.returncode != 0, "Expected private validation single asset fallback to fail when denied in metadata."
+        
+        # Test 12c: public mode -> one-asset reuse across all proof/payoff scenes must fail
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real", "POSTING_MODE": "real", "PRIVACY": "public"}, capture_output=True, text=True)
+        assert res_sel.returncode != 0, "Expected single asset fallback to fail in public mode."
+
+        # 13. Test multiple matching assets are distributed across proof/payoff scenes
+        print("Subtest 13: multiple matching assets are distributed across proof/payoff scenes...")
+        # Register two assets
+        asset_a = mock_asset.copy()
+        asset_a["asset_id"] = "asset_a"
+        asset_a["keywords"] = ["calendar"]
+        
+        asset_b = mock_asset.copy()
+        asset_b["asset_id"] = "asset_b"
+        asset_b["keywords"] = ["calendar"]
+        
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [asset_a, asset_b]}, f)
+            
+        sb_dist = make_base_storyboard()
+        for idx in range(len(sb_dist["scenes"])):
+            sb_dist["scenes"][idx]["reaction_or_reveal_type"] = "context"
+            sb_dist["scenes"][idx]["proof_asset_required"] = False
+        sb_dist["scenes"][12]["reaction_or_reveal_type"] = "proof"
+        sb_dist["scenes"][13]["reaction_or_reveal_type"] = "proof"
+        sb_dist["scenes"][23]["reaction_or_reveal_type"] = "payoff"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_dist, f)
+            
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_sel.returncode == 0, f"Expected distribution test to pass. Output: {res_sel.stdout}\n{res_sel.stderr}"
+        with open("docs/proof-diversity-report.json", "r", encoding="utf-8") as f:
+            div = json.load(f)
+        assert div["unique_proof_assets_used"] == 2, f"Expected 2 unique assets to be used, got {div['unique_proof_assets_used']}"
+
+        # 14. Test final payoff scene selects final_result_visual
+        print("Subtest 14: final payoff scene selects final_result_visual...")
+        # Register a standard asset and a strong final payoff asset
+        asset_std = mock_asset.copy()
+        asset_std["asset_id"] = "asset_std"
+        asset_std["asset_variant"] = "proof_visual"
+        asset_std["payoff_strength"] = "medium"
+        asset_std["best_for_scene_position"] = ["proof"]
+        
+        asset_strong = mock_asset.copy()
+        asset_strong["asset_id"] = "asset_strong"
+        asset_strong["asset_variant"] = "final_result_visual"
+        asset_strong["payoff_strength"] = "strong"
+        asset_strong["best_for_scene_position"] = ["final_payoff"]
+        
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [asset_std, asset_strong]}, f)
+            
+        sb_payoff = make_base_storyboard()
+        for idx in range(len(sb_payoff["scenes"])):
+            sb_payoff["scenes"][idx]["reaction_or_reveal_type"] = "context"
+            sb_payoff["scenes"][idx]["proof_asset_required"] = False
+        sb_payoff["scenes"][-1]["reaction_or_reveal_type"] = "payoff"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_payoff, f)
+            
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_sel.returncode == 0
+        with open("docs/proof-diversity-report.json", "r", encoding="utf-8") as f:
+            div = json.load(f)
+        assert div["final_payoff_asset_id"] == "asset_strong", f"Expected final payoff asset to be asset_strong, got {div['final_payoff_asset_id']}"
+
+        # 15. Test final payoff without strong payoff asset fails real mode
+        print("Subtest 15: final payoff without strong payoff asset fails real mode...")
+        # Only register asset_std (not strong)
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [asset_std]}, f)
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_sel.returncode != 0, "Expected select_proof_asset to fail when no strong final payoff asset exists."
+        assert "final_payoff_asset_required" in res_sel.stdout or "final_payoff_asset_required" in res_sel.stderr
+
+        # 16. Test final 3 seconds require payoff coverage
+        print("Subtest 16: final 3 seconds require payoff coverage...")
+        # Write clean storyboard and run selector
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [asset_strong]}, f)
+            
+        # Create a storyboard where payoff scene ends early (e.g. final scene is context)
+        sb_bad_duration = make_base_storyboard()
+        for idx in range(len(sb_bad_duration["scenes"])):
+            sb_bad_duration["scenes"][idx]["reaction_or_reveal_type"] = "context"
+            sb_bad_duration["scenes"][idx]["proof_asset_required"] = False
+        sb_bad_duration["scenes"][-2]["reaction_or_reveal_type"] = "payoff"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_bad_duration, f)
+            
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"})
+        
+        # Run validation
+        res_val = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_val.returncode != 0, "Expected validate_retention_format to fail when final scene role is not payoff."
+
+        # Let's test a storyboard where the payoff scene starts too late
+        sb_short_payoff = make_base_storyboard()
+        for idx in range(len(sb_short_payoff["scenes"])):
+            sb_short_payoff["scenes"][idx]["reaction_or_reveal_type"] = "context"
+            sb_short_payoff["scenes"][idx]["proof_asset_required"] = False
+        sb_short_payoff["scenes"][-1]["reaction_or_reveal_type"] = "payoff"
+        sb_short_payoff["scenes"][-1]["time_range"] = "0:22.00 - 0:24.00"
+        
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_short_payoff, f)
+            
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"})
+        
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 24.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+            
+        res_val = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_val.returncode != 0, "Expected validate_retention_format to fail when payoff coverage is < 3s."
+        assert "do not include payoff scene coverage" in res_val.stdout or "do not include payoff scene coverage" in res_val.stderr
+
+        # 17. Manual review rubric and summary audit verification
+        print("Subtest 17: Manual review rubric and summary audit verification...")
+        subprocess.run([sys.executable, "scripts/create_review_rubric.py"])
+        assert os.path.exists("docs/manual-review-rubric.json")
+        
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [asset_strong]}, f)
+        sb_ok = make_base_storyboard()
+        for idx in range(len(sb_ok["scenes"])):
+            sb_ok["scenes"][idx]["reaction_or_reveal_type"] = "context"
+            sb_ok["scenes"][idx]["proof_asset_required"] = False
+        sb_ok["scenes"][-1]["reaction_or_reveal_type"] = "payoff"
+        sb_ok["scenes"][-1]["time_range"] = "0:20.00 - 0:24.00"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_ok, f)
+            
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real", "PRIVACY": "private", "POSTING_MODE": "real"})
+        subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"})
+        
+        res_sum = subprocess.run([sys.executable, "scripts/write_summary.py"], env={"GENERATION_MODE": "mock", "GITHUB_STEP_SUMMARY": "step-summary-mock.md"}, capture_output=True, text=True)
+        assert res_sum.returncode == 0
+        
+        with open("run-log.json", "r", encoding="utf-8") as f:
+            log_data = json.load(f)
+        assert "proof_unique_assets_used" in log_data
+        assert "proof_max_asset_reuse_count" in log_data
+        assert "proof_final_payoff_asset_id" in log_data
+        assert "manual_review_rubric" in log_data
+        
+        with open("step-summary-mock.md", "r", encoding="utf-8") as f:
+            summary_content = f.read()
+        assert "Proof Diversity Audit" in summary_content
+        assert "Manual Review Checklist" in summary_content
+        assert "Unique Proof Assets Used" in summary_content
+        assert "Hook Frame Clarity" in summary_content
 
         print("Verification: All proof asset subtests completed successfully!")
 

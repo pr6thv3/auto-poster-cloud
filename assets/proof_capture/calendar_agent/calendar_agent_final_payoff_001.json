@@ -1,0 +1,40 @@
+{
+  "asset_id": "calendar_agent_final_payoff_001",
+  "file_path": "assets/proof_capture/calendar_agent/calendar_agent_final_payoff_001.mp4",
+  "project": "calendar_agent",
+  "descriptor": "Completed weekly schedule with a large readable WEEK PLANNED banner",
+  "keywords": [
+    "calendar",
+    "schedule",
+    "week",
+    "planned",
+    "payoff",
+    "booked"
+  ],
+  "supported_scene_roles": [
+    "payoff"
+  ],
+  "supported_topics": [
+    "ai_tools",
+    "productivity",
+    "calendar automation",
+    "AI agent schedules your entire week"
+  ],
+  "duration_seconds": 7.0,
+  "orientation": "vertical_or_crop_safe",
+  "source_type": "synthetic_private_validation_asset",
+  "approved_for_private_validation": true,
+  "approved_for_public_use": false,
+  "contains_private_data": false,
+  "notes": "Synthetic final payoff asset. Approved for private validation fallback if requested.",
+  "asset_variant": "final_result_visual",
+  "visual_strength_score": 5,
+  "best_for_scene_position": [
+    "final_payoff",
+    "last_3_seconds"
+  ],
+  "allowed_reuse_count": 2,
+  "allow_single_asset_private_validation": true,
+  "payoff_strength": "strong",
+  "visual_notes": "Shows fully planned week with WEEK PLANNED overlay."
+}

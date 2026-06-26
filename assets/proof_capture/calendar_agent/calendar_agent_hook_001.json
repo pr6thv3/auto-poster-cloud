@@ -1,0 +1,40 @@
+{
+  "asset_id": "calendar_agent_hook_001",
+  "file_path": "assets/proof_capture/calendar_agent/calendar_agent_hook_001.mp4",
+  "project": "calendar_agent",
+  "descriptor": "Messy weekly calendar with calendar conflicts and warning labels",
+  "keywords": [
+    "calendar",
+    "conflict",
+    "schedule",
+    "messy",
+    "empty",
+    "overlap"
+  ],
+  "supported_scene_roles": [
+    "proof"
+  ],
+  "supported_topics": [
+    "ai_tools",
+    "productivity",
+    "calendar automation",
+    "AI agent schedules your entire week"
+  ],
+  "duration_seconds": 6.0,
+  "orientation": "vertical_or_crop_safe",
+  "source_type": "synthetic_private_validation_asset",
+  "approved_for_private_validation": true,
+  "approved_for_public_use": false,
+  "contains_private_data": false,
+  "notes": "Synthetic hook asset. Not approved for public posting until manually reviewed.",
+  "asset_variant": "hook_visual",
+  "visual_strength_score": 4,
+  "best_for_scene_position": [
+    "hook",
+    "first_3_seconds"
+  ],
+  "allowed_reuse_count": 2,
+  "allow_single_asset_private_validation": false,
+  "payoff_strength": "weak",
+  "visual_notes": "Shows messy calendar with red conflict warning highlights."
+}

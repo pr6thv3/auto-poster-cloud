@@ -404,6 +404,52 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to load {proof_report_path}: {e}")
 
+    # Load Proof Diversity Report
+    unique_proof_assets_used = "N/A"
+    max_asset_reuse_count = "N/A"
+    repeated_asset_ids = []
+    final_payoff_asset_id = "N/A"
+    final_payoff_asset_variant = "N/A"
+    final_payoff_strength = "N/A"
+    proof_asset_diversity_status = "N/A"
+    single_asset_fallback_used = "N/A"
+    
+    div_report_path = "docs/proof-diversity-report.json"
+    if os.path.exists(div_report_path):
+        try:
+            with open(div_report_path, "r", encoding="utf-8") as f:
+                div = json.load(f)
+            unique_proof_assets_used = div.get("unique_proof_assets_used", "N/A")
+            max_asset_reuse_count = div.get("max_asset_reuse_count", "N/A")
+            repeated_asset_ids = div.get("repeated_asset_ids", [])
+            final_payoff_asset_id = div.get("final_payoff_asset_id", "N/A")
+            final_payoff_asset_variant = div.get("final_payoff_asset_variant", "N/A")
+            final_payoff_strength = div.get("final_payoff_strength", "N/A")
+            proof_asset_diversity_status = div.get("proof_asset_diversity_status", "N/A")
+            single_asset_fallback_used = div.get("single_asset_fallback_used", "N/A")
+        except Exception as e:
+            print(f"Warning: Failed to load {div_report_path}: {e}")
+            
+    # Load Manual Review Rubric
+    hook_frame_clarity = "N/A"
+    proof_asset_visible = "N/A"
+    final_payoff_clarity = "N/A"
+    proof_repetition_risk = "N/A"
+    overall_post_ready = False
+    
+    rubric_path = "docs/manual-review-rubric.json"
+    if os.path.exists(rubric_path):
+        try:
+            with open(rubric_path, "r", encoding="utf-8") as f:
+                rub = json.load(f)
+            hook_frame_clarity = str(rub.get("hook_frame_clarity")) if rub.get("hook_frame_clarity") is not None else "Pending"
+            proof_asset_visible = str(rub.get("proof_asset_visible")) if rub.get("proof_asset_visible") is not None else "Pending"
+            final_payoff_clarity = str(rub.get("final_payoff_clarity")) if rub.get("final_payoff_clarity") is not None else "Pending"
+            proof_repetition_risk = str(rub.get("proof_asset_repetition_score")) if rub.get("proof_asset_repetition_score") is not None else "Pending"
+            overall_post_ready = bool(rub.get("overall_post_ready", False))
+        except Exception as e:
+            print(f"Warning: Failed to load {rubric_path}: {e}")
+
     def format_pct(val):
         if isinstance(val, (int, float)):
             return f"{val * 100:.1f}%" if val <= 1.0 else f"{val:.1f}%"
@@ -463,6 +509,31 @@ def main():
 * **final_scene_role**: `{final_scene_role}`
 * **final_payoff_asset_status**: `{final_payoff_asset_status}`
 * **status**: `{proof_val_status.upper()}`
+
+---
+"""
+
+    proof_diversity_audit_md = f"""
+### 📊 Proof Diversity Audit
+* **Unique Proof Assets Used**: `{unique_proof_assets_used}`
+* **Max Asset Reuse Count**: `{max_asset_reuse_count}`
+* **Repeated Asset IDs**: `{repeated_asset_ids}`
+* **Final Payoff Asset ID**: `{final_payoff_asset_id}`
+* **Final Payoff Asset Variant**: `{final_payoff_asset_variant}`
+* **Final Payoff Strength**: `{final_payoff_strength}`
+* **Proof Asset Diversity Status**: `{proof_asset_diversity_status.upper() if isinstance(proof_asset_diversity_status, str) else proof_asset_diversity_status}`
+* **Single Asset Fallback Used**: `{str(single_asset_fallback_used).lower()}`
+
+---
+"""
+
+    manual_review_checklist_md = f"""
+### 📋 Manual Review Checklist
+* **Hook Frame Clarity**: `{hook_frame_clarity}`
+* **Proof Asset Visible**: `{proof_asset_visible}`
+* **Final Payoff Clarity**: `{final_payoff_clarity}`
+* **Proof Repetition Risk**: `{proof_repetition_risk}`
+* **Overall Post Ready**: `{str(overall_post_ready).lower()}`
 
 ---
 """
@@ -543,6 +614,8 @@ def main():
 {timeline_coverage_audit_md}
 {visual_fallback_audit_md}
 {proof_asset_audit_md}
+{proof_diversity_audit_md}
+{manual_review_checklist_md}
 {audio_mastering_audit_md}
 ### 🔍 LLM Provider Audit
 
@@ -667,6 +740,21 @@ def main():
         "final_payoff_asset_status": final_payoff_asset_status,
         "proof_validation_status": proof_val_status,
         "selected_proof_assets": selected_proof_assets,
+        "proof_unique_assets_used": unique_proof_assets_used,
+        "proof_max_asset_reuse_count": max_asset_reuse_count,
+        "proof_repeated_asset_ids": repeated_asset_ids,
+        "proof_final_payoff_asset_id": final_payoff_asset_id,
+        "proof_final_payoff_asset_variant": final_payoff_asset_variant,
+        "proof_final_payoff_strength": final_payoff_strength,
+        "proof_asset_diversity_status": proof_asset_diversity_status,
+        "proof_single_asset_fallback_used": single_asset_fallback_used,
+        "manual_review_rubric": {
+            "hook_frame_clarity": hook_frame_clarity,
+            "proof_asset_visible": proof_asset_visible,
+            "final_payoff_clarity": final_payoff_clarity,
+            "proof_repetition_risk": proof_repetition_risk,
+            "overall_post_ready": overall_post_ready
+        },
         "results": platform_results
     }
     try:

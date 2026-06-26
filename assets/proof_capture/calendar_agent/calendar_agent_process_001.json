@@ -1,0 +1,39 @@
+{
+  "asset_id": "calendar_agent_process_001",
+  "file_path": "assets/proof_capture/calendar_agent/calendar_agent_process_001.mp4",
+  "project": "calendar_agent",
+  "descriptor": "Meeting blocks automatically appearing on a calendar grid",
+  "keywords": [
+    "calendar",
+    "schedule",
+    "automation",
+    "process",
+    "planning",
+    "auto-fills"
+  ],
+  "supported_scene_roles": [
+    "proof"
+  ],
+  "supported_topics": [
+    "ai_tools",
+    "productivity",
+    "calendar automation",
+    "AI agent schedules your entire week"
+  ],
+  "duration_seconds": 6.0,
+  "orientation": "vertical_or_crop_safe",
+  "source_type": "synthetic_private_validation_asset",
+  "approved_for_private_validation": true,
+  "approved_for_public_use": false,
+  "contains_private_data": false,
+  "notes": "Synthetic process asset. Not approved for public posting until manually reviewed.",
+  "asset_variant": "process_visual",
+  "visual_strength_score": 4,
+  "best_for_scene_position": [
+    "process"
+  ],
+  "allowed_reuse_count": 2,
+  "allow_single_asset_private_validation": false,
+  "payoff_strength": "medium",
+  "visual_notes": "Shows meetings appearing sequentially on calendar grid."
+}

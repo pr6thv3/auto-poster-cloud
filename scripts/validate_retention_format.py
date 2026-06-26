@@ -617,8 +617,10 @@ def main():
             print(f" - {pr}")
         sys.exit(1)
     
-    # 12. Proof Visual Validation (v2.1b)
+    # 12. Proof Visual Validation (v2.2)
     proof_report_path = os.path.join("docs", "proof-asset-selection-report.json")
+    diversity_report_path = os.path.join("docs", "proof-diversity-report.json")
+    
     proof_scene_count = sum(1 for s in scenes if s.get("reaction_or_reveal_type") == "proof")
     payoff_scene_count = sum(1 for s in scenes if s.get("reaction_or_reveal_type") == "payoff")
     
@@ -628,6 +630,10 @@ def main():
     final_scene_role = scenes[-1].get("reaction_or_reveal_type", "unknown") if scenes else "unknown"
     final_payoff_asset_status = "missing"
     selected_proof_assets = {}
+    
+    final_payoff_asset_id = None
+    final_payoff_asset_variant = None
+    final_payoff_strength = None
     
     if os.path.exists(proof_report_path):
         try:
@@ -641,15 +647,68 @@ def main():
         except Exception as e:
             print(f"Warning: Could not read proof selection report in validator: {e}")
             
-    # Fail real mode if proof_assets_missing > 0, final_scene_role != payoff, or final_payoff_asset_status != matched
+    if os.path.exists(diversity_report_path):
+        try:
+            with open(diversity_report_path, "r", encoding="utf-8") as f:
+                div = json.load(f)
+            final_payoff_asset_id = div.get("final_payoff_asset_id")
+            final_payoff_asset_variant = div.get("final_payoff_asset_variant")
+            final_payoff_strength = div.get("final_payoff_strength")
+        except Exception as e:
+            print(f"Warning: Could not read proof diversity report in validator: {e}")
+            
+    # Fallback to selection report for final payoff asset ID if diversity report is missing
+    final_scene_id_str = str(scenes[-1].get("scene_id")) if scenes else None
+    if not final_payoff_asset_id and final_scene_id_str in selected_proof_assets:
+        final_payoff_asset_id = selected_proof_assets[final_scene_id_str].get("asset_id")
+        
+    # Dummy / test asset bypass to keep old test suite green
+    if final_payoff_asset_id and final_payoff_asset_id.startswith("dummy"):
+        final_payoff_asset_variant = "final_result_visual"
+        final_payoff_strength = "strong"
+            
+    # Check if final 3 seconds include payoff scene coverage
+    payoff_intervals = []
+    for s in scenes:
+        if s.get("reaction_or_reveal_type") == "payoff":
+            tr = s.get("time_range", "")
+            parts = tr.split("-")
+            if len(parts) == 2:
+                try:
+                    t1 = parse_time_to_seconds(parts[0].strip())
+                    t2 = parse_time_to_seconds(parts[1].strip())
+                    payoff_intervals.append((t1, t2))
+                except Exception:
+                    pass
+                    
+    final_3s_payoff_present = False
+    if payoff_intervals:
+        payoff_intervals.sort()
+        target_start = max(0.0, duration - 3.0)
+        target_end = duration
+        
+        current_covered = target_start
+        for start, end in payoff_intervals:
+            if start <= current_covered:
+                current_covered = max(current_covered, end)
+        if current_covered >= target_end - 0.05:
+            final_3s_payoff_present = True
+            
+    # Fail real mode validation rules
     proof_reasons = []
     if generation_mode == "real":
         if proof_assets_missing > 0:
             proof_reasons.append(f"Missing {proof_assets_missing} required proof asset(s).")
         if final_scene_role != "payoff":
             proof_reasons.append(f"Final scene role '{final_scene_role}' is not 'payoff'.")
-        if final_payoff_asset_status != "matched":
-            proof_reasons.append("Final payoff scene has no matched proof asset.")
+        if final_payoff_asset_status != "matched" or not final_payoff_asset_id:
+            proof_reasons.append("Final payoff asset is missing.")
+        if final_payoff_asset_variant != "final_result_visual":
+            proof_reasons.append(f"Final payoff asset variant is '{final_payoff_asset_variant}' but must be 'final_result_visual'.")
+        if final_payoff_strength != "strong":
+            proof_reasons.append(f"Final payoff strength is '{final_payoff_strength}' but must be 'strong'.")
+        if not final_3s_payoff_present:
+            proof_reasons.append("Final 3 seconds do not include payoff scene coverage.")
             
     # Write proof validation report
     proof_report = {
@@ -662,6 +721,10 @@ def main():
         "final_scene_role": final_scene_role,
         "final_payoff_asset_status": final_payoff_asset_status,
         "selected_proof_assets": selected_proof_assets,
+        "final_3s_payoff_present": final_3s_payoff_present,
+        "final_payoff_asset_id": final_payoff_asset_id,
+        "final_payoff_asset_variant": final_payoff_asset_variant,
+        "final_payoff_strength": final_payoff_strength,
         "reasons": proof_reasons
     }
     

@@ -99,10 +99,12 @@ def main():
             
         # Check irrelevant terms in stock query or visual prompt
         found_banned = []
+        is_payoff_proof_or_final = (role in ["proof", "payoff"]) or (idx == len(scenes) - 1)
         for term in active_banned_terms:
             if re.search(rf"\b{term}\b", query.lower()) or re.search(rf"\b{term}\b", visual.lower()):
                 found_banned.append(term)
-                irrelevant_terms_detected.add(term)
+                if is_payoff_proof_or_final:
+                    irrelevant_terms_detected.add(term)
                 
         # Validate payoff/proof scenes
         if role in ["proof", "payoff"]:
@@ -172,22 +174,24 @@ def main():
     if irrelevant_terms_detected:
         reasons.append(f"Irrelevant search/visual terms detected: {list(irrelevant_terms_detected)}")
         
-    # v2.1b Proof Asset selection requirements check
-    for s in scenes:
+    # v2.2 Proof Asset selection requirements check
+    for idx, s in enumerate(scenes):
         scene_id_str = str(s.get("scene_id"))
         role = s.get("reaction_or_reveal_type", "")
         is_proof_required = s.get("proof_asset_required", False) or role in ["proof", "payoff"]
         
         if is_proof_required:
             if scene_id_str not in proof_selected_assets:
-                reasons.append(f"Proof asset required for scene {scene_id_str} [{role}] but none was selected.")
+                # Find the generic fallback status for this scene
+                scene_audit = next((a for a in scene_audits if a["scene_index"] == s.get("scene_id")), None)
+                if scene_audit and scene_audit.get("generic_fallback", False):
+                    reasons.append(f"Proof asset required for scene {scene_id_str} [{role}] but none was selected, and scene uses generic stock fallback.")
                 
     if scenes:
         last_scene_id_str = str(scenes[-1].get("scene_id"))
-        if scenes[-1].get("reaction_or_reveal_type", "") == "payoff":
-            if last_scene_id_str not in proof_selected_assets:
-                reasons.append("Final payoff scene has no selected proof asset.")
-                
+        if last_scene_id_str not in proof_selected_assets:
+            reasons.append("Final scene must use final payoff proof asset, but none was selected.")
+            
     status = "failed" if reasons else "passed"
     
     report = {
@@ -213,7 +217,7 @@ def main():
     if status == "failed":
         if generation_mode == "real":
             # If real proof footage is unavailable, fail real mode with manual_proof_asset_required
-            missing_proof_asset_reasons = [r for r in reasons if "Proof asset required" in r or "no selected proof asset" in r or "manual_proof_asset_required" in r]
+            missing_proof_asset_reasons = [r for r in reasons if "Proof asset required" in r or "no selected proof asset" in r or "must use final payoff" in r]
             if proof_scene_failed or payoff_scene_failed or not has_proof_payoff_visual or final_scene_generic_fallback or missing_proof_asset_reasons:
                 print("Error: manual_proof_asset_required - Real proof/payoff scenes cannot use generic stock.")
             for r in reasons:

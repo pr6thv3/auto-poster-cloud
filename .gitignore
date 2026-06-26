@@ -16,4 +16,4 @@ video-info.json
 moneyprinter-log.txt
 cloud-pipeline/worker/node_modules/
 *.mp4
-
+!assets/proof_capture/**/*.mp4
