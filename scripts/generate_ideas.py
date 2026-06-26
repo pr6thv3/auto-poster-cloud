@@ -214,6 +214,19 @@ IDEAS_CATALOG = {
             "format": "viral_curiosity_24s",
             "freshness_window_days": 30,
             "risk_flags": []
+        },
+        {
+            "topic": "This AI bot auto-fills your calendar while you sleep",
+            "angle": "overnight intelligent meeting planner",
+            "hook": "You wake up and every meeting is already booked perfectly.",
+            "curiosity_gap": "An AI agent analyzes overnight emails, Slack messages, and deadlines to auto-fill your entire weekly calendar before you wake up.",
+            "visual_promise": "Watch an empty weekly calendar grid fill itself with perfectly-spaced meeting blocks and focus sessions in seconds.",
+            "payoff": "Seven days of meetings planned in under five seconds without a single click.",
+            "final_question_or_twist": "Would you trust an AI to run your entire work schedule?",
+            "keywords": ["calendar automation", "smart scheduling", "meeting planner"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": []
         }
     ],
     "fifa": [

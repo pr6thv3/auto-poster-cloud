@@ -17,24 +17,63 @@
     "payoff": "Your family's old memories look like they were shot yesterday.",
     "final_question_or_twist": "Would you pay a professional restorer when this exists?",
     "risk_flags": [],
-    "freshness_score": 85,
+    "freshness_score": 0,
     "penalties": [
+      "Exact topic overlap with 'This hidden AI tool restores old blurry photos in seconds' (-60)",
+      "Hook pattern start 'this hidden ai' matches recent video (-25)",
+      "Angle recency conflict: Angle 'photo restoration technology' used recently (-25)",
+      "Reused 2+ keywords (photo restoration, face enhancement, old photos) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
       "format_fatigue"
     ],
     "recent_history_matches": [
       {
+        "type": "exact_topic",
+        "history_topic": "This hidden AI tool restores old blurry photos in seconds",
+        "video_id": "lAVi7CjWfg4",
+        "date": "2026-06-25T21:44:31.384170Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This hidden AI tool restores old blurry photos in seconds",
+        "video_id": "lAVi7CjWfg4",
+        "date": "2026-06-25T21:44:31.384170Z",
+        "hook": "This hidden AI tool restores old blurry photos."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This hidden AI tool restores old blurry photos in seconds",
+        "video_id": "lAVi7CjWfg4",
+        "date": "2026-06-25T21:44:31.384170Z",
+        "angle": "photo restoration technology"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This hidden AI tool restores old blurry photos in seconds",
+        "video_id": "lAVi7CjWfg4",
+        "date": "2026-06-25T21:44:31.384170Z",
+        "keywords": [
+          "photo restoration",
+          "face enhancement",
+          "old photos"
+        ]
+      },
+      {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
-    "selected": true,
-    "selected_reason": "Selected as the highest scoring fresh idea (Score: 85)."
+    "selected": false,
+    "selected_reason": null
   },
   {
     "idea_id": "idea_ai_tools_10",
@@ -94,9 +133,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -161,9 +200,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -207,9 +246,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -237,14 +276,12 @@
     "freshness_score": 0,
     "penalties": [
       "Exact topic overlap with 'This free AI website removes background noise from any audio file' (-60)",
-      "Hook pattern start 'stop recording video' matches recent video (-25)",
       "Angle recency conflict: Angle 'audio cleanup tool' used recently (-25)",
       "Reused 2+ keywords (audio cleanup, remove noise, free ai tool) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
       "exact_topic_overlap",
-      "hook_pattern_overlap",
       "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
@@ -255,13 +292,6 @@
         "history_topic": "This free AI website removes background noise from any audio file",
         "video_id": "pS7ao1TNQ-U",
         "date": "2026-06-22T01:22:22.258583Z"
-      },
-      {
-        "type": "hook_pattern",
-        "history_topic": "This free AI website removes background noise from any audio file",
-        "video_id": "pS7ao1TNQ-U",
-        "date": "2026-06-22T01:22:22.258583Z",
-        "hook": "Stop recording video with background fan noise or traffic sounds."
       },
       {
         "type": "angle_recency",
@@ -283,9 +313,196 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_14",
+    "profile_id": "ai_tools",
+    "topic": "This new AI agent schedules your entire week",
+    "angle": "calendar scheduling automation",
+    "hook": "Stop manually planning your calendar meetings every week.",
+    "keywords": [
+      "calendar planning",
+      "scheduling assistant",
+      "time management"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "A new AI scheduling assistant analyzes your team's energy levels and automatically slots meetings to maximize focus time.",
+    "visual_promise": "Watch messy calendar blocks automatically shift and organize into color-coded focus sessions.",
+    "payoff": "It resolves ten conflicting meeting invites in less than three seconds.",
+    "final_question_or_twist": "Will you let an algorithm manage your daily work schedule?",
+    "risk_flags": [],
+    "freshness_score": 0,
+    "penalties": [
+      "Exact topic overlap with 'This new AI agent schedules your entire week' (-60)",
+      "Hook pattern start 'stop manually planning' matches recent video (-25)",
+      "Angle recency conflict: Angle 'calendar scheduling automation' used recently (-25)",
+      "Reused 2+ keywords (calendar planning, scheduling assistant, time management) from last 30 days (-20)",
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
+      "keyword_fatigue",
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "hook": "Stop manually planning your calendar meetings every week."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "angle": "calendar scheduling automation"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "keywords": [
+          "calendar planning",
+          "scheduling assistant",
+          "time management"
+        ]
+      },
+      {
+        "type": "format_fatigue",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_15",
+    "profile_id": "ai_tools",
+    "topic": "Create custom 3D game assets with simple text",
+    "angle": "3D model generation technology",
+    "hook": "Forget spending days modeling 3D assets for games.",
+    "keywords": [
+      "game assets",
+      "3d modeling",
+      "generative graphics"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "A brand new generative model constructs production-ready 3D meshes with clean UV maps from single text prompts.",
+    "visual_promise": "Watch a flat text prompt turn into a fully detailed 3D sword rotating in real-time.",
+    "payoff": "Export game-ready OBJ files directly into Unity or Unreal Engine.",
+    "final_question_or_twist": "Will indie game developers ever need to hire 3D artists again?",
+    "risk_flags": [],
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": true,
+    "selected_reason": "Selected as the highest scoring fresh idea (Score: 85)."
+  },
+  {
+    "idea_id": "idea_ai_tools_16",
+    "profile_id": "ai_tools",
+    "topic": "This smart AI extension refactors messy code instantly",
+    "angle": "code refactoring automation",
+    "hook": "Your codebase is filled with hidden technical debt.",
+    "keywords": [
+      "code refactoring",
+      "developer tools",
+      "local llm helper"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "A new local LLM extension scans your files and suggests instant refactoring to optimize performance and readability.",
+    "visual_promise": "Watch hundreds of lines of duplicate spaghetti code shrink into a clean, modular helper function.",
+    "payoff": "It detects memory leaks and fixes them before you commit.",
+    "final_question_or_twist": "Would you trust an AI assistant to clean up your legacy codebase?",
+    "risk_flags": [],
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
+        "format": "viral_curiosity_24s"
+      }
+    ],
+    "selected": false,
+    "selected_reason": null
+  },
+  {
+    "idea_id": "idea_ai_tools_17",
+    "profile_id": "ai_tools",
+    "topic": "This AI bot auto-fills your calendar while you sleep",
+    "angle": "overnight intelligent meeting planner",
+    "hook": "You wake up and every meeting is already booked perfectly.",
+    "keywords": [
+      "calendar automation",
+      "smart scheduling",
+      "meeting planner"
+    ],
+    "format": "viral_curiosity_24s",
+    "freshness_window_days": 30,
+    "curiosity_gap": "An AI agent analyzes overnight emails, Slack messages, and deadlines to auto-fill your entire weekly calendar before you wake up.",
+    "visual_promise": "Watch an empty weekly calendar grid fill itself with perfectly-spaced meeting blocks and focus sessions in seconds.",
+    "payoff": "Seven days of meetings planned in under five seconds without a single click.",
+    "final_question_or_twist": "Would you trust an AI to run your entire work schedule?",
+    "risk_flags": [],
+    "freshness_score": 85,
+    "penalties": [
+      "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
+    ],
+    "penalty_reasons": [
+      "format_fatigue"
+    ],
+    "recent_history_matches": [
+      {
+        "type": "format_fatigue",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -313,14 +530,12 @@
     "freshness_score": 0,
     "penalties": [
       "Exact topic overlap with 'One messy recording becomes studio clean' (-60)",
-      "Hook pattern start 'see how one' matches recent video (-25)",
       "Angle recency conflict: Angle 'audio restoration technology' used recently (-25)",
       "Reused 2+ keywords (audio restoration, voice cleaning, neural network sound) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
       "exact_topic_overlap",
-      "hook_pattern_overlap",
       "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
@@ -331,13 +546,6 @@
         "history_topic": "One messy recording becomes studio clean",
         "video_id": "SAtjoXraUZU",
         "date": "2026-06-25T17:57:13.189212Z"
-      },
-      {
-        "type": "hook_pattern",
-        "history_topic": "One messy recording becomes studio clean",
-        "video_id": "SAtjoXraUZU",
-        "date": "2026-06-25T17:57:13.189212Z",
-        "hook": "See how one messy recording becomes studio clean."
       },
       {
         "type": "angle_recency",
@@ -359,9 +567,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -435,9 +643,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -511,9 +719,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -541,14 +749,12 @@
     "freshness_score": 0,
     "penalties": [
       "Exact topic overlap with 'Create beautiful presentation slides instantly using artificial intelligence' (-60)",
-      "Hook pattern start 'stop spending hours' matches recent video (-25)",
       "Angle recency conflict: Angle 'presentation slide design automation' used recently (-25)",
       "Reused 2+ keywords (presentation slide, ai presentation, design deck) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
       "exact_topic_overlap",
-      "hook_pattern_overlap",
       "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
@@ -559,13 +765,6 @@
         "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
         "video_id": "pzr7wcQJbSc",
         "date": "2026-06-21T21:49:15.769475Z"
-      },
-      {
-        "type": "hook_pattern",
-        "history_topic": "Create beautiful presentation slides instantly using artificial intelligence",
-        "video_id": "pzr7wcQJbSc",
-        "date": "2026-06-21T21:49:15.769475Z",
-        "hook": "Stop spending hours designing presentation slides today."
       },
       {
         "type": "angle_recency",
@@ -587,9 +786,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -614,16 +813,53 @@
     "payoff": "Create a landing page mockup and export clean HTML.",
     "final_question_or_twist": "Will this make web developers obsolete?",
     "risk_flags": [],
-    "freshness_score": 65,
+    "freshness_score": 0,
     "penalties": [
-      "Reused 2+ keywords (website builder, ai design) from last 30 days (-20)",
+      "Exact topic overlap with 'This AI tool turns a website idea into a landing page' (-60)",
+      "Hook pattern start 'stop coding landing' matches recent video (-25)",
+      "Angle recency conflict: Angle 'landing page layout recreation' used recently (-25)",
+      "Reused 2+ keywords (website builder, ai design, landing page mockup) from last 30 days (-20)",
       "Format fatigue: Matches recent video format 'viral_curiosity_24s' (-15)"
     ],
     "penalty_reasons": [
+      "exact_topic_overlap",
+      "hook_pattern_overlap",
+      "angle_recency_conflict",
       "keyword_fatigue",
       "format_fatigue"
     ],
     "recent_history_matches": [
+      {
+        "type": "exact_topic",
+        "history_topic": "This AI tool turns a website idea into a landing page",
+        "video_id": "K3y_wcTL7Ig",
+        "date": "2026-06-26T09:43:19.845477Z"
+      },
+      {
+        "type": "hook_pattern",
+        "history_topic": "This AI tool turns a website idea into a landing page",
+        "video_id": "K3y_wcTL7Ig",
+        "date": "2026-06-26T09:43:19.845477Z",
+        "hook": "Stop coding landing page mockups from scratch today."
+      },
+      {
+        "type": "angle_recency",
+        "history_topic": "This AI tool turns a website idea into a landing page",
+        "video_id": "K3y_wcTL7Ig",
+        "date": "2026-06-26T09:43:19.845477Z",
+        "angle": "landing page layout recreation"
+      },
+      {
+        "type": "keyword_overlap",
+        "history_topic": "This AI tool turns a website idea into a landing page",
+        "video_id": "K3y_wcTL7Ig",
+        "date": "2026-06-26T09:43:19.845477Z",
+        "keywords": [
+          "website builder",
+          "ai design",
+          "landing page mockup"
+        ]
+      },
       {
         "type": "keyword_overlap",
         "history_topic": "This AI tool clones any website in one click",
@@ -645,9 +881,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -714,9 +950,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       },
       {
@@ -787,9 +1023,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
@@ -856,9 +1092,9 @@
       },
       {
         "type": "format_fatigue",
-        "history_topic": "Nobody expects this AI trick to work",
-        "video_id": "L9Z02wpfRgI",
-        "date": "2026-06-25T21:20:23.041094Z",
+        "history_topic": "This new AI agent schedules your entire week",
+        "video_id": "7nbrl3jq9XM",
+        "date": "2026-06-26T11:01:55.396785Z",
         "format": "viral_curiosity_24s"
       }
     ],
