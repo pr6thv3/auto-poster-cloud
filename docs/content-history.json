@@ -365,5 +365,24 @@
     "freshness_score": 65,
     "quality_score": 100,
     "source_run_id": "28230041461"
+  },
+  {
+    "idea_id": "idea_ai_tools_14",
+    "profile_id": "ai_tools",
+    "topic": "This new AI agent schedules your entire week",
+    "angle": "calendar scheduling automation",
+    "hook": "Stop manually planning your calendar meetings every week.",
+    "keywords": [
+      "calendar planning",
+      "scheduling assistant",
+      "time management"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-26T11:01:55.396785Z",
+    "status": "success",
+    "youtube_video_id": "7nbrl3jq9XM",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28233689531"
   }
 ]
