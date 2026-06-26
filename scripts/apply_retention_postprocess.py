@@ -195,6 +195,7 @@ def main():
                 "total_overlay_words": 0,
                 "total_matched_words": 0,
                 "alignment_coverage_pct": 0.0,
+                "caption_overlap_count": 0,
                 "mode": "mock"
             }
             synced_path = os.path.join("docs", "retention-storyboard-synced.json")
@@ -250,7 +251,22 @@ def main():
             adjusted_overlays.append(ov)
         synced_overlays = adjusted_overlays
         
+        # Resolve caption overlaps (v2.1a)
+        caption_overlap_count = 0
+        active_overlays = [ov for ov in synced_overlays if ov.get("text", "").strip() != ""]
+        for i in range(len(active_overlays) - 1):
+            curr = active_overlays[i]
+            nxt = active_overlays[i+1]
+            curr_end = curr.get("end_time", 0.0)
+            nxt_start = nxt.get("start_time", 0.0)
+            if curr_end > nxt_start + 0.02:
+                caption_overlap_count += 1
+                curr["end_time"] = round(max(curr.get("start_time", 0.0) + 0.01, nxt_start - 0.03), 3)
+                
+        print(f"[REAL] Resolved {caption_overlap_count} caption overlaps.")
+        
         stats = compute_alignment_stats(synced_overlays)
+        stats["caption_overlap_count"] = caption_overlap_count
         print(f"[REAL] Alignment coverage: {stats['alignment_coverage_pct']}% "
               f"({stats['total_matched_words']}/{stats['total_overlay_words']} words matched)")
     else:
@@ -259,6 +275,7 @@ def main():
             "total_overlay_words": 0,
             "total_matched_words": 0,
             "alignment_coverage_pct": 0.0,
+            "caption_overlap_count": 0,
             "mode": "fallback_fixed_grid"
         }
 

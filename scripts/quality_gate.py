@@ -334,6 +334,71 @@ def main():
         payoff = brief.get("narration_beats", [""])[3] if len(brief.get("narration_beats", [])) > 3 else ""
         if not payoff or len(str(payoff).strip()) < 5:
             warnings.append("Payoff is unclear or missing.")
+
+    # Story structure / payoff / final resolution keyword validation (v2.1a)
+    payoff_line = brief.get("payoff_line", "").strip() or brief.get("payoff", "").strip()
+    final_res_line = brief.get("final_resolution_line", "").strip() or brief.get("final_question_or_twist", "").strip()
+    hook_claim = brief.get("hook_claim", "").strip() or brief.get("hook", "").strip()
+    
+    if not payoff_line:
+        reasons.append("Story completion error: 'payoff_line' is missing from the video brief.")
+    if not final_res_line:
+        reasons.append("Story completion error: 'final_resolution_line' is missing from the video brief.")
+        
+    # Check final caption/voice overlap with hook or payoff keywords (or acceptable concepts)
+    if final_res_line and (hook_claim or payoff_line):
+        final_text = final_res_line.lower()
+        stop_words = {"this", "that", "these", "those", "is", "are", "was", "were", "the", "a", "an", "and", "or", "but", "if", "you", "your", "my", "to", "for", "in", "on", "at", "with", "it", "its", "will", "let", "would", "should", "exists", "exist"}
+        
+        def get_keywords(text):
+            words = re.findall(r'[a-zA-Z]{3,}', text.lower())
+            return {w for w in words if w not in stop_words}
+            
+        hook_keywords = get_keywords(hook_claim)
+        payoff_keywords = get_keywords(payoff_line)
+        
+        # Acceptable topic-specific concept keywords for various niches/topics
+        acceptable_concepts = {
+            # calendar / scheduling
+            "calendar", "week", "meeting", "conflict", "schedule", "plan", "assistant", "agent", "booking", "booked", "filled",
+            # audio / noise cleanup
+            "audio", "sound", "noise", "clean", "microphone", "mic", "podcast", "clear", "voice",
+            # 3d game assets / design
+            "3d", "model", "render", "asset", "game", "mesh", "texture", "export",
+            # presentation / slides
+            "slide", "presentation", "deck", "powerpoint", "design", "layout", "template",
+            # photo / video restoration / editing
+            "photo", "image", "picture", "blurry", "restore", "restoration", "fix", "face", "detail", "enhance", "enhancer", "upscale", "upscaler", "video", "editor",
+            # sports (cricket, football/soccer)
+            "cricket", "match", "player", "wicket", "run", "score", "game", "ball", "goal", "soccer", "football", "team",
+            # finance / money
+            "money", "cash", "credit", "debt", "card", "bank", "invest", "stock", "dollar", "wealth", "save", "budget",
+            # general technology / software
+            "tech", "technology", "software", "hardware", "app", "application", "website", "code", "coder", "developer", "nvidia", "apple", "google", "chip", "ai"
+        }
+        
+        def stem_word(w):
+            w = w.lower()
+            for _ in range(2):
+                for suffix in ['ingly', 'fully', 'ally', 'ly', 'ing', 'ed', 'es', 'er', 'est', 's', 'y']:
+                    if w.endswith(suffix) and len(w) - len(suffix) >= 3:
+                        w = w[:-len(suffix)]
+                        break
+            return w
+
+        # Build stemmed keywords sets
+        hook_stems = {stem_word(w) for w in hook_keywords}
+        payoff_stems = {stem_word(w) for w in payoff_keywords}
+        concept_stems = {stem_word(w) for w in acceptable_concepts}
+        check_stems = hook_stems.union(payoff_stems).union(concept_stems)
+        
+        final_words = re.findall(r'[a-zA-Z]{3,}', final_text)
+        final_stems = {stem_word(w) for w in final_words if w not in stop_words}
+        
+        matched_stems = final_stems.intersection(check_stems)
+        
+        if not matched_stems:
+            reasons.append(f"Story completion error: Final caption/voice '{final_res_line}' does not include at least one keyword from hook, payoff, or acceptable topic concepts.")
             
     # 9. Claim Safety Checks (Phase 1)
     unsafe_phrases = [

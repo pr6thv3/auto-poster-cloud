@@ -214,6 +214,13 @@ def main():
         "hashtag_guidance": "Include #Shorts, the niche #" + niche + ", and keywords: " + ", ".join(selected_idea.get("keywords", [])),
         "banned_words": profile.get("banned_words", []),
         
+        # Storytelling checkpoints (v2.1a)
+        "hook_claim": hook,
+        "proof_event": visual_promise if visual_promise else "Watch the proof.",
+        "payoff_line": payoff if payoff else "This solves the problem.",
+        "final_resolution_line": final_question_or_twist if final_question_or_twist else "Will you try this?",
+        "loop_tieback": selected_idea.get("loop_tieback", "") or f"Loop back to: {hook}",
+
         # Viral format attributes
         "format_id": format_preset.get("format_id") if format_preset else format_type,
         "target_length_seconds": target_len,

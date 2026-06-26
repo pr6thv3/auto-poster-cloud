@@ -135,6 +135,7 @@ jobs:
           python scripts/build_video_brief.py
           python scripts/build_retention_storyboard.py
           python scripts/quality_gate.py
+          python scripts/audit_visual_fallbacks.py
 
       - name: Generate YouTube Metadata
         id: generate-metadata

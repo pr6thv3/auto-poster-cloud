@@ -375,17 +375,15 @@ def main():
         audio_a = " ".join(words[:mid]) if mid > 0 else base_audio
         audio_b = " ".join(words[mid:]) if mid > 0 else ""
         
-        # Story beat role mapping
+        # Story beat role mapping (v2.1a)
         if i < 3:
-            role = "claim"
+            role = "hook"
         elif i < 6:
-            role = "evidence"
+            role = "context"
         elif i < 9:
-            role = "suspense_build"
-        elif i < 11:
-            role = "reveal_or_prediction"
+            role = "proof"
         else:
-            role = "final_question_or_twist"
+            role = "payoff"
             
         # Overlay text for Scene A (corresponds to overlays 2*i and 2*i + 0.5s if mapped)
         overlay_text_a = text_overlays[2*i]["text"]

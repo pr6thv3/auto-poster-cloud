@@ -98,4 +98,8 @@ audio:
   bgm_volume: 0.12
   max_full_silence_gap_seconds: 1.0
   require_audio_full_duration: true
+  loudness_normalization:
+    target_i: -16.0
+    true_peak: -1.5
+    lra: 7.0
 

@@ -300,6 +300,12 @@ def main():
     tail_silence_val = "N/A"
     val_status_val = "N/A"
     
+    # Mastering fields
+    measured_i = "N/A"
+    loudnorm_status = "N/A"
+    measured_tp = "N/A"
+    target_i = "N/A"
+    
     mix_report_path = "docs/audio-mix-report.json"
     if os.path.exists(mix_report_path):
         try:
@@ -312,11 +318,76 @@ def main():
             silence_gap_val = amr.get("max_silence_gap_seconds", "N/A")
             tail_silence_val = amr.get("final_tail_silence_status", "N/A")
             val_status_val = amr.get("audio_validation_status", "N/A")
+            
+            measured_i = amr.get("measured_i", "N/A")
+            loudnorm_status = amr.get("loudnorm_status", "N/A")
+            measured_tp = amr.get("measured_tp", "N/A")
+            target_i = amr.get("target_i", "N/A")
         except Exception as e:
             print(f"Warning: Failed to load docs/audio-mix-report.json for summary: {e}")
             
     silence_str = f"{silence_gap_val:.2f}s" if isinstance(silence_gap_val, (int, float)) else f"{silence_gap_val}"
     
+    # 1. Timeline Coverage Audit
+    voice_time_coverage_pct = "N/A"
+    caption_time_coverage_pct = "N/A"
+    last_spoken_word_end_time = "N/A"
+    last_caption_end_time = "N/A"
+    max_caption_gap_seconds = "N/A"
+    final_caption_tail_gap_seconds = "N/A"
+    final_voice_tail_gap_seconds = "N/A"
+    timeline_status = "N/A"
+    caption_overlap_count = "N/A"
+
+    timeline_report_path = "docs/timeline-coverage-report.json"
+    if os.path.exists(timeline_report_path):
+        try:
+            with open(timeline_report_path, "r", encoding="utf-8") as f:
+                tlr = json.load(f)
+            timeline_status = tlr.get("status", "N/A")
+            voice_time_coverage_pct = tlr.get("voice_time_coverage_pct", "N/A")
+            caption_time_coverage_pct = tlr.get("caption_time_coverage_pct", "N/A")
+            last_spoken_word_end_time = tlr.get("last_spoken_word_end_time", "N/A")
+            last_caption_end_time = tlr.get("last_caption_end_time", "N/A")
+            max_caption_gap_seconds = tlr.get("max_caption_gap_seconds", "N/A")
+            final_caption_tail_gap_seconds = tlr.get("final_caption_tail_gap_seconds", "N/A")
+            final_voice_tail_gap_seconds = tlr.get("final_voice_tail_gap_seconds", "N/A")
+            caption_overlap_count = tlr.get("caption_overlap_count", "N/A")
+        except Exception as e:
+            print(f"Warning: Failed to load {timeline_report_path}: {e}")
+
+    # 2. Visual Fallback Audit
+    generic_fallback_count = "N/A"
+    proof_scene_status = "N/A"
+    payoff_scene_status = "N/A"
+    final_scene_role = "N/A"
+    irrelevant_terms_detected = "N/A"
+    visual_status = "N/A"
+
+    visual_report_path = "docs/visual-fallback-report.json"
+    if os.path.exists(visual_report_path):
+        try:
+            with open(visual_report_path, "r", encoding="utf-8") as f:
+                vfr = json.load(f)
+            visual_status = vfr.get("status", "N/A")
+            generic_fallback_count = vfr.get("generic_fallback_count", "N/A")
+            proof_scene_status = vfr.get("proof_scene_status", "N/A")
+            payoff_scene_status = vfr.get("payoff_scene_status", "N/A")
+            final_scene_role = vfr.get("final_scene_role", "N/A")
+            irrelevant_terms_detected = vfr.get("irrelevant_terms_detected", "N/A")
+        except Exception as e:
+            print(f"Warning: Failed to load {visual_report_path}: {e}")
+
+    def format_pct(val):
+        if isinstance(val, (int, float)):
+            return f"{val * 100:.1f}%" if val <= 1.0 else f"{val:.1f}%"
+        return f"{val}"
+
+    def format_sec(val):
+        if isinstance(val, (int, float)):
+            return f"{val:.2f}s"
+        return f"{val}"
+
     audio_mix_audit_md = f"""
 ### 🎵 Audio Mix Audit
 * **BGM Status**: `{bgm_status_val}`
@@ -329,6 +400,43 @@ def main():
 
 ---
 """
+
+    timeline_coverage_audit_md = f"""
+### Timeline Coverage Audit
+* **voice_time_coverage_pct**: `{format_pct(voice_time_coverage_pct)}`
+* **caption_time_coverage_pct**: `{format_pct(caption_time_coverage_pct)}`
+* **last_spoken_word_end_time**: `{format_sec(last_spoken_word_end_time)}`
+* **last_caption_end_time**: `{format_sec(last_caption_end_time)}`
+* **max_caption_gap_seconds**: `{format_sec(max_caption_gap_seconds)}`
+* **final_caption_tail_gap_seconds**: `{format_sec(final_caption_tail_gap_seconds)}`
+* **final_voice_tail_gap_seconds**: `{format_sec(final_voice_tail_gap_seconds)}`
+* **status**: `{timeline_status.upper()}`
+
+---
+"""
+
+    visual_fallback_audit_md = f"""
+### Visual Fallback Audit
+* **generic_fallback_count**: `{generic_fallback_count}`
+* **proof_scene_status**: `{proof_scene_status.upper() if isinstance(proof_scene_status, str) else proof_scene_status}`
+* **payoff_scene_status**: `{payoff_scene_status.upper() if isinstance(payoff_scene_status, str) else payoff_scene_status}`
+* **final_scene_role**: `{final_scene_role}`
+* **irrelevant_terms_detected**: `{irrelevant_terms_detected}`
+* **status**: `{visual_status.upper()}`
+
+---
+"""
+
+    audio_mastering_audit_md = f"""
+### Audio Mastering Audit
+* **integrated_loudness_lufs**: `{measured_i}`
+* **loudnorm_status**: `{loudnorm_status.upper() if isinstance(loudnorm_status, str) else loudnorm_status}`
+* **true_peak**: `{measured_tp}`
+* **target_lufs**: `{target_i}`
+
+---
+"""
+
 
     content_engine_md = ""
     if use_video_brief:
@@ -392,6 +500,9 @@ def main():
 {viral_format_audit_md}
 {retention_fidelity_audit_md}
 {audio_mix_audit_md}
+{timeline_coverage_audit_md}
+{visual_fallback_audit_md}
+{audio_mastering_audit_md}
 ### 🔍 LLM Provider Audit
 
 #### 🎥 Video Generation (MoneyPrinterTurbo)
@@ -495,6 +606,18 @@ def main():
         "audio_max_silence_gap_seconds": silence_gap_val,
         "audio_final_tail_silence_status": tail_silence_val,
         "audio_validation_status": val_status_val,
+        "timeline_coverage_status": timeline_status,
+        "voice_time_coverage_pct": voice_time_coverage_pct,
+        "caption_time_coverage_pct": caption_time_coverage_pct,
+        "max_caption_gap_seconds": max_caption_gap_seconds,
+        "caption_overlap_count": caption_overlap_count,
+        "visual_fallback_status": visual_status,
+        "generic_fallback_count": generic_fallback_count,
+        "proof_scene_status": proof_scene_status,
+        "payoff_scene_status": payoff_scene_status,
+        "audio_loudnorm_status": loudnorm_status,
+        "audio_measured_i": measured_i,
+        "audio_measured_tp": measured_tp,
         "results": platform_results
     }
     try:

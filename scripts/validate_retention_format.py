@@ -6,6 +6,36 @@ import subprocess
 import yaml
 import re
 
+def parse_time_to_seconds(time_str):
+    if not time_str:
+        return 0.0
+    # Handle optional decimals like 0:09.50
+    parts = time_str.split(":")
+    try:
+        if len(parts) == 2:
+            mins = int(parts[0])
+            secs = float(parts[1])
+            return mins * 60 + secs
+        elif len(parts) == 3:
+            hours = int(parts[0])
+            mins = int(parts[1])
+            secs = float(parts[2])
+            return hours * 3600 + mins * 60 + secs
+    except ValueError:
+        pass
+    return 0.0
+
+def get_scene_duration(time_range):
+    parts = time_range.split("-")
+    if len(parts) == 2:
+        try:
+            t1 = parse_time_to_seconds(parts[0].strip())
+            t2 = parse_time_to_seconds(parts[1].strip())
+            return t2 - t1
+        except Exception:
+            pass
+    return 0.0
+
 def has_audio_stream(file_path):
     # Try ffprobe first
     try:
@@ -130,7 +160,7 @@ def main():
         sys.exit(1)
         
     video_path = video_info.get("video_path", "")
-    duration = video_info.get("duration", 0.0)
+    duration = video_info.get("duration", video_info.get("actual_duration_seconds", 0.0))
     
     if not video_path:
         print("Error: video_path is empty in video-info.json.")
@@ -255,7 +285,7 @@ def main():
     os.makedirs("docs", exist_ok=True)
     contact_sheet_path = os.path.join("docs", "retention-contact-sheet.jpg")
     
-    file_size_kb = os.path.getsize(video_path) / 1024
+    file_size_kb = os.path.getsize(video_path) / 1024 if os.path.exists(video_path) else 0.0
     is_mock = (generation_mode == "mock" or 
                file_size_kb < 100 or 
                video_info.get("validation") == "mocked")
@@ -391,9 +421,201 @@ def main():
     else:
         print("[MOCK/BYPASS] Bypassing actual silence detection.")
         
+    # Loudness validation check
+    measured_i = mix_report.get("measured_i")
+    if generation_mode == "real" and measured_i is not None:
+        try:
+            measured_i_val = float(measured_i)
+            if measured_i_val < -20.0:
+                print(f"Error: Loudness validation failed: measured loudness {measured_i_val:.2f} LUFS is below -20.0 LUFS threshold.")
+                audio_validation_status = "failed"
+        except (ValueError, TypeError):
+            pass
+        
     mix_report["max_silence_gap_seconds"] = round(max_silence, 3)
     mix_report["final_tail_silence_status"] = "silent" if tail_silent else "not_silent"
     mix_report["audio_validation_status"] = audio_validation_status
+
+    # 9. Resolution validation (v2.1a)
+    width = video_info.get("width", 0)
+    height = video_info.get("height", 0)
+    posting_mode = os.environ.get('POSTING_MODE', 'mock').lower()
+    privacy = os.environ.get('PRIVACY', 'private').lower()
+    is_public = (posting_mode == "real" and privacy == "public")
+    
+    if width < 1080 or height < 1920:
+        if is_public:
+            print(f"Error: Resolution {width}x{height} is below 1080x1920 for public run.")
+            sys.exit(1)
+        else:
+            print(f"Warning: Resolution {width}x{height} is below 1080x1920 for private run.")
+
+    # 10. Timeline and Storyboard Coverage Validation (v2.1a)
+    voice_time_coverage_pct = 1.0
+    caption_time_coverage_pct = 1.0
+    last_spoken_word_end_time = duration
+    last_caption_end_time = duration
+    max_caption_gap = 0.0
+    final_caption_tail_gap = 0.0
+    final_voice_tail_gap = 0.0
+    caption_overlap_count = 0
+    
+    timeline_reasons = []
+    
+    # Read tts-timestamps.json
+    if os.path.exists(tts_path):
+        try:
+            with open(tts_path, "r", encoding="utf-8") as f:
+                tts_d = json.load(f)
+            words = tts_d.get("words", [])
+            if words:
+                last_spoken_word_end_time = float(words[-1]["end"])
+                final_voice_tail_gap = max(0.0, duration - last_spoken_word_end_time)
+                voice_time_coverage_pct = last_spoken_word_end_time / duration if duration > 0 else 0.0
+        except Exception as e:
+            print(f"Warning: Failed to load tts-timestamps: {e}")
+            
+    # Read retention-storyboard-synced.json
+    if os.path.exists(synced_path):
+        try:
+            with open(synced_path, "r", encoding="utf-8") as f:
+                synced_d = json.load(f)
+            overlays_synced = synced_d.get("text_overlays_synced", [])
+            stats = synced_d.get("alignment_stats", {})
+            caption_overlap_count = stats.get("caption_overlap_count", 0)
+            
+            # Sort active overlays by start_time
+            active_overlays = [ov for ov in overlays_synced if ov.get("text", "").strip() != ""]
+            active_overlays.sort(key=lambda x: float(x.get("start_time", 0.0)))
+            
+            if active_overlays:
+                last_caption_end_time = float(active_overlays[-1]["end_time"])
+                final_caption_tail_gap = max(0.0, duration - last_caption_end_time)
+                caption_time_coverage_pct = last_caption_end_time / duration if duration > 0 else 0.0
+                
+                # Check consecutive caption gaps
+                for idx in range(len(active_overlays) - 1):
+                    curr_end = float(active_overlays[idx]["end_time"])
+                    nxt_start = float(active_overlays[idx+1]["start_time"])
+                    if nxt_start > curr_end:
+                        gap = nxt_start - curr_end
+                        if gap > max_caption_gap:
+                            max_caption_gap = gap
+                        # Fail if gap before final 3 seconds is > 2.0s
+                        if nxt_start < duration - 3.0 and gap > 2.0:
+                            timeline_reasons.append(f"Caption gap of {gap:.2f}s (at {curr_end:.2f}s) before final 3s exceeds 2.0s limit.")
+        except Exception as e:
+            print(f"Warning: Failed to load retention-storyboard-synced: {e}")
+            
+    if generation_mode == "real":
+        if caption_overlap_count > 0:
+            timeline_reasons.append(f"Caption overlap detected: count={caption_overlap_count} > 0.")
+        if voice_time_coverage_pct < 0.80:
+            timeline_reasons.append(f"Voice time coverage {voice_time_coverage_pct*100:.1f}% is below 80% threshold.")
+        if caption_time_coverage_pct < 0.80:
+            timeline_reasons.append(f"Caption time coverage {caption_time_coverage_pct*100:.1f}% is below 80% threshold.")
+        if final_caption_tail_gap > 3.0:
+            timeline_reasons.append(f"Final caption tail gap {final_caption_tail_gap:.2f}s exceeds 3.0s threshold.")
+        if final_voice_tail_gap > 3.0:
+            timeline_reasons.append(f"Final voice tail gap {final_voice_tail_gap:.2f}s exceeds 3.0s threshold.")
+            
+    # Write timeline coverage report
+    timeline_report = {
+        "status": "failed" if timeline_reasons else "passed",
+        "video_duration_seconds": round(duration, 3),
+        "last_spoken_word_end_time": round(last_spoken_word_end_time, 3),
+        "last_caption_end_time": round(last_caption_end_time, 3),
+        "voice_time_coverage_pct": round(voice_time_coverage_pct, 3),
+        "caption_time_coverage_pct": round(caption_time_coverage_pct, 3),
+        "max_caption_gap_seconds": round(max_caption_gap, 3),
+        "final_caption_tail_gap_seconds": round(final_caption_tail_gap, 3),
+        "final_voice_tail_gap_seconds": round(final_voice_tail_gap, 3),
+        "caption_overlap_count": caption_overlap_count,
+        "reasons": timeline_reasons
+    }
+    
+    tl_report_path = os.path.join("docs", "timeline-coverage-report.json")
+    try:
+        with open(tl_report_path, "w", encoding="utf-8") as f:
+            json.dump(timeline_report, f, indent=2)
+        print(f"Timeline coverage report saved to {tl_report_path}. Status: {timeline_report['status'].upper()}")
+    except Exception as e:
+        print(f"Warning: Could not write timeline report: {e}")
+        
+    if generation_mode == "real" and timeline_reasons:
+        print("Error: Timeline coverage validation failed!")
+        for tr in timeline_reasons:
+            print(f" - {tr}")
+        sys.exit(1)
+
+    # 11. Optional Cut and Pacing Validation (v2.1a)
+    pacing_reasons = []
+    
+    scene_durations = [get_scene_duration(s.get("time_range", "")) for s in scenes]
+    non_proof_scenes = [s for s in scenes if s.get("reaction_or_reveal_type") != "proof"]
+    non_proof_durations = [get_scene_duration(s.get("time_range", "")) for s in non_proof_scenes]
+    
+    longest_scene_duration = max(scene_durations) if scene_durations else 0.0
+    average_scene_duration = sum(scene_durations) / len(scenes) if scenes else 0.0
+    scenes_over_2_5s = sum(1 for d in scene_durations if d > 2.5)
+    scenes_over_4_0s = sum(1 for d in scene_durations if d > 4.0)
+    
+    # Calculate back-half average scene duration
+    back_half_scenes = scenes[len(scenes)//2:]
+    back_half_avg = sum(get_scene_duration(s.get("time_range", "")) for s in back_half_scenes) / len(back_half_scenes) if back_half_scenes else 0.0
+    
+    # Check if final 15s contains a static hold > 4.0s
+    has_static_hold_final_15s = False
+    for s in scenes:
+        tr = s.get("time_range", "")
+        parts = tr.split("-")
+        if len(parts) == 2:
+            try:
+                end_t = parse_time_to_seconds(parts[1].strip())
+                if end_t > duration - 15.0:
+                    dur = get_scene_duration(tr)
+                    if dur > 4.0:
+                        has_static_hold_final_15s = True
+            except Exception:
+                pass
+                
+    if generation_mode == "real":
+        for idx, s in enumerate(scenes):
+            role = s.get("reaction_or_reveal_type", "")
+            tr = s.get("time_range", "")
+            dur = get_scene_duration(tr)
+            if role != "proof" and dur > 4.0:
+                pacing_reasons.append(f"Non-proof scene {idx+1} duration ({dur:.2f}s) exceeds 4.0s.")
+        if back_half_avg > 3.0:
+            pacing_reasons.append(f"Back-half average scene duration ({back_half_avg:.2f}s) exceeds 3.0s.")
+        if has_static_hold_final_15s:
+            pacing_reasons.append("Final 15s contains a static scene hold longer than 4.0s.")
+            
+    # Write pacing stats to a report
+    pacing_report = {
+        "status": "failed" if pacing_reasons else "passed",
+        "average_scene_duration": round(average_scene_duration, 3),
+        "longest_scene_duration": round(longest_scene_duration, 3),
+        "scenes_over_2_5s": scenes_over_2_5s,
+        "scenes_over_4_0s": scenes_over_4_0s,
+        "back_half_average_scene_duration": round(back_half_avg, 3),
+        "has_static_hold_final_15s": has_static_hold_final_15s,
+        "reasons": pacing_reasons
+    }
+    
+    pacing_report_path = os.path.join("docs", "pacing-report.json")
+    try:
+        with open(pacing_report_path, "w", encoding="utf-8") as f:
+            json.dump(pacing_report, f, indent=2)
+        print(f"Pacing report saved to {pacing_report_path}. Status: {pacing_report['status'].upper()}")
+    except Exception as e:
+        print(f"Warning: Could not write pacing report: {e}")
+        
+    if generation_mode == "real" and pacing_reasons:
+        print("Error: Pacing validation failed!")
+        for pr in pacing_reasons:
+            print(f" - {pr}")
+        sys.exit(1)
     
     try:
         with open(mix_report_path, "w", encoding="utf-8") as f:

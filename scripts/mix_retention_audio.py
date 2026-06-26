@@ -208,11 +208,14 @@ def main():
                 print(f"Error copying input video: {e}")
                 sys.exit(1)
 
-    # Perform ffmpeg audio mix
+    # Perform ffmpeg audio mix (v2.1a)
     video_duration = get_duration(input_video)
     voice_audio_present = has_audio_stream(input_video)
 
     print(f"Video duration: {video_duration:.2f}s, voice present: {voice_audio_present}")
+    
+    # We mix to a temporary video file first
+    temp_mixed_video = os.path.join(os.path.dirname(input_video), "pre-overlay-temp-mixed.mp4")
 
     if not voice_audio_present:
         # Mix only BGM
@@ -227,7 +230,7 @@ def main():
             "-c:v", "copy",
             "-c:a", "aac",
             "-t", f"{video_duration:.3f}",
-            output_video
+            temp_mixed_video
         ]
     else:
         # Mix voice and BGM
@@ -242,10 +245,10 @@ def main():
             "-c:v", "copy",
             "-c:a", "aac",
             "-t", f"{video_duration:.3f}",
-            output_video
+            temp_mixed_video
         ]
 
-    print(f"Executing ffmpeg command: {' '.join(cmd)}")
+    print(f"Executing ffmpeg mix command: {' '.join(cmd)}")
     res = subprocess.run(cmd, capture_output=True, text=True)
 
     if res.returncode != 0:
@@ -272,12 +275,70 @@ def main():
             json.dump(report, rf, indent=2)
         sys.exit(1)
 
+    # Apply loudness mastering pass (loudnorm)
+    measured_i = "N/A"
+    measured_lra = "N/A"
+    measured_tp = "N/A"
+    loudnorm_status = "failed"
+    
+    # Run loudnorm pass
+    loudnorm_cmd = [
+        "ffmpeg", "-y",
+        "-i", temp_mixed_video,
+        "-af", "loudnorm=I=-16:TP=-1.5:LRA=7:print_format=json",
+        "-c:v", "copy",
+        "-c:a", "aac",
+        output_video
+    ]
+    print(f"Executing ffmpeg loudnorm command: {' '.join(loudnorm_cmd)}")
+    res_ln = subprocess.run(loudnorm_cmd, capture_output=True, text=True)
+    
+    if res_ln.returncode == 0:
+        stderr = res_ln.stderr
+        json_match = re.search(r"\{\s*\"input_i\".*?\}", stderr, re.DOTALL)
+        if json_match:
+            try:
+                ln_data = json.loads(json_match.group(0))
+                measured_i = float(ln_data.get("output_i", "0.0"))
+                measured_lra = float(ln_data.get("output_lra", "0.0"))
+                measured_tp = float(ln_data.get("output_tp", "0.0"))
+                
+                if measured_i >= -20.0:
+                    loudnorm_status = "passed"
+            except Exception as e:
+                print("Warning: Failed to parse loudnorm JSON:", e)
+                
+        if loudnorm_status == "failed":
+            # Fallback regex parsing
+            i_match = re.search(r"Output Integrated:\s+([-+.\d]+)\s+LUFS", stderr)
+            lra_match = re.search(r"Output LRA:\s+([-+.\d]+)\s+LU", stderr)
+            tp_match = re.search(r"Output True Peak:\s+([-+.\d]+)\s+dBTP", stderr)
+            if i_match:
+                measured_i = float(i_match.group(1))
+                if measured_i >= -20.0:
+                    loudnorm_status = "passed"
+            if lra_match:
+                measured_lra = float(lra_match.group(1))
+            if tp_match:
+                measured_tp = float(tp_match.group(1))
+                
+        print(f"Loudnorm Mastering Stats: Integrated={measured_i} LUFS, LRA={measured_lra} LU, True Peak={measured_tp} dBTP, Status={loudnorm_status.upper()}")
+    else:
+        print("Error: ffmpeg loudnorm mastering failed.")
+        print("stderr:", res_ln.stderr)
+        
+    # Clean up temp file
+    if os.path.exists(temp_mixed_video):
+        try:
+            os.remove(temp_mixed_video)
+        except Exception:
+            pass
+
     print("Audio mixing successfully completed!")
     final_audio_present = has_audio_stream(output_video)
     final_duration = get_duration(output_video)
     
     # Check coverage: audio covers the entire duration
-    # Since we used -t <video_duration> and looped BGM indefinitely, coverage should be true
     full_duration_audio_coverage = final_audio_present and (final_duration >= video_duration - 0.5)
 
     report = {
@@ -292,12 +353,28 @@ def main():
         "volume_settings": {
             "voice_volume": 1.0,
             "bgm_volume": bgm_volume
-        }
+        },
+        # Mastered Loudness fields (v2.1a)
+        "measured_i": measured_i,
+        "measured_lra": measured_lra,
+        "measured_tp": measured_tp,
+        "target_i": -16.0,
+        "loudnorm_status": loudnorm_status
     }
 
     with open(report_path, "w", encoding="utf-8") as rf:
         json.dump(report, rf, indent=2)
     print(f"Wrote audio mix report to {report_path}")
+    
+    # Validate final loudness and presence
+    if not final_audio_present:
+        print("Error: Final mastered video is missing an audio stream.")
+        sys.exit(1)
+        
+    if loudnorm_status == "failed" or (isinstance(measured_i, (int, float)) and measured_i < -20.0):
+        print(f"Error: Integrated loudness {measured_i} LUFS is quieter than -20.0 LUFS threshold.")
+        sys.exit(1)
+        
     sys.exit(0)
 
 

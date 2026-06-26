@@ -299,8 +299,15 @@ def main():
 
     # Helper function to run quality gate on a test brief
     def check_brief(test_brief, env_mode="real", posting_mode="mock"):
+        tb = test_brief.copy()
+        if "payoff_line" not in tb and "payoff" not in tb:
+            tb["payoff_line"] = "This plans the week automatically."
+        if "final_resolution_line" not in tb and "final_question_or_twist" not in tb:
+            tb["final_resolution_line"] = "The calendar plans itself."
+        if "hook_claim" not in tb and "hook" in tb:
+            tb["hook_claim"] = tb["hook"]
         with open(brief_file, "w", encoding="utf-8") as f:
-            json.dump(test_brief, f, indent=2)
+            json.dump(tb, f, indent=2)
         env = os.environ.copy()
         env["GENERATION_MODE"] = env_mode
         env["POSTING_MODE"] = posting_mode
@@ -1322,9 +1329,402 @@ def main():
     ]:
         if os.path.exists(cleanup_path):
             os.remove(cleanup_path)
+            
+    # === TEST CONTENT ENGINE V2.1A — TIMELINE COVERAGE + VISUAL FALLBACK GATES ===
+    print("\n--- Testing v2.1a Timeline Coverage & Visual Fallback Guards ---")
+    
+    # Backup files that might be in docs
+    backups = {}
+    test_docs = [
+        "video-info.json",
+        "docs/video-info.json", 
+        "docs/tts-timestamps.json", 
+        "docs/retention-storyboard-synced.json", 
+        "docs/video-brief.json", 
+        "docs/retention-storyboard.json", 
+        "docs/audio-mix-report.json", 
+        "docs/timeline-coverage-report.json", 
+        "docs/visual-fallback-report.json", 
+        "docs/quality-report.json"
+    ]
+    for path in test_docs:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                backups[path] = json.load(f)
+
+    # Let's make sure the directories exist
+    os.makedirs("docs", exist_ok=True)
+    os.makedirs("storage/tasks/mock-task", exist_ok=True)
+
+    def restore_backups():
+        import time
+        for path in test_docs:
+            if path in backups:
+                for attempt in range(5):
+                    try:
+                        with open(path, "w", encoding="utf-8") as f:
+                            json.dump(backups[path], f, indent=2)
+                        break
+                    except Exception:
+                        time.sleep(0.1)
+            else:
+                for attempt in range(5):
+                    try:
+                        if os.path.exists(path):
+                            os.remove(path)
+                        break
+                    except Exception:
+                        try:
+                            with open(path, "w", encoding="utf-8") as f:
+                                f.write("")
+                            break
+                        except Exception:
+                            time.sleep(0.1)
+
+    def write_mock_storyboard(duration_sec):
+        scene_dur = duration_sec / 15.0
+        scenes = []
+        for idx in range(15):
+            t_start = idx * scene_dur
+            t_end = (idx + 1) * scene_dur
+            tr = f"0:{t_start:05.2f} - 0:{t_end:05.2f}"
+            scenes.append({
+                "scene_id": idx + 1,
+                "time_range": tr,
+                "reaction_or_reveal_type": "hook" if idx < 4 else "context" if idx < 8 else "proof" if idx < 12 else "payoff",
+                "stock_search_query": "query",
+                "visual_prompt": "prompt"
+            })
+            
+        overlays = []
+        overlay_dur = min(1.5, scene_dur * 0.8)
+        for idx in range(15):
+            t_start = idx * scene_dur
+            t_end = idx * scene_dur + overlay_dur
+            tr = f"0:{t_start:05.2f} - 0:{t_end:05.2f}"
+            overlays.append({
+                "time_range": tr,
+                "text": f"overlay text {idx}"
+            })
+            
+        mock_sb = {
+            "format_id": "viral_retention_engine_24s",
+            "scenes": scenes,
+            "text_overlays": overlays
+        }
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(mock_sb, f, indent=2)
+
+    # Test premature voice ending (fails real runs)
+    print("Testing premature voice ending (voice_time_coverage_pct < 0.80)...")
+    try:
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 30.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+        
+        write_mock_storyboard(30.0)
+
+        tts_data = {
+            "mode": "real",
+            "word_count": 2,
+            "total_duration": 9.5,
+            "words": [
+                {"word": "hello", "start": 0.0, "end": 0.5, "probability": 0.99},
+                {"word": "world", "start": 9.0, "end": 9.5, "probability": 0.99}
+            ]
+        }
+        with open("docs/tts-timestamps.json", "w", encoding="utf-8") as f:
+            json.dump(tts_data, f)
+            
+        synced_sb = {
+            "alignment_stats": {"caption_overlap_count": 0},
+            "text_overlays_synced": [
+                {"time_range": "0:00 - 0:02", "text": "hello", "start_time": 0.0, "end_time": 2.0},
+                {"time_range": "0:28 - 0:29", "text": "world", "start_time": 28.0, "end_time": 29.0}
+            ],
+            "scenes": [
+                {"scene_id": idx+1, "time_range": f"0:{idx*2:02d} - 0:{(idx+1)*2:02d}", "reaction_or_reveal_type": "hook"} for idx in range(15)
+            ]
+        }
+        with open("docs/retention-storyboard-synced.json", "w", encoding="utf-8") as f:
+            json.dump(synced_sb, f)
+
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump({"audio_validation_status": "passed", "max_silence_gap_seconds": 0.1, "final_tail_silence_status": "not_silent", "measured_i": -16.0, "bgm_status": "added"}, f)
+
+        res = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        if "below 80% threshold" not in res.stdout and "below 80% threshold" not in res.stderr:
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+        assert res.returncode != 0, "Expected validate_retention_format to fail due to voice coverage < 80%"
+        assert "below 80% threshold" in res.stdout or "below 80% threshold" in res.stderr
+    finally:
+        restore_backups()
+
+    # Test premature caption ending (fails real runs)
+    print("Testing premature caption ending (caption_time_coverage_pct < 0.80)...")
+    try:
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 30.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+        
+        write_mock_storyboard(30.0)
+
+        tts_data = {
+            "mode": "real",
+            "word_count": 2,
+            "total_duration": 29.0,
+            "words": [
+                {"word": "hello", "start": 0.0, "end": 0.5, "probability": 0.99},
+                {"word": "world", "start": 28.0, "end": 29.0, "probability": 0.99}
+            ]
+        }
+        with open("docs/tts-timestamps.json", "w", encoding="utf-8") as f:
+            json.dump(tts_data, f)
+            
+        synced_sb = {
+            "alignment_stats": {"caption_overlap_count": 0},
+            "text_overlays_synced": [
+                {"time_range": "0:00 - 0:02", "text": "hello", "start_time": 0.0, "end_time": 2.0},
+                {"time_range": "0:09 - 0:09.50", "text": "world", "start_time": 9.0, "end_time": 9.5}
+            ],
+            "scenes": [
+                {"scene_id": idx+1, "time_range": f"0:{idx*2:02d} - 0:{(idx+1)*2:02d}", "reaction_or_reveal_type": "hook"} for idx in range(15)
+            ]
+        }
+        with open("docs/retention-storyboard-synced.json", "w", encoding="utf-8") as f:
+            json.dump(synced_sb, f)
+
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump({"audio_validation_status": "passed", "max_silence_gap_seconds": 0.1, "final_tail_silence_status": "not_silent", "measured_i": -16.0, "bgm_status": "added"}, f)
+
+        res = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        if "below 80% threshold" not in res.stdout and "below 80% threshold" not in res.stderr:
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+        assert res.returncode != 0, "Expected validate_retention_format to fail due to caption coverage < 80%"
+        assert "below 80% threshold" in res.stdout or "below 80% threshold" in res.stderr
+    finally:
+        restore_backups()
+
+    # Test caption overlap (fails real runs)
+    print("Testing caption overlap failure...")
+    try:
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 24.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+        
+        write_mock_storyboard(24.0)
+
+        tts_data = {
+            "mode": "real",
+            "word_count": 2,
+            "total_duration": 23.0,
+            "words": [
+                {"word": "hello", "start": 0.0, "end": 0.5, "probability": 0.99},
+                {"word": "world", "start": 22.0, "end": 23.0, "probability": 0.99}
+            ]
+        }
+        with open("docs/tts-timestamps.json", "w", encoding="utf-8") as f:
+            json.dump(tts_data, f)
+            
+        synced_sb = {
+            "alignment_stats": {"caption_overlap_count": 1},
+            "text_overlays_synced": [
+                {"time_range": "0:00 - 0:02", "text": "hello", "start_time": 0.0, "end_time": 2.0},
+                {"time_range": "0:22 - 0:23", "text": "world", "start_time": 22.0, "end_time": 23.0}
+            ],
+            "scenes": [
+                {"scene_id": idx+1, "time_range": f"0:{idx*1.5:02.1f} - 0:{(idx+1)*1.5:02.1f}", "reaction_or_reveal_type": "hook"} for idx in range(15)
+            ]
+        }
+        with open("docs/retention-storyboard-synced.json", "w", encoding="utf-8") as f:
+            json.dump(synced_sb, f)
+
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump({"audio_validation_status": "passed", "max_silence_gap_seconds": 0.1, "final_tail_silence_status": "not_silent", "measured_i": -16.0, "bgm_status": "added"}, f)
+
+        res = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        if "caption_overlap_count" not in res.stdout and "caption_overlap_count" not in res.stderr:
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+        assert res.returncode != 0, "Expected validate_retention_format to fail due to caption overlap count > 0"
+        assert "caption_overlap_count" in res.stdout or "caption_overlap_count" in res.stderr or "Caption overlap" in res.stdout or "Caption overlap" in res.stderr
+    finally:
+        restore_backups()
+
+    # Test missing payoff/resolution quality gate check
+    print("Testing missing payoff/resolution line failure in quality gate...")
+    try:
+        bad_brief = {
+            "topic": "Clean topic about productivity website",
+            "hook": "Stop wasting hours.",
+            "title_guidance": "Clean Title Guidance of length 15+",
+            "script_outline": ["Step 1"],
+            "banned_words": [],
+            "freshness_score": 100,
+            "format_id": "viral_retention_engine_24s",
+            "target_length_seconds": 24,
+            "hard_min_duration_seconds": 18,
+            "hard_max_duration_seconds": 32,
+            "scene_plan": [
+                {"scene_id": 1, "time_range": "0:00 - 0:02", "visual": "visual", "audio": "Stop wasting hours.", "reaction_or_reveal_type": "hook"}
+            ],
+            "text_overlay_plan": [{"time_range": "0:00 - 0:01", "text": "text"}],
+            "safety_rules": ["no copyright issues"],
+            "hook_claim": "Stop wasting hours.",
+            "proof_event": "Show calendar before and after.",
+        }
+        with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+            json.dump(bad_brief, f, indent=2)
+            
+        res = subprocess.run([sys.executable, "scripts/quality_gate.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected quality_gate to fail due to missing payoff/resolution lines"
+        assert "payoff_line" in res.stdout or "payoff_line" in res.stderr or "final_resolution_line" in res.stdout or "final_resolution_line" in res.stderr
+    finally:
+        restore_backups()
+
+    # Test visual blacklist/fallback auditor logic
+    print("Testing visual fallback auditor on generic stock / irrelevant terms...")
+    try:
+        brief = {
+            "topic": "automation tools",
+            "hook_claim": "Automate everything.",
+            "proof_event": "We build a tool.",
+            "payoff_line": "Our tool plans the week.",
+            "final_resolution_line": "Plan completed automatically.",
+            "loop_tieback": "Go automate."
+        }
+        with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+            json.dump(brief, f, indent=2)
+
+        scenes = []
+        for idx in range(1, 25):
+            role = "hook" if idx <= 6 else "context" if idx <= 12 else "proof" if idx <= 18 else "payoff"
+            is_fallback = idx >= 20
+            scenes.append({
+                "scene_id": idx,
+                "reaction_or_reveal_type": role,
+                "stock_search_query": "honey jar recipe" if idx == 1 else "generic placeholder query",
+                "visual_prompt": "some visual description",
+                "narration_derived_query": "" if is_fallback else "specific animation query",
+                "preset_fallback_query": "generic stock fallback query"
+            })
+            
+        storyboard = {"scenes": scenes}
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(storyboard, f, indent=2)
+
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected visual fallback auditor to fail"
+        assert "exceeds limit" in res.stdout or "exceeds limit" in res.stderr or "generic stock" in res.stdout or "generic stock" in res.stderr or "Irrelevant search" in res.stdout or "Irrelevant search" in res.stderr
+        
+        assert os.path.exists("docs/visual-fallback-report.json"), "Expected visual-fallback-report.json to be written"
+        with open("docs/visual-fallback-report.json", "r", encoding="utf-8") as f:
+            vfr = json.load(f)
+        assert vfr["status"] == "failed"
+        assert vfr["generic_fallback_count"] > 2
+    finally:
+        restore_backups()
+
+    # Test low audio loudness failure
+    print("Testing low audio loudness failure...")
+    try:
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 24.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+        
+        write_mock_storyboard(24.0)
+
+        dummy_mix_report = {
+            "bgm_status": "added",
+            "bgm_file": "assets/music/tech_pulse.mp3",
+            "bgm_mood": "tech_pulse",
+            "video_duration": 24.0,
+            "bgm_duration_after_loop": 24.0,
+            "voice_audio_present": True,
+            "final_audio_present": True,
+            "full_duration_audio_coverage": True,
+            "volume_settings": {"voice_volume": 1.0, "bgm_volume": 0.12},
+            "measured_i": -25.0, # low loudness
+            "measured_tp": -6.0,
+            "measured_lra": 7.0,
+            "target_i": -16.0,
+            "loudnorm_status": "failed"
+        }
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump(dummy_mix_report, f, indent=2)
+
+        tts_data = {
+            "mode": "real",
+            "word_count": 2,
+            "total_duration": 23.0,
+            "words": [
+                {"word": "hello", "start": 0.0, "end": 0.5, "probability": 0.99},
+                {"word": "world", "start": 22.0, "end": 23.0, "probability": 0.99}
+            ]
+        }
+        with open("docs/tts-timestamps.json", "w", encoding="utf-8") as f:
+            json.dump(tts_data, f)
+
+        synced_sb = {
+            "alignment_stats": {"caption_overlap_count": 0},
+            "text_overlays_synced": [
+                {"time_range": "0:00 - 0:02", "text": "hello", "start_time": 0.0, "end_time": 2.0},
+                {"time_range": "0:22 - 0:23", "text": "world", "start_time": 22.0, "end_time": 23.0}
+            ],
+            "scenes": [
+                {"scene_id": idx+1, "time_range": f"0:{idx*1.5:02.1f} - 0:{(idx+1)*1.5:02.1f}", "reaction_or_reveal_type": "hook"} for idx in range(15)
+            ]
+        }
+        with open("docs/retention-storyboard-synced.json", "w", encoding="utf-8") as f:
+            json.dump(synced_sb, f)
+
+        res = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        if "loudness" not in res.stdout and "loudness" not in res.stderr:
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+        assert res.returncode != 0, "Expected validate_retention_format to fail due to low loudness"
+        assert "loudness" in res.stdout or "loudness" in res.stderr
+    finally:
+        restore_backups()
+
+    # Test mock mode bypass of visual fallback failures
+    print("Testing mock mode bypass of visual fallback failures...")
+    try:
+        brief = {
+            "topic": "automation tools",
+            "hook_claim": "Automate everything.",
+            "proof_event": "We build a tool.",
+            "payoff_line": "Our tool plans the week.",
+            "final_resolution_line": "Plan completed automatically.",
+            "loop_tieback": "Go automate."
+        }
+        with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+            json.dump(brief, f, indent=2)
+
+        scenes = []
+        for idx in range(1, 25):
+            role = "hook" if idx <= 6 else "context" if idx <= 12 else "proof" if idx <= 18 else "payoff"
+            scenes.append({
+                "scene_id": idx,
+                "reaction_or_reveal_type": role,
+                "stock_search_query": "generic stock fallback query",
+                "visual_prompt": "some visual description",
+                "narration_derived_query": "", # trigger fallback
+                "preset_fallback_query": "generic stock fallback query"
+            })
+            
+        storyboard = {"scenes": scenes}
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(storyboard, f, indent=2)
+
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "mock"}, capture_output=True, text=True)
+        assert res.returncode == 0, f"Expected mock mode fallback audit to pass, got {res.returncode}"
+    finally:
+        restore_backups()
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 
 if __name__ == '__main__':
     main()
-
