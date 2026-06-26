@@ -216,15 +216,49 @@ def main():
         
     # Mark the best idea as selected
     if scored_ideas:
-        # Sort by freshness_score descending to find the highest scorer
-        scored_ideas.sort(key=lambda x: x["freshness_score"], reverse=True)
-        scored_ideas[0]["selected"] = True
-        scored_ideas[0]["selected_reason"] = f"Selected as the highest scoring fresh idea (Score: {scored_ideas[0]['freshness_score']})."
+        generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+        input_topic = os.environ.get('TOPIC', '').strip()
+        
+        pinned_idea = None
+        
+        # If a specific TOPIC was provided, try to pin a matching idea
+        if input_topic:
+            # 1. Try exact match first
+            for idea in scored_ideas:
+                if idea.get("topic", "").strip().lower() == input_topic.lower():
+                    pinned_idea = idea
+                    break
+            
+            # 2. Try high word-overlap match (>= 60%)
+            if not pinned_idea:
+                best_overlap = 0.0
+                best_match = None
+                for idea in scored_ideas:
+                    overlap = calculate_word_overlap(input_topic, idea.get("topic", ""))
+                    if overlap > best_overlap:
+                        best_overlap = overlap
+                        best_match = idea
+                if best_overlap >= 0.6 and best_match:
+                    pinned_idea = best_match
+                    print(f"Topic pin: No exact match for '{input_topic}', using closest match '{best_match['topic']}' ({int(best_overlap*100)}% overlap).")
+            
+            if pinned_idea:
+                pinned_idea["selected"] = True
+                pinned_idea["selected_reason"] = f"Pinned by input TOPIC='{input_topic}' (Score: {pinned_idea['freshness_score']})."
+                print(f"Topic pin: Selected idea '{pinned_idea['topic']}' (Score: {pinned_idea['freshness_score']}) matching input topic.")
+            else:
+                print(f"Warning: Input TOPIC='{input_topic}' did not match any idea in the catalog. Falling back to highest-scoring idea.")
+        
+        # Fallback: select the highest-scoring idea if no pin matched
+        if not pinned_idea:
+            scored_ideas.sort(key=lambda x: x["freshness_score"], reverse=True)
+            scored_ideas[0]["selected"] = True
+            scored_ideas[0]["selected_reason"] = f"Selected as the highest scoring fresh idea (Score: {scored_ideas[0]['freshness_score']})."
         
         # Check freshness policy in real mode
-        generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
-        if generation_mode == 'real' and scored_ideas[0]["freshness_score"] < 70:
-            print(f"Error: Selected idea '{scored_ideas[0]['topic']}' has freshness score {scored_ideas[0]['freshness_score']}, which is below the minimum required threshold (70) in real mode.")
+        selected = next((i for i in scored_ideas if i["selected"]), None)
+        if selected and generation_mode == 'real' and selected["freshness_score"] < 70:
+            print(f"Error: Selected idea '{selected['topic']}' has freshness score {selected['freshness_score']}, which is below the minimum required threshold (70) in real mode.")
             sys.exit(1)
             
         # Re-sort by idea_id to preserve output order

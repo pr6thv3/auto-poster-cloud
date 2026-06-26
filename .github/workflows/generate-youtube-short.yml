@@ -129,6 +129,7 @@ jobs:
         env:
           GENERATION_MODE: ${{ github.event.inputs.generation_mode }}
           POSTING_MODE: ${{ github.event.inputs.posting_mode }}
+          TOPIC: ${{ github.event.inputs.topic }}
         run: |
           python scripts/generate_ideas.py --profile ${{ github.event.inputs.profile_path }}
           python scripts/score_idea_freshness.py
