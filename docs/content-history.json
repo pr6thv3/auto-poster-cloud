@@ -384,5 +384,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28233689531"
+  },
+  {
+    "idea_id": "idea_ai_tools_17",
+    "profile_id": "ai_tools",
+    "topic": "This AI bot auto-fills your calendar while you sleep",
+    "angle": "overnight intelligent meeting planner",
+    "hook": "You wake up and every meeting is already booked perfectly.",
+    "keywords": [
+      "calendar automation",
+      "smart scheduling",
+      "meeting planner"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-26T18:58:03.639029Z",
+    "status": "success",
+    "youtube_video_id": "xGHxm8oy3eo",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28258815516"
   }
 ]
