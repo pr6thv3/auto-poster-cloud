@@ -271,6 +271,8 @@ def main():
         print("Error: No text overlays defined in storyboard.")
         sys.exit(1)
 
+    trim_duration = None
+
     # Load TTS timestamps for audio-synced re-timing
     tts_path = os.path.join("docs", "tts-timestamps.json")
     tts_words = []
@@ -288,6 +290,8 @@ def main():
     # Re-time overlays to TTS audio boundaries
     if tts_words:
         last_word_end = max([w["end"] for w in tts_words]) if tts_words else 0.0
+        # Trim video to last_word_end + 1.5 seconds (at least 18.5s to respect format limits)
+        trim_duration = max(18.5, round(last_word_end + 1.5, 3))
         print("[REAL] Matching overlay words to TTS timestamps for audio sync...")
         synced_overlays = match_overlays_to_tts(overlays, tts_words, duration=last_word_end)
         
@@ -393,10 +397,14 @@ def main():
     cmd = [
         "ffmpeg", "-y",
         "-i", input_video,
+    ]
+    if trim_duration is not None:
+        cmd.extend(["-t", f"{trim_duration:.3f}"])
+    cmd.extend([
         "-vf", filter_graph,
         "-codec:a", "copy",
         output_video
-    ]
+    ])
 
     print(f"Executing ffmpeg post-processing with {len(filters)} overlay filters...")
     print(f"Output: {output_video}")
