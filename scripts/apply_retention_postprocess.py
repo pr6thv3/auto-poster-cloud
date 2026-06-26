@@ -30,7 +30,7 @@ def normalize_word(word):
     return re.sub(r'[^a-z0-9]', '', word.lower().strip())
 
 
-def match_overlays_to_tts(overlays, tts_words):
+def match_overlays_to_tts(overlays, tts_words, duration):
     """
     Match each overlay's words to TTS word-level timestamps.
     Returns a list of re-timed overlays with start/end from actual TTS audio.
@@ -38,12 +38,18 @@ def match_overlays_to_tts(overlays, tts_words):
     synced_overlays = []
     tts_index = 0  # tracks position in TTS words for sequential matching
 
+    # First pass: find exact matches and set to None if unmatched
     for overlay in overlays:
         text = overlay.get("text", "")
         overlay_words = text.split()
         if not overlay_words:
             # Keep original timing for empty overlays
-            synced_overlays.append(dict(overlay))
+            synced_overlay = dict(overlay)
+            synced_overlay["start_time"] = round(float(overlay.get("start_time", 0.0)), 3)
+            synced_overlay["end_time"] = round(float(overlay.get("end_time", 0.5)), 3)
+            synced_overlay["matched_words"] = 0
+            synced_overlay["total_words"] = 0
+            synced_overlays.append(synced_overlay)
             continue
 
         matched_starts = []
@@ -76,21 +82,70 @@ def match_overlays_to_tts(overlays, tts_words):
                 # Advance tts_index past the matched word
                 tts_index = best_match + 1
 
+        synced_overlay = dict(overlay)
         if matched_starts and matched_ends:
             # Re-time: use actual TTS boundaries + small hold time
             new_start = min(matched_starts)
             new_end = max(matched_ends) + 0.1  # 100ms hold after last word
+            synced_overlay["start_time"] = round(new_start, 3)
+            synced_overlay["end_time"] = round(new_end, 3)
+            synced_overlay["matched_words"] = len(matched_starts)
         else:
-            # No match found — interpolate from neighbors or keep original
-            new_start = float(overlay.get("start_time", 0.0))
-            new_end = float(overlay.get("end_time", 0.5))
-
-        synced_overlay = dict(overlay)
-        synced_overlay["start_time"] = round(new_start, 3)
-        synced_overlay["end_time"] = round(new_end, 3)
-        synced_overlay["matched_words"] = len(matched_starts)
+            synced_overlay["start_time"] = None
+            synced_overlay["end_time"] = None
+            synced_overlay["matched_words"] = 0
+            
         synced_overlay["total_words"] = len([w for w in overlay_words if normalize_word(w)])
         synced_overlays.append(synced_overlay)
+
+    # Second pass: interpolate unmatched overlays to prevent gaps/overlaps/out-of-order timings
+    idx = 0
+    n = len(synced_overlays)
+    while idx < n:
+        if synced_overlays[idx]["start_time"] is None:
+            # Found a group of contiguous unmatched overlays
+            group_start_idx = idx
+            while idx < n and synced_overlays[idx]["start_time"] is None:
+                idx += 1
+            group_end_idx = idx
+            num_unmatched = group_end_idx - group_start_idx
+            
+            # Find bounds
+            prev_end = 0.0
+            if group_start_idx > 0:
+                prev_end = synced_overlays[group_start_idx - 1]["end_time"]
+                
+            next_start = duration
+            # Find the next matched one
+            for j in range(group_end_idx, n):
+                if synced_overlays[j]["start_time"] is not None:
+                    next_start = synced_overlays[j]["start_time"]
+                    break
+                    
+            # Interpolate
+            gap_duration = next_start - prev_end
+            margin = 0.05
+            usable_duration = gap_duration - (2 * margin)
+            
+            if usable_duration > 0:
+                share = usable_duration / num_unmatched
+                for k in range(num_unmatched):
+                    curr_idx = group_start_idx + k
+                    new_start = prev_end + margin + (k * share)
+                    new_end = new_start + share
+                    synced_overlays[curr_idx]["start_time"] = round(new_start, 3)
+                    synced_overlays[curr_idx]["end_time"] = round(new_end, 3)
+            else:
+                # Squeeze them into tiny non-overlapping intervals
+                share = max(0.01, gap_duration / max(1, num_unmatched))
+                for k in range(num_unmatched):
+                    curr_idx = group_start_idx + k
+                    new_start = prev_end + (k * share)
+                    new_end = new_start + share
+                    synced_overlays[curr_idx]["start_time"] = round(new_start, 3)
+                    synced_overlays[curr_idx]["end_time"] = round(new_end, 3)
+        else:
+            idx += 1
 
     return synced_overlays
 
@@ -232,11 +287,11 @@ def main():
 
     # Re-time overlays to TTS audio boundaries
     if tts_words:
+        last_word_end = max([w["end"] for w in tts_words]) if tts_words else 0.0
         print("[REAL] Matching overlay words to TTS timestamps for audio sync...")
-        synced_overlays = match_overlays_to_tts(overlays, tts_words)
+        synced_overlays = match_overlays_to_tts(overlays, tts_words, duration=last_word_end)
         
         # Shift and filter filler overlays to prevent visual overlap/double exposure
-        last_word_end = max([w["end"] for w in tts_words]) if tts_words else 0.0
         print(f"[REAL] Narration ends at {last_word_end:.3f}s. Adjusting filler overlays...")
         
         adjusted_overlays = []
@@ -266,7 +321,16 @@ def main():
         print(f"[REAL] Resolved {caption_overlap_count} caption overlaps.")
         
         stats = compute_alignment_stats(synced_overlays)
-        stats["caption_overlap_count"] = caption_overlap_count
+        # Calculate actual unresolved overlaps remaining
+        unresolved_overlap_count = 0
+        for i in range(len(active_overlays) - 1):
+            curr = active_overlays[i]
+            nxt = active_overlays[i+1]
+            curr_end = curr.get("end_time", 0.0)
+            nxt_start = nxt.get("start_time", 0.0)
+            if curr_end > nxt_start:
+                unresolved_overlap_count += 1
+        stats["caption_overlap_count"] = unresolved_overlap_count
         print(f"[REAL] Alignment coverage: {stats['alignment_coverage_pct']}% "
               f"({stats['total_matched_words']}/{stats['total_overlay_words']} words matched)")
     else:
