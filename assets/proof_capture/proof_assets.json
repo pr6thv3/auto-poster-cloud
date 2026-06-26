@@ -1,3 +1,20 @@
 {
-  "assets": []
+  "assets": [
+    {
+      "asset_id": "calendar_agent_demo_001",
+      "file_path": "assets/proof_capture/calendar_agent/calendar_agent_demo_001.mp4",
+      "project": "calendar_agent",
+      "descriptor": "AI scheduling assistant automatically fills a weekly calendar and books meetings",
+      "keywords": ["calendar", "schedule", "meeting", "week", "automation", "agent", "planned", "booked"],
+      "supported_scene_roles": ["proof", "payoff"],
+      "supported_topics": ["ai_tools", "productivity", "calendar automation", "AI agent schedules your entire week"],
+      "duration_seconds": 7.0,
+      "orientation": "vertical_or_crop_safe",
+      "source_type": "synthetic_private_validation_asset",
+      "approved_for_private_validation": true,
+      "approved_for_public_use": false,
+      "contains_private_data": false,
+      "notes": "Synthetic demo asset for private proof-asset validation only. Not approved for public posting until manually reviewed."
+    }
+  ]
 }
