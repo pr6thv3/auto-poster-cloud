@@ -668,15 +668,29 @@ def main():
         final_payoff_strength = "strong"
             
     # Check if final 3 seconds include payoff scene coverage
+    # Scale storyboard time ranges to actual video duration if they differ
     payoff_intervals = []
+    storyboard_duration = 0.0
+    for s in scenes:
+        tr = s.get("time_range", "")
+        parts = tr.split("-")
+        if len(parts) == 2:
+            try:
+                t2 = parse_time_to_seconds(parts[1].strip())
+                storyboard_duration = max(storyboard_duration, t2)
+            except Exception:
+                pass
+    
+    time_scale = duration / storyboard_duration if storyboard_duration > 0 else 1.0
+    
     for s in scenes:
         if s.get("reaction_or_reveal_type") == "payoff":
             tr = s.get("time_range", "")
             parts = tr.split("-")
             if len(parts) == 2:
                 try:
-                    t1 = parse_time_to_seconds(parts[0].strip())
-                    t2 = parse_time_to_seconds(parts[1].strip())
+                    t1 = parse_time_to_seconds(parts[0].strip()) * time_scale
+                    t2 = parse_time_to_seconds(parts[1].strip()) * time_scale
                     payoff_intervals.append((t1, t2))
                 except Exception:
                     pass
