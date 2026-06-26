@@ -175,6 +175,45 @@ IDEAS_CATALOG = {
             "format": "viral_curiosity_24s",
             "freshness_window_days": 14,
             "risk_flags": []
+        },
+        {
+            "topic": "This new AI agent schedules your entire week",
+            "angle": "calendar scheduling automation",
+            "hook": "Stop manually planning your calendar meetings every week.",
+            "curiosity_gap": "A new AI scheduling assistant analyzes your team's energy levels and automatically slots meetings to maximize focus time.",
+            "visual_promise": "Watch messy calendar blocks automatically shift and organize into color-coded focus sessions.",
+            "payoff": "It resolves ten conflicting meeting invites in less than three seconds.",
+            "final_question_or_twist": "Will you let an algorithm manage your daily work schedule?",
+            "keywords": ["calendar planning", "scheduling assistant", "time management"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": []
+        },
+        {
+            "topic": "Create custom 3D game assets with simple text",
+            "angle": "3D model generation technology",
+            "hook": "Forget spending days modeling 3D assets for games.",
+            "curiosity_gap": "A brand new generative model constructs production-ready 3D meshes with clean UV maps from single text prompts.",
+            "visual_promise": "Watch a flat text prompt turn into a fully detailed 3D sword rotating in real-time.",
+            "payoff": "Export game-ready OBJ files directly into Unity or Unreal Engine.",
+            "final_question_or_twist": "Will indie game developers ever need to hire 3D artists again?",
+            "keywords": ["game assets", "3d modeling", "generative graphics"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": []
+        },
+        {
+            "topic": "This smart AI extension refactors messy code instantly",
+            "angle": "code refactoring automation",
+            "hook": "Your codebase is filled with hidden technical debt.",
+            "curiosity_gap": "A new local LLM extension scans your files and suggests instant refactoring to optimize performance and readability.",
+            "visual_promise": "Watch hundreds of lines of duplicate spaghetti code shrink into a clean, modular helper function.",
+            "payoff": "It detects memory leaks and fixes them before you commit.",
+            "final_question_or_twist": "Would you trust an AI assistant to clean up your legacy codebase?",
+            "keywords": ["code refactoring", "developer tools", "local llm helper"],
+            "format": "viral_curiosity_24s",
+            "freshness_window_days": 30,
+            "risk_flags": []
         }
     ],
     "fifa": [

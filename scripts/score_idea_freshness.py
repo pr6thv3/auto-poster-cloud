@@ -220,6 +220,13 @@ def main():
         scored_ideas.sort(key=lambda x: x["freshness_score"], reverse=True)
         scored_ideas[0]["selected"] = True
         scored_ideas[0]["selected_reason"] = f"Selected as the highest scoring fresh idea (Score: {scored_ideas[0]['freshness_score']})."
+        
+        # Check freshness policy in real mode
+        generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+        if generation_mode == 'real' and scored_ideas[0]["freshness_score"] < 70:
+            print(f"Error: Selected idea '{scored_ideas[0]['topic']}' has freshness score {scored_ideas[0]['freshness_score']}, which is below the minimum required threshold (70) in real mode.")
+            sys.exit(1)
+            
         # Re-sort by idea_id to preserve output order
         scored_ideas.sort(key=lambda x: x["idea_id"])
         

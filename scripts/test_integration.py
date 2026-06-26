@@ -259,6 +259,28 @@ def main():
     assert "keyword_fatigue" in idea3["penalty_reasons"], "Expected keyword_fatigue penalty on idea 3"
     print("Verification: Freshness penalties scoring tests passed.")
 
+    # Test that score_idea_freshness.py fails in real mode if selected idea score is < 70
+    stale_ideas = [
+        {
+            "idea_id": "idea_test_1",
+            "profile_id": "ai_tools",
+            "topic": "3 AI tools to start a side hustle", # Exact Topic Overlap
+            "angle": "side hustle automation",
+            "hook": "Want to start a side hustle? These 3 AI tools will do all the work for you.",
+            "keywords": ["side hustle", "ai tools", "make money online"],
+            "format": "list_top_3",
+            "freshness_window_days": 14
+        }
+    ]
+    with open(ideas_file, "w", encoding="utf-8") as f:
+        json.dump(stale_ideas, f, indent=2)
+        
+    env_real = os.environ.copy()
+    env_real["GENERATION_MODE"] = "real"
+    res = subprocess.run([sys.executable, "scripts/score_idea_freshness.py"], env=env_real, capture_output=True, text=True)
+    assert res.returncode == 1, f"Expected score_idea_freshness.py to fail in real mode when best freshness < 70, got exit code {res.returncode}"
+    assert "Error: Selected idea" in res.stdout or "Error: Selected idea" in res.stderr
+    print("Verification: score_idea_freshness.py successfully blocked real run with low freshness score")
     # === TEST QUALITY GATE HARDENING ===
     print("\n--- Testing Quality Gate Hardening ---")
     brief_file = "docs/video-brief.json"
@@ -276,11 +298,12 @@ def main():
             report_backup = json.load(f)
 
     # Helper function to run quality gate on a test brief
-    def check_brief(test_brief):
+    def check_brief(test_brief, env_mode="real", posting_mode="mock"):
         with open(brief_file, "w", encoding="utf-8") as f:
             json.dump(test_brief, f, indent=2)
         env = os.environ.copy()
-        env["GENERATION_MODE"] = "real"
+        env["GENERATION_MODE"] = env_mode
+        env["POSTING_MODE"] = posting_mode
         res = subprocess.run([sys.executable, "scripts/quality_gate.py"], env=env, capture_output=True, text=True)
         with open(report_file, "r", encoding="utf-8") as f:
             report_data = json.load(f)
@@ -338,18 +361,41 @@ def main():
     assert report_data["status"] == "failed"
     assert any("too long" in r for r in report_data["reasons"])
 
-    # (e) Freshness score below 70 failure
+    # (e) Freshness score below 70 failure / warning based on mode
+    # Test real generation mode (should fail)
     res_code, report_data = check_brief({
         "topic": "Clean topic",
-        "hook": "Discover this cool tool today.",
+        "hook": "Discover this incredibly cool tool today.",
         "title_guidance": "Clean Title Guidance of length 15+",
         "script_outline": ["Step 1", "Step 2", "Step 3"],
         "banned_words": [],
         "freshness_score": 65
-    })
-    assert res_code == 1, "Expected quality gate to fail for low freshness score"
+    }, env_mode="real", posting_mode="real")
+    assert res_code == 1, "Expected quality gate to fail for low freshness score in real mode"
     assert report_data["status"] == "failed"
     assert any("Freshness score" in r for r in report_data["reasons"])
+    # Verify warning message does not mention "mock mode" in real mode reasons
+    assert not any("mock mode" in r.lower() for r in report_data["reasons"]), "Real mode failure should not mention mock mode"
+    # Verify report JSON fields
+    assert report_data["detected_generation_mode"] == "real"
+    assert report_data["detected_posting_mode"] == "real"
+    assert report_data["freshness_score"] == 65
+    assert report_data["freshness_threshold"] == 70
+    assert report_data["freshness_policy"] == "fail_in_real_mode_warn_in_mock_mode"
+
+    # Test mock generation mode (should warn / pass with warning)
+    res_code, report_data = check_brief({
+        "topic": "Clean topic",
+        "hook": "Discover this incredibly cool tool today.",
+        "title_guidance": "Clean Title Guidance of length 15+",
+        "script_outline": ["Step 1", "Step 2", "Step 3"],
+        "banned_words": [],
+        "freshness_score": 65
+    }, env_mode="mock", posting_mode="real")
+    assert res_code == 0, "Expected quality gate to warn (and pass) for low freshness score in mock mode"
+    assert report_data["status"] == "warning"
+    assert any("Freshness score" in w for w in report_data["warnings"])
+    assert any("mock mode" in w.lower() for w in report_data["warnings"]), "Mock mode warning should mention mock mode"
 
     # (f) Title too generic failure
     res_code, report_data = check_brief({

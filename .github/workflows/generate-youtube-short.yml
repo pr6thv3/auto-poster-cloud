@@ -126,6 +126,9 @@ jobs:
 
       - name: Run Content Engine Pipeline
         if: github.event.inputs.run_content_engine == 'true'
+        env:
+          GENERATION_MODE: ${{ github.event.inputs.generation_mode }}
+          POSTING_MODE: ${{ github.event.inputs.posting_mode }}
         run: |
           python scripts/generate_ideas.py --profile ${{ github.event.inputs.profile_path }}
           python scripts/score_idea_freshness.py

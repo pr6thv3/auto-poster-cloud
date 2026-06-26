@@ -169,12 +169,13 @@ def main():
         
     # 4. Check Freshness Score Threshold
     freshness_score = brief.get("freshness_score", 100)
+    generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
+    posting_mode = os.environ.get('POSTING_MODE', 'mock').lower()
     if freshness_score < 70:
-        generation_mode = os.environ.get('GENERATION_MODE', 'mock').lower()
-        if generation_mode == 'mock':
-            warnings.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70). (Downgraded to warning in mock mode)")
+        if generation_mode == 'real':
+            reasons.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70). [Detected Mode: generation_mode={generation_mode}, posting_mode={posting_mode}]")
         else:
-            reasons.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70).")
+            warnings.append(f"Freshness score ({freshness_score}) is below the required quality threshold (70). (Downgraded to warning in mock mode) [Detected Mode: generation_mode={generation_mode}, posting_mode={posting_mode}]")
         
     # 5. Check Script Outline and Durations
     script_outline = brief.get("script_outline", [])
@@ -533,7 +534,12 @@ def main():
     report = {
         "status": status,
         "reasons": reasons,
-        "warnings": warnings
+        "warnings": warnings,
+        "detected_generation_mode": generation_mode,
+        "detected_posting_mode": posting_mode,
+        "freshness_score": freshness_score,
+        "freshness_threshold": 70,
+        "freshness_policy": "fail_in_real_mode_warn_in_mock_mode"
     }
     
     output_path = os.path.join("docs", "quality-report.json")
