@@ -346,5 +346,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28202233918"
+  },
+  {
+    "idea_id": "idea_ai_tools_6",
+    "profile_id": "ai_tools",
+    "topic": "This AI tool turns a website idea into a landing page",
+    "angle": "landing page layout recreation",
+    "hook": "Stop coding landing page mockups from scratch today.",
+    "keywords": [
+      "website builder",
+      "ai design",
+      "landing page mockup"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-26T09:43:19.845477Z",
+    "status": "success",
+    "youtube_video_id": "K3y_wcTL7Ig",
+    "freshness_score": 65,
+    "quality_score": 100,
+    "source_run_id": "28230041461"
   }
 ]
