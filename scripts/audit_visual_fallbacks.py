@@ -38,6 +38,17 @@ def main():
         
     scenes = sb.get("scenes", [])
     
+    # Load proof selection report
+    proof_report_path = os.path.join("docs", "proof-asset-selection-report.json")
+    proof_selected_assets = {}
+    if os.path.exists(proof_report_path):
+        try:
+            with open(proof_report_path, "r", encoding="utf-8") as f:
+                pr = json.load(f)
+            proof_selected_assets = pr.get("selected_assets", {})
+        except Exception as e:
+            print(f"Warning: Could not read proof selection report: {e}")
+    
     # Irrelevant terms detection
     banned_terms = {"food", "recipe", "jar", "honey", "cooking", "construction", "blueprint"}
     # Filter terms: only search for them if they are not in the topic
@@ -70,6 +81,7 @@ def main():
 
     for idx, s in enumerate(scenes):
         scene_id = s.get("scene_id", idx + 1)
+        scene_id_str = str(scene_id)
         role = s.get("reaction_or_reveal_type", "") # e.g. hook, context, proof, payoff
         query = s.get("stock_search_query", "")
         visual = s.get("visual_prompt", "")
@@ -95,16 +107,21 @@ def main():
         # Validate payoff/proof scenes
         if role in ["proof", "payoff"]:
             if generic_fallback:
-                if role == "proof":
-                    proof_scene_failed = True
-                if role == "payoff":
-                    payoff_scene_failed = True
+                # If a custom proof asset is selected for this scene, it won't use stock
+                if scene_id_str in proof_selected_assets:
+                    has_proof_payoff_visual = True
+                else:
+                    if role == "proof":
+                        proof_scene_failed = True
+                    if role == "payoff":
+                        payoff_scene_failed = True
             else:
                 has_proof_payoff_visual = True
                 
         # Validate final 20%
         if idx >= final_20_start_idx and generic_fallback:
-            final_20_percent_failed = True
+            if scene_id_str not in proof_selected_assets:
+                final_20_percent_failed = True
             
         asset_name = downloaded_assets.get(idx, None)
         
@@ -130,20 +147,11 @@ def main():
         last_narr = last_scene.get("narration_derived_query", "")
         last_generic = (not bool(last_narr)) and (category == "fallback")
         if last_generic:
-            final_scene_generic_fallback = True
+            last_scene_id_str = str(last_scene.get("scene_id"))
+            if last_scene_id_str not in proof_selected_assets:
+                final_scene_generic_fallback = True
         if last_role != "payoff":
             final_scene_not_payoff = True
-
-    # Load proof selection report
-    proof_report_path = os.path.join("docs", "proof-asset-selection-report.json")
-    proof_selected_assets = {}
-    if os.path.exists(proof_report_path):
-        try:
-            with open(proof_report_path, "r", encoding="utf-8") as f:
-                pr = json.load(f)
-            proof_selected_assets = pr.get("selected_assets", {})
-        except Exception as e:
-            print(f"Warning: Could not read proof selection report: {e}")
 
     # Check overall status
     reasons = []
