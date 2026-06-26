@@ -617,6 +617,68 @@ def main():
             print(f" - {pr}")
         sys.exit(1)
     
+    # 12. Proof Visual Validation (v2.1b)
+    proof_report_path = os.path.join("docs", "proof-asset-selection-report.json")
+    proof_scene_count = sum(1 for s in scenes if s.get("reaction_or_reveal_type") == "proof")
+    payoff_scene_count = sum(1 for s in scenes if s.get("reaction_or_reveal_type") == "payoff")
+    
+    proof_assets_required = 0
+    proof_assets_matched = 0
+    proof_assets_missing = 0
+    final_scene_role = scenes[-1].get("reaction_or_reveal_type", "unknown") if scenes else "unknown"
+    final_payoff_asset_status = "missing"
+    selected_proof_assets = {}
+    
+    if os.path.exists(proof_report_path):
+        try:
+            with open(proof_report_path, "r", encoding="utf-8") as f:
+                pr = json.load(f)
+            proof_assets_required = pr.get("required_scene_count", 0)
+            proof_assets_matched = pr.get("matched_scene_count", 0)
+            proof_assets_missing = pr.get("missing_scene_count", 0)
+            final_payoff_asset_status = pr.get("final_payoff_asset_status", "missing")
+            selected_proof_assets = pr.get("selected_assets", {})
+        except Exception as e:
+            print(f"Warning: Could not read proof selection report in validator: {e}")
+            
+    # Fail real mode if proof_assets_missing > 0, final_scene_role != payoff, or final_payoff_asset_status != matched
+    proof_reasons = []
+    if generation_mode == "real":
+        if proof_assets_missing > 0:
+            proof_reasons.append(f"Missing {proof_assets_missing} required proof asset(s).")
+        if final_scene_role != "payoff":
+            proof_reasons.append(f"Final scene role '{final_scene_role}' is not 'payoff'.")
+        if final_payoff_asset_status != "matched":
+            proof_reasons.append("Final payoff scene has no matched proof asset.")
+            
+    # Write proof validation report
+    proof_report = {
+        "status": "failed" if proof_reasons else "passed",
+        "proof_scene_count": proof_scene_count,
+        "payoff_scene_count": payoff_scene_count,
+        "proof_assets_required": proof_assets_required,
+        "proof_assets_matched": proof_assets_matched,
+        "proof_assets_missing": proof_assets_missing,
+        "final_scene_role": final_scene_role,
+        "final_payoff_asset_status": final_payoff_asset_status,
+        "selected_proof_assets": selected_proof_assets,
+        "reasons": proof_reasons
+    }
+    
+    proof_val_report_path = os.path.join("docs", "proof-validation-report.json")
+    try:
+        with open(proof_val_report_path, "w", encoding="utf-8") as f:
+            json.dump(proof_report, f, indent=2)
+        print(f"Proof validation report saved to {proof_val_report_path}. Status: {proof_report['status'].upper()}")
+    except Exception as e:
+        print(f"Warning: Could not write proof validation report: {e}")
+        
+    if generation_mode == "real" and proof_reasons:
+        print("Error: Proof visual validation failed!")
+        for pr in proof_reasons:
+            print(f" - {pr}")
+        sys.exit(1)
+
     try:
         with open(mix_report_path, "w", encoding="utf-8") as f:
             json.dump(mix_report, f, indent=2)

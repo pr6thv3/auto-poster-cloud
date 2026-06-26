@@ -399,7 +399,7 @@ def main():
 
         # Scene A (e.g. 0.0s - 1.0s)
         time_a = f"0:{2*i:02d} - 0:{2*i+1:02d}" # Represents 1s interval structurally
-        scenes.append({
+        scene_a_data = {
             "scene_id": 2 * i + 1,
             "time_range": time_a,
             "visual_prompt": visual_a,
@@ -411,11 +411,16 @@ def main():
             "overlay_text": overlay_text_a,
             "narration_line": audio_a if audio_a else "Watch closely.",
             "sound_cue": sfx_list[(2*i) % len(sfx_list)]
-        })
+        }
+        if role in ["proof", "payoff"]:
+            scene_a_data["proof_asset_required"] = True
+            scene_a_data["proof_descriptor"] = f"Visual proof showing {visual_a.lower()}."
+            scene_a_data["expected_result_visual"] = f"Verification showing {audio_a.lower() if audio_a else 'the final result'}."
+        scenes.append(scene_a_data)
         
         # Scene B (e.g. 1.0s - 2.0s)
         time_b = f"0:{2*i+1:02d} - 0:{2*i+2:02d}" # Represents 1s interval structurally
-        scenes.append({
+        scene_b_data = {
             "scene_id": 2 * i + 2,
             "time_range": time_b,
             "visual_prompt": visual_b,
@@ -427,7 +432,12 @@ def main():
             "overlay_text": overlay_text_b,
             "narration_line": audio_b if audio_b else "Process completed.",
             "sound_cue": sfx_list[(2*i+1) % len(sfx_list)]
-        })
+        }
+        if role in ["proof", "payoff"]:
+            scene_b_data["proof_asset_required"] = True
+            scene_b_data["proof_descriptor"] = f"Visual proof showing {visual_b.lower()}."
+            scene_b_data["expected_result_visual"] = f"Verification showing {audio_b.lower() if audio_b else 'the final result'}."
+        scenes.append(scene_b_data)
 
     # 3. Compile separate metadata event arrays
     camera_motion = []

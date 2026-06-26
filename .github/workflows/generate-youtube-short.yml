@@ -134,6 +134,7 @@ jobs:
           python scripts/score_idea_freshness.py
           python scripts/build_video_brief.py
           python scripts/build_retention_storyboard.py
+          python scripts/select_proof_asset.py
           python scripts/quality_gate.py
           python scripts/audit_visual_fallbacks.py
 
@@ -344,6 +345,8 @@ jobs:
             docs/retention-storyboard-synced.json
             docs/retention-contact-sheet.jpg
             docs/tts-timestamps.json
+            docs/proof-asset-selection-report.json
+            docs/proof-validation-report.json
 
       - name: Run R2 Cleanup (Mock)
         if: always()

@@ -378,6 +378,32 @@ def main():
         except Exception as e:
             print(f"Warning: Failed to load {visual_report_path}: {e}")
 
+    # 3. Proof Validation Report
+    proof_scene_count = "N/A"
+    payoff_scene_count = "N/A"
+    proof_assets_required = "N/A"
+    proof_assets_matched = "N/A"
+    proof_assets_missing = "N/A"
+    final_payoff_asset_status = "N/A"
+    selected_proof_assets = {}
+    proof_val_status = "N/A"
+
+    proof_report_path = "docs/proof-validation-report.json"
+    if os.path.exists(proof_report_path):
+        try:
+            with open(proof_report_path, "r", encoding="utf-8") as f:
+                pvr = json.load(f)
+            proof_val_status = pvr.get("status", "N/A")
+            proof_scene_count = pvr.get("proof_scene_count", "N/A")
+            payoff_scene_count = pvr.get("payoff_scene_count", "N/A")
+            proof_assets_required = pvr.get("proof_assets_required", "N/A")
+            proof_assets_matched = pvr.get("proof_assets_matched", "N/A")
+            proof_assets_missing = pvr.get("proof_assets_missing", "N/A")
+            final_payoff_asset_status = pvr.get("final_payoff_asset_status", "N/A")
+            selected_proof_assets = pvr.get("selected_proof_assets", {})
+        except Exception as e:
+            print(f"Warning: Failed to load {proof_report_path}: {e}")
+
     def format_pct(val):
         if isinstance(val, (int, float)):
             return f"{val * 100:.1f}%" if val <= 1.0 else f"{val:.1f}%"
@@ -423,6 +449,20 @@ def main():
 * **final_scene_role**: `{final_scene_role}`
 * **irrelevant_terms_detected**: `{irrelevant_terms_detected}`
 * **status**: `{visual_status.upper()}`
+
+---
+"""
+
+    proof_asset_audit_md = f"""
+### 🔒 Proof Asset Audit
+* **proof_scene_count**: `{proof_scene_count}`
+* **payoff_scene_count**: `{payoff_scene_count}`
+* **proof_assets_required**: `{proof_assets_required}`
+* **proof_assets_matched**: `{proof_assets_matched}`
+* **proof_assets_missing**: `{proof_assets_missing}`
+* **final_scene_role**: `{final_scene_role}`
+* **final_payoff_asset_status**: `{final_payoff_asset_status}`
+* **status**: `{proof_val_status.upper()}`
 
 ---
 """
@@ -502,6 +542,7 @@ def main():
 {audio_mix_audit_md}
 {timeline_coverage_audit_md}
 {visual_fallback_audit_md}
+{proof_asset_audit_md}
 {audio_mastering_audit_md}
 ### 🔍 LLM Provider Audit
 
@@ -618,6 +659,14 @@ def main():
         "audio_loudnorm_status": loudnorm_status,
         "audio_measured_i": measured_i,
         "audio_measured_tp": measured_tp,
+        "proof_scene_count": proof_scene_count,
+        "payoff_scene_count": payoff_scene_count,
+        "proof_assets_required": proof_assets_required,
+        "proof_assets_matched": proof_assets_matched,
+        "proof_assets_missing": proof_assets_missing,
+        "final_payoff_asset_status": final_payoff_asset_status,
+        "proof_validation_status": proof_val_status,
+        "selected_proof_assets": selected_proof_assets,
         "results": platform_results
     }
     try:

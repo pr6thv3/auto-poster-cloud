@@ -134,6 +134,17 @@ def main():
         if last_role != "payoff":
             final_scene_not_payoff = True
 
+    # Load proof selection report
+    proof_report_path = os.path.join("docs", "proof-asset-selection-report.json")
+    proof_selected_assets = {}
+    if os.path.exists(proof_report_path):
+        try:
+            with open(proof_report_path, "r", encoding="utf-8") as f:
+                pr = json.load(f)
+            proof_selected_assets = pr.get("selected_assets", {})
+        except Exception as e:
+            print(f"Warning: Could not read proof selection report: {e}")
+
     # Check overall status
     reasons = []
     
@@ -153,6 +164,22 @@ def main():
     if irrelevant_terms_detected:
         reasons.append(f"Irrelevant search/visual terms detected: {list(irrelevant_terms_detected)}")
         
+    # v2.1b Proof Asset selection requirements check
+    for s in scenes:
+        scene_id_str = str(s.get("scene_id"))
+        role = s.get("reaction_or_reveal_type", "")
+        is_proof_required = s.get("proof_asset_required", False) or role in ["proof", "payoff"]
+        
+        if is_proof_required:
+            if scene_id_str not in proof_selected_assets:
+                reasons.append(f"Proof asset required for scene {scene_id_str} [{role}] but none was selected.")
+                
+    if scenes:
+        last_scene_id_str = str(scenes[-1].get("scene_id"))
+        if scenes[-1].get("reaction_or_reveal_type", "") == "payoff":
+            if last_scene_id_str not in proof_selected_assets:
+                reasons.append("Final payoff scene has no selected proof asset.")
+                
     status = "failed" if reasons else "passed"
     
     report = {
@@ -178,7 +205,8 @@ def main():
     if status == "failed":
         if generation_mode == "real":
             # If real proof footage is unavailable, fail real mode with manual_proof_asset_required
-            if proof_scene_failed or payoff_scene_failed or not has_proof_payoff_visual or final_scene_generic_fallback:
+            missing_proof_asset_reasons = [r for r in reasons if "Proof asset required" in r or "no selected proof asset" in r or "manual_proof_asset_required" in r]
+            if proof_scene_failed or payoff_scene_failed or not has_proof_payoff_visual or final_scene_generic_fallback or missing_proof_asset_reasons:
                 print("Error: manual_proof_asset_required - Real proof/payoff scenes cannot use generic stock.")
             for r in reasons:
                 print(f"Error: {r}")

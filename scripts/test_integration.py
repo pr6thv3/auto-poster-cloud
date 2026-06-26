@@ -982,6 +982,22 @@ def main():
     with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
         json.dump(dummy_mix_report, f, indent=2)
 
+    # Write dummy proof selection report to satisfy validator for real mode
+    dummy_proof_report = {
+        "status": "passed",
+        "required_scene_count": 12,
+        "matched_scene_count": 12,
+        "missing_scene_count": 0,
+        "final_scene_role": "payoff",
+        "final_payoff_asset_status": "matched",
+        "selected_assets": {
+            str(i): {"asset_id": f"dummy_asset_{i}", "file_path": "dummy.mp4"} for i in range(13, 25)
+        },
+        "missing_requirements": []
+    }
+    with open("docs/proof-asset-selection-report.json", "w", encoding="utf-8") as f:
+        json.dump(dummy_proof_report, f, indent=2)
+
 
     # Re-create mock files
     os.makedirs("storage/tasks/mock-task", exist_ok=True)
@@ -1415,6 +1431,28 @@ def main():
         with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
             json.dump(mock_sb, f, indent=2)
 
+        # Write dummy proof selection report to satisfy validator
+        dummy_proof_report = {
+            "status": "passed",
+            "required_scene_count": 4,
+            "matched_scene_count": 4,
+            "missing_scene_count": 0,
+            "final_scene_role": "payoff",
+            "final_payoff_asset_status": "matched",
+            "selected_assets": {
+                "9": {"asset_id": "dummy_proof_1", "file_path": "dummy.mp4"},
+                "10": {"asset_id": "dummy_proof_2", "file_path": "dummy.mp4"},
+                "11": {"asset_id": "dummy_proof_3", "file_path": "dummy.mp4"},
+                "12": {"asset_id": "dummy_proof_4", "file_path": "dummy.mp4"},
+                "13": {"asset_id": "dummy_proof_5", "file_path": "dummy.mp4"},
+                "14": {"asset_id": "dummy_proof_6", "file_path": "dummy.mp4"},
+                "15": {"asset_id": "dummy_payoff", "file_path": "dummy.mp4"}
+            },
+            "missing_requirements": []
+        }
+        with open("docs/proof-asset-selection-report.json", "w", encoding="utf-8") as f:
+            json.dump(dummy_proof_report, f, indent=2)
+
     # Test premature voice ending (fails real runs)
     print("Testing premature voice ending (voice_time_coverage_pct < 0.80)...")
     try:
@@ -1615,6 +1653,22 @@ def main():
         with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
             json.dump(storyboard, f, indent=2)
 
+        # Write dummy proof selection report to satisfy validator for real mode
+        dummy_proof_report = {
+            "status": "passed",
+            "required_scene_count": 12,
+            "matched_scene_count": 12,
+            "missing_scene_count": 0,
+            "final_scene_role": "payoff",
+            "final_payoff_asset_status": "matched",
+            "selected_assets": {
+                str(i): {"asset_id": f"dummy_asset_{i}", "file_path": "dummy.mp4"} for i in range(13, 25)
+            },
+            "missing_requirements": []
+        }
+        with open("docs/proof-asset-selection-report.json", "w", encoding="utf-8") as f:
+            json.dump(dummy_proof_report, f, indent=2)
+
         res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
         assert res.returncode != 0, "Expected visual fallback auditor to fail"
         assert "exceeds limit" in res.stdout or "exceeds limit" in res.stderr or "generic stock" in res.stdout or "generic stock" in res.stderr or "Irrelevant search" in res.stdout or "Irrelevant search" in res.stderr
@@ -1723,6 +1777,242 @@ def main():
         assert res.returncode == 0, f"Expected mock mode fallback audit to pass, got {res.returncode}"
     finally:
         restore_backups()
+
+    # === TEST CONTENT ENGINE V2.1B — PROOF ASSET SYSTEM ===
+    print("\n--- Testing v2.1b Proof Asset System ---")
+    proof_backups = {}
+    proof_files = [
+        "assets/proof_capture/proof_assets.json",
+        "docs/proof-asset-selection-report.json",
+        "docs/proof-validation-report.json",
+        "docs/video-brief.json",
+        "docs/retention-storyboard.json",
+        "docs/visual-fallback-report.json",
+        "docs/quality-report.json",
+        "video-info.json",
+        "docs/audio-mix-report.json",
+        "docs/retention-storyboard-synced.json",
+        "docs/tts-timestamps.json",
+        "run-log.json",
+        "step-summary-mock.md"
+    ]
+    for p in proof_files:
+        if os.path.exists(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    proof_backups[p] = json.load(f)
+            except Exception:
+                with open(p, "rb") as f:
+                    proof_backups[p] = f.read()
+
+    def restore_proof_backups():
+        for p in proof_files:
+            if p in proof_backups:
+                try:
+                    if isinstance(proof_backups[p], (dict, list)):
+                        with open(p, "w", encoding="utf-8") as f:
+                            json.dump(proof_backups[p], f, indent=2)
+                    else:
+                        with open(p, "wb") as f:
+                            f.write(proof_backups[p])
+                except Exception as e:
+                    print(f"Warning: Failed to restore backup for {p}: {e}")
+            else:
+                if os.path.exists(p):
+                    try:
+                        os.remove(p)
+                    except Exception:
+                        pass
+
+    try:
+        # Helper to create basic brief
+        def make_base_brief(topic="productivity calendar"):
+            return {
+                "topic": topic,
+                "hook_claim": "Automate everything.",
+                "proof_event": "We build a tool.",
+                "payoff_line": "Our tool plans the week.",
+                "final_resolution_line": "Plan completed automatically.",
+                "loop_tieback": "Go automate."
+            }
+
+        # Helper to create base storyboard
+        def make_base_storyboard(scenes_list=None):
+            if scenes_list is None:
+                scenes_list = []
+                for idx in range(1, 25):
+                    role = "hook" if idx <= 6 else "context" if idx <= 12 else "proof" if idx <= 18 else "payoff"
+                    scenes_list.append({
+                        "scene_id": idx,
+                        "time_range": f"0:{idx-1:02d} - 0:{idx:02d}",
+                        "reaction_or_reveal_type": role,
+                        "stock_search_query": "productivity assistant",
+                        "visual_prompt": "A clean computer screen showing a weekly calendar",
+                        "narration_line": "automated planning schedule"
+                    })
+            return {"format_id": "viral_retention_engine_24s", "scenes": scenes_list, "text_overlays": [{"time_range": "0:00 - 0:01", "text": "test"}] * 24}
+
+        # 1. Test Empty proof registry warnings in mock mode
+        print("Subtest 1: Empty proof registry warnings in mock mode...")
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": []}, f)
+        with open("docs/video-brief.json", "w", encoding="utf-8") as f:
+            json.dump(make_base_brief(), f)
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(make_base_storyboard(), f)
+            
+        res = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"}, capture_output=True, text=True)
+        assert res.returncode == 0, f"Expected select_proof_asset to pass in mock mode with empty registry. Got code {res.returncode}. Output:\n{res.stdout}\n{res.stderr}"
+        assert os.path.exists("docs/proof-asset-selection-report.json")
+        with open("docs/proof-asset-selection-report.json", "r", encoding="utf-8") as f:
+            rep = json.load(f)
+        assert rep["status"] == "passed"
+        assert rep["missing_scene_count"] > 0
+
+        # 2. Test Empty proof registry failures in real mode
+        print("Subtest 2: Empty proof registry failures in real mode...")
+        res = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected select_proof_asset to fail in real mode with empty registry."
+        assert "manual_proof_asset_required" in res.stdout or "manual_proof_asset_required" in res.stderr
+
+        # 3. Test Proof/payoff scene using generic stock fails in real mode (audit_visual_fallbacks.py)
+        print("Subtest 3: Proof/payoff scene using generic stock fails in real mode...")
+        # Write selection report showing missing asset
+        rep["status"] = "passed" # simulate warning bypass in selection script, but fallback audit must catch it
+        with open("docs/proof-asset-selection-report.json", "w", encoding="utf-8") as f:
+            json.dump(rep, f)
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, f"Expected audit_visual_fallbacks to fail in real mode due to missing proof assets. Output: {res.stdout}"
+        assert "Proof asset required" in res.stdout or "Proof asset required" in res.stderr
+
+        # 4. Test Context scene using stock does not trigger failures
+        # (This is implicitly tested by verifying that only proof/payoff scenes trigger failures in the check)
+
+        # 5. Test Final scene not being payoff fails
+        print("Subtest 5: Final scene not being payoff fails...")
+        # Write registry with active asset matching storyboard
+        mock_asset = {
+            "asset_id": "mock_calendar_001",
+            "file_path": "assets/proof_capture/calendar_agent/mock_calendar_agent_demo.mp4",
+            "project": "calendar_agent",
+            "descriptor": "A clean computer screen showing a weekly calendar",
+            "keywords": ["calendar", "schedule", "planning"],
+            "supported_scene_roles": ["proof", "payoff"],
+            "supported_topics": ["productivity", "ai_tools"],
+            "duration_seconds": 6.0,
+            "orientation": "vertical_or_crop_safe",
+            "source_type": "synthetic_mock_asset",
+            "approved_for_private_validation": True,
+            "approved_for_public_use": False,
+            "contains_private_data": False
+        }
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [mock_asset]}, f)
+
+        # Make base storyboard with final scene not payoff
+        sb_bad_final = make_base_storyboard()
+        sb_bad_final["scenes"][-1]["reaction_or_reveal_type"] = "context"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_bad_final, f)
+            
+        # Run selection
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"})
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected final scene not payoff to fail fallback audit."
+        assert "is not 'payoff'" in res.stdout or "is not 'payoff'" in res.stderr
+
+        # 6. Test Final payoff scene without matching proof asset fails
+        print("Subtest 6: Final payoff scene without matching proof asset fails...")
+        # Storyboard has payoff final scene, but we delete the proof asset registry entry so it doesn't match
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": []}, f)
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(make_base_storyboard(), f)
+            
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"})
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected final payoff scene without selected proof asset to fail fallback audit."
+        assert "Final payoff scene has no selected proof asset" in res.stdout or "Final payoff scene has no selected proof asset" in res.stderr or "none was selected" in res.stdout
+
+        # 7. Test Irrelevant terms in proof/payoff scenes fail
+        print("Subtest 7: Irrelevant terms in proof/payoff scenes fail...")
+        # Re-register valid asset
+        with open("assets/proof_capture/proof_assets.json", "w", encoding="utf-8") as f:
+            json.dump({"assets": [mock_asset]}, f)
+        sb_irrelevant = make_base_storyboard()
+        # Add irrelevant term "blueprint" to the first proof scene
+        sb_irrelevant["scenes"][12]["stock_search_query"] = "blueprint tool design"
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(sb_irrelevant, f)
+            
+        subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "mock"})
+        res = subprocess.run([sys.executable, "scripts/audit_visual_fallbacks.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res.returncode != 0, "Expected irrelevant term in storyboard to fail fallback audit."
+        assert "blueprint" in res.stdout or "blueprint" in res.stderr
+
+        # 8. Test Valid matched proof asset passes format validator
+        print("Subtest 8: Valid matched proof asset passes format validator...")
+        # Write clean storyboard and run selector
+        with open("docs/retention-storyboard.json", "w", encoding="utf-8") as f:
+            json.dump(make_base_storyboard(), f)
+        res_sel = subprocess.run([sys.executable, "scripts/select_proof_asset.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_sel.returncode == 0, f"Expected selection to pass with registered asset. Output: {res_sel.stdout}\n{res_sel.stderr}"
+        
+        # Setup mock info for validate_retention_format.py
+        v_info = {"video_path": "storage/tasks/mock-task/final-retention.mp4", "actual_duration_seconds": 24.0, "target_duration_seconds": 24.0, "duration_status": "passed"}
+        with open("video-info.json", "w", encoding="utf-8") as f:
+            json.dump(v_info, f)
+        with open("docs/audio-mix-report.json", "w", encoding="utf-8") as f:
+            json.dump({"audio_validation_status": "passed", "max_silence_gap_seconds": 0.1, "final_tail_silence_status": "not_silent", "measured_i": -16.0, "bgm_status": "added"}, f)
+            
+        # Write dummy tts timestamps
+        tts_data = {
+            "mode": "real",
+            "word_count": 2,
+            "total_duration": 23.0,
+            "words": [
+                {"word": "hello", "start": 0.0, "end": 0.5, "probability": 0.99},
+                {"word": "world", "start": 22.0, "end": 23.0, "probability": 0.99}
+            ]
+        }
+        with open("docs/tts-timestamps.json", "w", encoding="utf-8") as f:
+            json.dump(tts_data, f)
+            
+        res_val = subprocess.run([sys.executable, "scripts/validate_retention_format.py"], env={"GENERATION_MODE": "real"}, capture_output=True, text=True)
+        assert res_val.returncode == 0, f"Expected validate_retention_format to pass. Output: {res_val.stdout}\n{res_val.stderr}"
+        assert os.path.exists("docs/proof-validation-report.json")
+        with open("docs/proof-validation-report.json", "r", encoding="utf-8") as f:
+            val_rep = json.load(f)
+        assert val_rep["status"] == "passed"
+        assert val_rep["proof_assets_matched"] > 0
+        assert val_rep["proof_assets_missing"] == 0
+
+        # 9. Test Selection reports and summaries produce all expected fields
+        print("Subtest 9: Selection reports and summaries produce all expected fields...")
+        # Run write_summary.py
+        res_sum = subprocess.run([sys.executable, "scripts/write_summary.py"], env={"GENERATION_MODE": "mock", "GITHUB_STEP_SUMMARY": "step-summary-mock.md"}, capture_output=True, text=True)
+        assert res_sum.returncode == 0, f"Expected write_summary to pass. Output: {res_sum.stdout}\n{res_sum.stderr}"
+        
+        # Check run-log.json
+        assert os.path.exists("run-log.json")
+        with open("run-log.json", "r", encoding="utf-8") as f:
+            log_data = json.load(f)
+        assert log_data.get("proof_scene_count") == val_rep["proof_scene_count"]
+        assert log_data.get("proof_assets_matched") == val_rep["proof_assets_matched"]
+        assert log_data.get("proof_validation_status") == "passed"
+        assert len(log_data.get("selected_proof_assets", {})) > 0
+
+        # Check summary markdown
+        with open("step-summary-mock.md", "r", encoding="utf-8") as f:
+            summary_content = f.read()
+        assert "Proof Asset Audit" in summary_content
+        assert "proof_assets_matched" in summary_content
+        assert "proof_assets_missing" in summary_content
+
+        print("Verification: All proof asset subtests completed successfully!")
+
+    finally:
+        restore_proof_backups()
 
     print("\n=== ALL LOCAL INTEGRATION TESTS PASSED SUCCESSFULLY ===")
 
