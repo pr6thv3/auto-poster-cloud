@@ -178,13 +178,13 @@ IDEAS_CATALOG = {
         },
         {
             "topic": "Schedule meetings automatically with this tool",
-            "angle": "calendar scheduling automation",
-            "hook": "Stop manually planning your calendar meetings every week.",
+            "angle": "smart calendar assistant",
+            "hook": "Let an artificial intelligence plan your calendar.",
             "curiosity_gap": "A new AI scheduling assistant analyzes your team's energy levels and automatically slots meetings to maximize focus time.",
             "visual_promise": "Watch messy calendar blocks automatically shift and organize into color-coded focus sessions.",
             "payoff": "It resolves ten conflicting meeting invites in less than three seconds.",
             "final_question_or_twist": "Will you let an algorithm manage your daily work schedule?",
-            "keywords": ["calendar planning", "scheduling assistant", "time management"],
+            "keywords": ["smart calendar", "auto planner", "schedule organizer"],
             "format": "viral_curiosity_24s",
             "freshness_window_days": 30,
             "risk_flags": []
