@@ -177,7 +177,7 @@ IDEAS_CATALOG = {
             "risk_flags": []
         },
         {
-            "topic": "This new AI agent schedules your entire week",
+            "topic": "Schedule meetings automatically with this tool",
             "angle": "calendar scheduling automation",
             "hook": "Stop manually planning your calendar meetings every week.",
             "curiosity_gap": "A new AI scheduling assistant analyzes your team's energy levels and automatically slots meetings to maximize focus time.",
