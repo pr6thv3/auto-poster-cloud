@@ -195,6 +195,9 @@ def main():
                 continue
             if role not in asset.get("supported_scene_roles", []):
                 continue
+            # Enforce the hard reuse limit of 4 to distribute selections and pass diversity validation
+            if reuse_counts[asset["asset_id"]] >= 4:
+                continue
             candidates.append(asset)
             
         scored_candidates = []
