@@ -64,9 +64,9 @@ def match_overlays_to_tts(overlays, tts_words, duration):
             best_match = None
             best_distance = float('inf')
 
-            # Search window: from current position to +20 words ahead
+            # Search window: from current position to +8 words ahead to prevent matching future sentences
             search_start = max(0, tts_index - 3)
-            search_end = min(len(tts_words), tts_index + 20)
+            search_end = min(len(tts_words), tts_index + 8)
 
             for i in range(search_start, search_end):
                 tts_norm = normalize_word(tts_words[i].get("word", ""))
