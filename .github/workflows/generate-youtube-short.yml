@@ -124,6 +124,15 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: YouTube OAuth Credentials Preflight
+        if: github.event.inputs.posting_mode == 'real'
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python scripts/check_youtube_oauth.py
+
       - name: Run Content Engine Pipeline
         if: github.event.inputs.run_content_engine == 'true'
         env:

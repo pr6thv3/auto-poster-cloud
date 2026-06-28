@@ -2,6 +2,29 @@ import os
 import sys
 import json
 import subprocess
+import time
+
+# Patch os.remove with a retrying wrapper to handle Windows file locking lag
+_original_remove = os.remove
+def safe_remove(path):
+    for attempt in range(5):
+        try:
+            if os.path.exists(path):
+                _original_remove(path)
+            return
+        except PermissionError:
+            if attempt == 4:
+                print(f"[Warning] Failed to delete {path} after 5 attempts due to permission lock. Ignoring.")
+                return
+            time.sleep(0.1)
+        except Exception:
+            try:
+                _original_remove(path)
+            except Exception:
+                pass
+            return
+
+os.remove = safe_remove
 
 def run_cmd(args, env_override=None):
     env = os.environ.copy()
