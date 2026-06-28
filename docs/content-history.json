@@ -403,5 +403,24 @@
     "freshness_score": 85,
     "quality_score": 100,
     "source_run_id": "28258815516"
+  },
+  {
+    "idea_id": "idea_ai_tools_14",
+    "profile_id": "ai_tools",
+    "topic": "Schedule meetings automatically with this tool",
+    "angle": "smart calendar assistant",
+    "hook": "Let an artificial intelligence plan your calendar.",
+    "keywords": [
+      "smart calendar",
+      "auto planner",
+      "schedule organizer"
+    ],
+    "format": "viral_curiosity_24s",
+    "created_at": "2026-06-28T08:25:34.009996Z",
+    "status": "success",
+    "youtube_video_id": "qCX5IAQRuIs",
+    "freshness_score": 85,
+    "quality_score": 100,
+    "source_run_id": "28316331675"
   }
 ]
